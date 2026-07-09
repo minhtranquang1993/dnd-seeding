@@ -34,10 +34,11 @@ Skill này được đồng bộ với repo GitHub riêng: https://github.com/mi
 - **Giờ làm việc:** Thứ 2–7: 08h00–17h00, Chủ nhật: 08h00–12h00.
 
 ### 2. Đội ngũ Bác sĩ
-- **BSNT Bùi Quang Tuấn (Giám đốc):** 13 năm kinh nghiệm, BS Nội trú ĐH Y Dược Huế, 10 năm Trưởng khoa DND Hà Nội trước khi vào làm GĐ DND Sài Gòn. Chuyên Phaco, khúc xạ, dịch kính - võng mạc. Nổi tiếng khéo tay, tận tâm, hàng chục nghìn ca thành công.
-- **ThS.BS Hoàng Mai Linh:** >7 năm nhãn khoa.
-- **PGS.TS.BS Võ Thị Hoàng Lan:** Chuyên gia khúc xạ.
-- **BS.CKII Nguyễn Đăng Dũng:** Sáng lập hệ thống DND, ~40 năm, 300.000+ ca, tiên phong Phaco & khúc xạ VN.
+- **BSNT Bùi Quang Tuấn (Giám đốc):** 13 năm kinh nghiệm, BS Nội trú ĐH Y Dược Huế, 10 năm Trưởng khoa DND Hà Nội trước khi vào làm GĐ DND Sài Gòn. Chuyên Phaco, khúc xạ, dịch kính - võng mạc. Nổi tiếng khéo tay, tận tâm, hàng chục nghìn ca thành công. **Phụ trách mổ chính** (có khám luôn).
+- **ThS.BS Hoàng Mai Linh:** >7 năm nhãn khoa. Khám khúc xạ và khám trẻ em. **Không mổ.**
+- **PGS.TS.BS Võ Thị Hoàng Lan:** Chuyên gia khúc xạ. Khám phaco. **Không mổ.**
+
+> **Quy tắc dùng tên bác sĩ trong content:** Nội dung nói về **mổ** → chỉ nhắc BS Tuấn. Nội dung nói về **khám** → có thể dùng BS Tuấn, BS Linh, hoặc BS Hoàng Lan. Không nhắc BS.CKII Nguyễn Đăng Dũng (Chủ tịch hệ thống, vẫn mổ nhưng ít có mặt tại DND Sài Gòn — không truyền thông tên bác trong content seeding).
 
 ### 3. Công nghệ Phẫu thuật
 - **SMILE Pro (VISUMAX 800, Carl Zeiss - Đức):** 8-10 giây/mắt, vết mổ 2mm, định tâm tự động, phục hồi 24h, ít khô mắt.
@@ -102,7 +103,7 @@ Xáo trộn persona mỗi lần chạy. Không dùng quá 3 câu cùng 1 persona
 
 ### Phân bổ 8 góc (tổng ~28 câu)
 
-1. **Góc 1: Hỏi review Bác sĩ (3 câu)** — Hỏi tay nghề BS Tuấn, BS Dũng, BS Linh. Ai mát tay, ai khám kỹ.
+1. **Góc 1: Hỏi review Bác sĩ (3 câu)** — Hỏi tay nghề/khám của BS Tuấn (mổ chính), BS Linh, BS Hoàng Lan (khám). Ai mát tay, ai khám kỹ.
 2. **Góc 2: Chi phí & Ưu đãi (3 câu)** — Hỏi khám 12 bước 0đ, SmileDays giảm 50%, giá trọn gói.
 3. **Góc 3: So sánh Công nghệ (3 câu)** — SMILE Pro vs SmartSight, SmartSurfACE cho mắt mỏng, Phakic ICL cho cận nặng.
 4. **Góc 4: Dịch vụ & CSVC (3 câu)** — Quy trình trong ngày, phòng ốc, Ortho-K cho trẻ.
