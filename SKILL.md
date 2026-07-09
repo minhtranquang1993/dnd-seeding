@@ -35,7 +35,6 @@ Skill này được đồng bộ với repo GitHub riêng: https://github.com/mi
 
 ### 2. Đội ngũ Bác sĩ
 - **BSNT Bùi Quang Tuấn (Giám đốc):** 13 năm kinh nghiệm, BS Nội trú ĐH Y Dược Huế, 10 năm Trưởng khoa DND Hà Nội trước khi vào làm GĐ DND Sài Gòn. Chuyên Phaco, khúc xạ, dịch kính - võng mạc. Nổi tiếng khéo tay, tận tâm, hàng chục nghìn ca thành công.
-- **ThS.BS Lê Thị Thu Hà (Trưởng khoa Khúc xạ):** 12 năm, Thạc sĩ ĐH Y Hà Nội. Chuyên gia kiểm soát cận thị trẻ em + phẫu thuật laser hiện đại. Nhẹ nhàng, chu đáo.
 - **ThS.BS Hoàng Mai Linh:** >7 năm nhãn khoa.
 - **PGS.TS.BS Võ Thị Hoàng Lan:** Chuyên gia khúc xạ.
 - **BS.CKII Nguyễn Đăng Dũng:** Sáng lập hệ thống DND, ~40 năm, 300.000+ ca, tiên phong Phaco & khúc xạ VN.
@@ -103,7 +102,7 @@ Xáo trộn persona mỗi lần chạy. Không dùng quá 3 câu cùng 1 persona
 
 ### Phân bổ 8 góc (tổng ~28 câu)
 
-1. **Góc 1: Hỏi review Bác sĩ (3 câu)** — Hỏi tay nghề BS Tuấn, BS Hà, BS Dũng. Ai mát tay, ai khám kỹ.
+1. **Góc 1: Hỏi review Bác sĩ (3 câu)** — Hỏi tay nghề BS Tuấn, BS Dũng, BS Linh. Ai mát tay, ai khám kỹ.
 2. **Góc 2: Chi phí & Ưu đãi (3 câu)** — Hỏi khám 12 bước 0đ, SmileDays giảm 50%, giá trọn gói.
 3. **Góc 3: So sánh Công nghệ (3 câu)** — SMILE Pro vs SmartSight, SmartSurfACE cho mắt mỏng, Phakic ICL cho cận nặng.
 4. **Góc 4: Dịch vụ & CSVC (3 câu)** — Quy trình trong ngày, phòng ốc, Ortho-K cho trẻ.
