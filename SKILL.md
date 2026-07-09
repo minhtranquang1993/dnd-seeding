@@ -1,8 +1,8 @@
 ---
-name: seeding-dnd
+name: dnd-seeding
 description: >
   Tạo danh sách ~20 content seeding ngắn dạng câu hỏi cho Bệnh viện Mắt Quốc tế DND Sài Gòn.
-  Trigger khi user gõ "/seeding-dnd", "seeding-dnd", "content seeding dnd", hoặc yêu cầu
+  Trigger khi user gõ "/dnd-seeding", "dnd-seeding", "seeding-dnd", "content seeding dnd", hoặc yêu cầu
   tạo ý tưởng/câu hỏi đi seeding cho DND.
 ---
 
@@ -10,12 +10,18 @@ description: >
 
 Tạo content seeding tự nhiên cho Bệnh viện Mắt Quốc tế DND Sài Gòn (147 Trương Định, Quận 3, TP.HCM) với 3 chế độ khác nhau tùy mục đích sử dụng.
 
+## Repo
+
+Skill này được đồng bộ với repo GitHub riêng: https://github.com/minhtranquang1993/dnd-seeding (nhánh `main`, chỉ có file `SKILL.md`).
+- **Push cập nhật lên repo:** copy `SKILL.md` vào clone local của repo trên, commit, push.
+- **Pull về máy:** lấy `SKILL.md` từ repo trên, ghi đè vào `C:\Users\Admin\.claude\skills\dnd-seeding\SKILL.md`.
+
 ## When to Use
 
-- `/seeding-dnd group` — Tạo ~20 bài đăng seeding trên group mổ cận
-- `/seeding-dnd reply-group "câu hỏi gốc"` — Tạo ~20 comment reply vào bài người khác trên group
-- `/seeding-dnd ads` — Tạo ~20 comment seeding dưới bài quảng cáo của mình
-- `/seeding-dnd` (không tham số) — Mặc định chạy mode `group`
+- `/dnd-seeding group` — Tạo ~28 bài đăng seeding trên group mổ cận
+- `/dnd-seeding reply-group "câu hỏi gốc"` — Tạo ~20 comment reply vào bài người khác trên group
+- `/dnd-seeding ads` — Tạo ~20 comment seeding dưới bài quảng cáo của mình
+- `/dnd-seeding` (không tham số) — Mặc định chạy mode `group`
 
 ---
 
@@ -69,6 +75,7 @@ Xáo trộn persona mỗi lần chạy. Không dùng quá 3 câu cùng 1 persona
 | **Tiktoker / KOC** | "e muốn quay review", "share đc cashback 3tr k", "làm content" |
 | **Người cận nặng** | "e cận 12 độ", "giác mạc mỏng", "bs bảo k bắn laser đc" |
 | **Người đã mổ xong** | "mình mới mổ tuần trước", "tái khám đạt 1.5/1.5", "thoát kính r" |
+| **Người tìm hiểu nhiều viện** | "e đi khám 2-3 chỗ r", "đang cân nhắc mổ ở đâu", "so sánh giá/công nghệ mấy viện" |
 
 ---
 
@@ -90,11 +97,11 @@ Xáo trộn persona mỗi lần chạy. Không dùng quá 3 câu cùng 1 persona
 
 ---
 
-# MODE 1: `/seeding-dnd group`
+# MODE 1: `/dnd-seeding group`
 
-**Mục đích:** Tạo ~20 bài đăng mới trên các group review mổ cận (Hội mổ cận, Hội review SMILE Pro...). Đóng vai người đi tìm hiểu hoặc người đã mổ xong muốn chia sẻ.
+**Mục đích:** Tạo ~28 bài đăng mới trên các group review mổ cận (Hội mổ cận, Hội review SMILE Pro...). Đóng vai người đi tìm hiểu, người đã mổ xong muốn chia sẻ, hoặc người đang kể lại một trải nghiệm/tâm trạng cụ thể.
 
-### Phân bổ 6 góc (tổng 20 câu)
+### Phân bổ 8 góc (tổng ~28 câu)
 
 1. **Góc 1: Hỏi review Bác sĩ (3 câu)** — Hỏi tay nghề BS Tuấn, BS Hà, BS Dũng. Ai mát tay, ai khám kỹ.
 2. **Góc 2: Chi phí & Ưu đãi (3 câu)** — Hỏi khám 12 bước 0đ, SmileDays giảm 50%, giá trọn gói.
@@ -102,15 +109,21 @@ Xáo trộn persona mỗi lần chạy. Không dùng quá 3 câu cùng 1 persona
 4. **Góc 4: Dịch vụ & CSVC (3 câu)** — Quy trình trong ngày, phòng ốc, Ortho-K cho trẻ.
 5. **Góc 5: Hậu phẫu (3 câu)** — Hồi phục, khô mắt, tái khám, kiêng cữ.
 6. **Góc 6: Social proof — Người đã mổ xong (5 câu)** — Chia sẻ trải nghiệm tích cực, kể chi tiết (BS, thị lực, số ngày hồi phục).
+7. **Góc 7: Story kể chuyện (4 câu)** — Bài dài hơn hẳn các góc khác (1 đoạn 4-6 câu, kể mạch trải nghiệm thật). Chủ đề: tâm lý lo lắng/rén trước ngày mổ, buổi khám chuyên sâu 12 bước diễn ra thế nào, băn khoăn trước khi quyết định mổ. Luôn đặt bối cảnh ở DND Sài Gòn/DND Trương Định — không dùng tên bệnh viện khác. Kết bài bằng 1 câu hỏi xin chia sẻ/động lực/kinh nghiệm từ mọi người, không phải câu hỏi thông tin khô khan.
+8. **Góc 8: So sánh bệnh viện (4 câu)** — Đóng vai người đang tìm hiểu nhiều nơi: đã khám (hoặc định khám) ở 1-2 viện khác — ví dụ Mắt Sài Gòn, Mắt TPHCM, Việt Nhật — và đang cân nhắc thêm DND Sài Gòn để khám/so sánh giá, công nghệ, cách tư vấn. DND luôn xuất hiện như **1 lựa chọn đang xem xét** bên cạnh viện khác, không phải viện đã chốt hay được khen vượt trội — giữ đúng tinh thần "đang tìm hiểu, chưa quyết".
 
 ### Ví dụ mode `group`
 - "mn có ai mổ cận chỗ bs tuấn dnd sài gòn chưa ạ, cho e xin review tay nghề bác với"
 - "e thấy bên dnd sg đang smiledays giảm 50%, tc tầm 25tr mổ đc gói nào tốt nhỉ"
 - "mình mổ smile pro bên dnd trương định tuần trước, bs tuấn mổ cho, nhẹ nhàng lắm mn, 2 ngày đi làm lại r"
+- (Góc 7 - story) "e vừa đặt lịch mổ cận tuần sau ở dnd sài gòn xong mà từ hôm qua đến giờ tự nhiên lại thấy rén 😅. lúc đi khám thì quyết tâm lắm, bs bảo mắt e đủ điều kiện, cũng chọn được phương pháp r. về nhà bố mẹ lại hỏi đủ thứ, có đau k, nhỡ sau này có vấn đề thì sao, làm e cũng dao động theo. anh/chị nào từng mổ ở dnd sg r cho e xin ít động lực với ạ, k biết trước ngày mổ mn có bị tâm lý giống e k"
+- (Góc 7 - story) "mn cho e xin review mổ cận ở dnd sài gòn với ạ 🙏 tuần trước e đi khám chuyên sâu trước mổ ở đây, bình thường e khá sợ khám mắt vì nhìn máy móc là run, nhưng buổi khám nhẹ nhàng hơn e tưởng, mất khá nhiều tg vì qua nhiều bước, có nhỏ thuốc rồi đợi đo lại nên gần cả buổi sáng. bs giải thích tình trạng mắt e khá kỹ và tư vấn e đủ điều kiện mổ smile pro, nhưng e vẫn chưa chốt ngay vì đây là quyết định lớn. ai mổ ở dnd sg r cho e xin ít review: thị lực sau mổ ổn k, hồi phục ntn, bv theo dõi hậu phẫu có kỹ k ạ, e cảm ơn mn nhiều"
+- (Góc 8 - so sánh viện) "e cận 5 độ loạn 1, mới khám ở mắt sg đc tư vấn femto pro với smile pro r, giờ muốn khám thêm chỗ khác xem sao. có ai khám ở dnd sài gòn r k, chi phí khám bên đó tầm nhiêu, có nên qua khám thêm 1 vòng trước khi chốt k ạ"
+- (Góc 8 - so sánh viện) "e đang phân vân giữa mắt tphcm với dnd trương định q3, chưa biết nên khám ở đâu trước, ai đi khám cả 2 chỗ r so sánh giúp e với"
 
 ---
 
-# MODE 2: `/seeding-dnd reply-group "câu hỏi gốc"`
+# MODE 2: `/dnd-seeding reply-group "câu hỏi gốc"`
 
 **Mục đích:** Tạo ~20 comment reply vào bài viết của người khác trên group. Đóng vai **người từng trải nghiệm** hoặc **người cũng đang tìm hiểu** mà biết DND, dẫn dắt tự nhiên về DND Sài Gòn.
 
@@ -144,7 +157,7 @@ Giả sử câu hỏi gốc: _"mọi người ơi cận 5 độ loạn 2 độ m
 
 ---
 
-# MODE 3: `/seeding-dnd ads`
+# MODE 3: `/dnd-seeding ads`
 
 **Mục đích:** Tạo ~20 comment seeding dưới bài quảng cáo (Facebook Ads) của chính mình, dùng nhiều nick ảo. Mục tiêu: tạo engagement, social proof, kéo người thật comment theo.
 
@@ -180,7 +193,7 @@ Giả sử câu hỏi gốc: _"mọi người ơi cận 5 độ loạn 2 độ m
 
 ## Process Flow
 
-### Khi nhận lệnh `/seeding-dnd [mode] [tham số]`:
+### Khi nhận lệnh `/dnd-seeding [mode] [tham số]`:
 
 **Bước 1: Xác định mode**
 - Không có tham số hoặc `group` → chạy Mode 1
@@ -189,7 +202,7 @@ Giả sử câu hỏi gốc: _"mọi người ơi cận 5 độ loạn 2 độ m
 
 **Bước 2: Chọn Persona & Sinh nội dung**
 - Chọn ngẫu nhiên 5-6 persona từ Persona Pool
-- Sinh đúng ~20 câu seeding theo cấu trúc của mode tương ứng
+- Sinh đúng số câu theo cấu trúc của mode tương ứng (mode `group` ~28 câu, mode `reply-group`/`ads` ~20 câu)
 - Đảm bảo đa dạng persona, cấu trúc câu, cách xưng hô
 
 **Bước 3: Áp dụng Tone & Viết tắt**
@@ -202,7 +215,7 @@ Giả sử câu hỏi gốc: _"mọi người ơi cận 5 độ loạn 2 độ m
 - Mode `reply-group`: hiện lại câu hỏi gốc ở đầu để tiện đối chiếu
 
 **Bước 5: Lưu file scratch**
-Lưu vào: `/Users/minhtqm1993/.gemini/antigravity-ide/scratch/seeding_<mode>_<timestamp>.md`
+Lưu vào: `C:/tmp/seeding_<mode>_<timestamp>.md`
 (timestamp định dạng `yyyyMMdd_HHmmss`). In đường dẫn file.
 
 ---
