@@ -8,7 +8,7 @@ description: >
 
 # Seeding DND Skill 👁️
 
-Tạo content seeding tự nhiên cho Bệnh viện Mắt Quốc tế DND Sài Gòn (147 Trương Định, Quận 3, TP.HCM) với 3 chế độ khác nhau tùy mục đích sử dụng.
+Tạo content seeding tự nhiên cho Bệnh viện Mắt Quốc tế DND Sài Gòn (147 Trương Định, Quận 3, TP.HCM) với 4 chế độ khác nhau tùy mục đích sử dụng.
 
 ## Repo
 
@@ -21,6 +21,7 @@ Skill này được đồng bộ với repo GitHub riêng: https://github.com/mi
 - `/dnd-seeding group` — Tạo ~28 bài đăng seeding trên group mổ cận
 - `/dnd-seeding reply-group "câu hỏi gốc"` — Tạo ~20 comment reply vào bài người khác trên group
 - `/dnd-seeding ads` — Tạo ~20 comment seeding dưới bài quảng cáo của mình
+- `/dnd-seeding live (nội dung content live)` — Tạo ~20 comment seeding dùng nick ảo để bình luận trên livestream (workshop/hội thảo)
 - `/dnd-seeding` (không tham số) — Mặc định chạy mode `group`
 
 ---
@@ -83,8 +84,13 @@ Xáo trộn persona mỗi lần chạy. Không dùng quá 3 câu cùng 1 persona
 
 - **Viết tắt tự nhiên (xen kẽ, không dùng hết):**
   `e` (em), `mn`/`mng` (mọi người), `bs` (bác sĩ), `bv` (bệnh viện), `đc` (được), `k`/`ko` (không), `q3` (quận 3), `j` (gì), `r` (rồi), `vs` (với), `cx` (cũng), `tc` (tài chính), `ntn` (như thế nào), `đt` (điện thoại)
+  - **Cách gọi bệnh viện phải đa dạng:** xen kẽ "bv mắt" và "bệnh viện mắt" (lúc viết tắt, lúc viết đầy đủ), thỉnh thoảng chỉ nói "bên viện" / "chỗ này" — đừng câu nào cũng "bv".
+- **Tên riêng LUÔN viết hoa (dù cả câu viết thường):**
+  - Tên bác sĩ: bs **Tuấn**, bs **Linh**, bs Hoàng **Lan** (chỉ viết hoa TÊN, chữ "bs" vẫn để thường). KHÔNG viết "bs tuấn".
+  - Thương hiệu: **DND**, **DND SG**, **DND Sài Gòn**, **DND Trương Định** — KHÔNG viết "dnd", "dnd sg".
+  - Địa danh/đường: **Trương Định**, **Sài Gòn**, **Hà Nội**.
 - **Phong cách:**
-  - Chữ thường (lowercase) là chính
+  - Chữ thường (lowercase) là chính — trừ tên riêng ở trên
   - Ngắn gọn, 1-2 ý/câu
   - Biểu cảm: `hihi`, `huhu`, `hic`, `ạ`, `mn ơi`, `nha`, `nè`, `hen`, `á`, `lun`
   - **CẤM** từ marketing: "đẳng cấp quốc tế", "đồng bộ hiện đại", "tiên phong", "trải nghiệm đỉnh cao"
@@ -113,13 +119,13 @@ Xáo trộn persona mỗi lần chạy. Không dùng quá 3 câu cùng 1 persona
 8. **Góc 8: So sánh bệnh viện (4 câu)** — Đóng vai người đang tìm hiểu nhiều nơi: đã khám (hoặc định khám) ở 1-2 viện khác — ví dụ Mắt Sài Gòn, Mắt TPHCM, Việt Nhật — và đang cân nhắc thêm DND Sài Gòn để khám/so sánh giá, công nghệ, cách tư vấn. DND luôn xuất hiện như **1 lựa chọn đang xem xét** bên cạnh viện khác, không phải viện đã chốt hay được khen vượt trội — giữ đúng tinh thần "đang tìm hiểu, chưa quyết".
 
 ### Ví dụ mode `group`
-- "mn có ai mổ cận chỗ bs tuấn dnd sài gòn chưa ạ, cho e xin review tay nghề bác với"
-- "e thấy bên dnd sg đang smiledays giảm 50%, tc tầm 25tr mổ đc gói nào tốt nhỉ"
-- "mình mổ smile pro bên dnd trương định tuần trước, bs tuấn mổ cho, nhẹ nhàng lắm mn, 2 ngày đi làm lại r"
-- (Góc 7 - story) "e vừa đặt lịch mổ cận tuần sau ở dnd sài gòn xong mà từ hôm qua đến giờ tự nhiên lại thấy rén 😅. lúc đi khám thì quyết tâm lắm, bs bảo mắt e đủ điều kiện, cũng chọn được phương pháp r. về nhà bố mẹ lại hỏi đủ thứ, có đau k, nhỡ sau này có vấn đề thì sao, làm e cũng dao động theo. anh/chị nào từng mổ ở dnd sg r cho e xin ít động lực với ạ, k biết trước ngày mổ mn có bị tâm lý giống e k"
-- (Góc 7 - story) "mn cho e xin review mổ cận ở dnd sài gòn với ạ 🙏 tuần trước e đi khám chuyên sâu trước mổ ở đây, bình thường e khá sợ khám mắt vì nhìn máy móc là run, nhưng buổi khám nhẹ nhàng hơn e tưởng, mất khá nhiều tg vì qua nhiều bước, có nhỏ thuốc rồi đợi đo lại nên gần cả buổi sáng. bs giải thích tình trạng mắt e khá kỹ và tư vấn e đủ điều kiện mổ smile pro, nhưng e vẫn chưa chốt ngay vì đây là quyết định lớn. ai mổ ở dnd sg r cho e xin ít review: thị lực sau mổ ổn k, hồi phục ntn, bv theo dõi hậu phẫu có kỹ k ạ, e cảm ơn mn nhiều"
-- (Góc 8 - so sánh viện) "e cận 5 độ loạn 1, mới khám ở mắt sg đc tư vấn femto pro với smile pro r, giờ muốn khám thêm chỗ khác xem sao. có ai khám ở dnd sài gòn r k, chi phí khám bên đó tầm nhiêu, có nên qua khám thêm 1 vòng trước khi chốt k ạ"
-- (Góc 8 - so sánh viện) "e đang phân vân giữa mắt tphcm với dnd trương định q3, chưa biết nên khám ở đâu trước, ai đi khám cả 2 chỗ r so sánh giúp e với"
+- "mn có ai mổ cận chỗ bs Tuấn DND Sài Gòn chưa ạ, cho e xin review tay nghề bác với"
+- "e thấy bên DND SG đang smiledays giảm 50%, tc tầm 25tr mổ đc gói nào tốt nhỉ"
+- "mình mổ smile pro bên DND Trương Định tuần trước, bs Tuấn mổ cho, nhẹ nhàng lắm mn, 2 ngày đi làm lại r"
+- (Góc 7 - story) "e vừa đặt lịch mổ cận tuần sau ở DND Sài Gòn xong mà từ hôm qua đến giờ tự nhiên lại thấy rén 😅. lúc đi khám thì quyết tâm lắm, bs bảo mắt e đủ điều kiện, cũng chọn được phương pháp r. về nhà bố mẹ lại hỏi đủ thứ, có đau k, nhỡ sau này có vấn đề thì sao, làm e cũng dao động theo. anh/chị nào từng mổ ở DND SG r cho e xin ít động lực với ạ, k biết trước ngày mổ mn có bị tâm lý giống e k"
+- (Góc 7 - story) "mn cho e xin review mổ cận ở DND Sài Gòn với ạ 🙏 tuần trước e đi khám chuyên sâu trước mổ ở đây, bình thường e khá sợ khám mắt vì nhìn máy móc là run, nhưng buổi khám nhẹ nhàng hơn e tưởng, mất khá nhiều tg vì qua nhiều bước, có nhỏ thuốc rồi đợi đo lại nên gần cả buổi sáng. bs giải thích tình trạng mắt e khá kỹ và tư vấn e đủ điều kiện mổ smile pro, nhưng e vẫn chưa chốt ngay vì đây là quyết định lớn. ai mổ ở DND SG r cho e xin ít review: thị lực sau mổ ổn k, hồi phục ntn, bệnh viện theo dõi hậu phẫu có kỹ k ạ, e cảm ơn mn nhiều"
+- (Góc 8 - so sánh viện) "e cận 5 độ loạn 1, mới khám ở mắt sg đc tư vấn femto pro với smile pro r, giờ muốn khám thêm chỗ khác xem sao. có ai khám ở DND Sài Gòn r k, chi phí khám bên đó tầm nhiêu, có nên qua khám thêm 1 vòng trước khi chốt k ạ"
+- (Góc 8 - so sánh viện) "e đang phân vân giữa mắt tphcm với DND Trương Định q3, chưa biết nên khám ở đâu trước, ai đi khám cả 2 chỗ r so sánh giúp e với"
 
 ---
 
@@ -134,25 +140,25 @@ Xáo trộn persona mỗi lần chạy. Không dùng quá 3 câu cùng 1 persona
 
 ### 5 kiểu reply (phân bổ đều ~4 câu/kiểu)
 
-1. **Trả lời từ kinh nghiệm bản thân** — "mình cx từng bị vậy, cuối cùng chọn mổ bên dnd sg..."
-2. **Gợi ý/Recommend tự nhiên** — "bạn thử qua dnd trương định q3 khám free xem, mình thấy ổn lắm"
-3. **Bổ sung thông tin hữu ích** — "theo mình biết thì bên dnd sg đang có smiledays giảm 50% nè"
-4. **Đồng cảm + dẫn dắt** — "e cx sợ vậy nè, nhưng mổ xong thấy nhẹ nhàng lắm, bs tuấn bên dnd sg khéo tay lắm"
-5. **Tag bạn / Rủ đi cùng** — "cái này giống case đứa bạn mình mổ bên dnd sg nè, để mình hỏi rồi rep lại"
+1. **Trả lời từ kinh nghiệm bản thân** — "mình cx từng bị vậy, cuối cùng chọn mổ bên DND SG..."
+2. **Gợi ý/Recommend tự nhiên** — "bạn thử qua DND Trương Định q3 khám free xem, mình thấy ổn lắm"
+3. **Bổ sung thông tin hữu ích** — "theo mình biết thì bên DND SG đang có smiledays giảm 50% nè"
+4. **Đồng cảm + dẫn dắt** — "e cx sợ vậy nè, nhưng mổ xong thấy nhẹ nhàng lắm, bs Tuấn bên DND SG khéo tay lắm"
+5. **Tag bạn / Rủ đi cùng** — "cái này giống case đứa bạn mình mổ bên DND SG nè, để mình hỏi rồi rep lại"
 
 ### Quy tắc riêng mode `reply-group`
 - Phải **liên quan trực tiếp** đến câu hỏi gốc, không trả lời lạc đề
-- Không nhắc DND quá lộ liễu — tối đa nhắc tên 1 lần/comment, có comment chỉ nói "chỗ mình mổ bên trương định q3" mà không nhắc DND
+- Không nhắc DND quá lộ liễu — tối đa nhắc tên 1 lần/comment, có comment chỉ nói "chỗ mình mổ bên Trương Định q3" mà không nhắc DND
 - Một số reply **không nhắc DND** — chỉ trả lời câu hỏi thuần túy, tạo cảm giác tự nhiên cho cả thread
 - Độ dài: ngắn hơn mode group, 1-3 câu/reply (comment thường ngắn hơn bài đăng)
 
 ### Ví dụ mode `reply-group`
 Giả sử câu hỏi gốc: _"mọi người ơi cận 5 độ loạn 2 độ mổ smile pro có ổn không ạ"_
 
-- "case mình cx tương tự bạn nè, cận 4.5 loạn 1.75, mổ smile pro bên dnd sg, giờ 10/10 r nha"
+- "case mình cx tương tự bạn nè, cận 4.5 loạn 1.75, mổ smile pro bên DND SG, giờ 10/10 r nha"
 - "cận 5 loạn 2 thì làm smile pro đc bạn ơi, quan trọng là giác mạc đủ dày, bạn đi khám chuyên sâu trước đi"
-- "bạn qua dnd trương định q3 khám 12 bước free luôn á, bs sẽ tư vấn phương pháp phù hợp cho bạn"
-- "e cx loạn 2 độ nè, bs tuấn bên dnd sg bảo e làm smile pro đc, mổ xong k thấy loạn nữa lun"
+- "bạn qua DND Trương Định q3 khám 12 bước free luôn á, bs sẽ tư vấn phương pháp phù hợp cho bạn"
+- "e cx loạn 2 độ nè, bs Tuấn bên DND SG bảo e làm smile pro đc, mổ xong k thấy loạn nữa lun"
 - "loạn 2 độ thì smile pro máy visumax 800 xử lý tốt lắm bạn, nó có OcuLign bù trừ trục loạn thị"
 
 ---
@@ -167,7 +173,7 @@ Giả sử câu hỏi gốc: _"mọi người ơi cận 5 độ loạn 2 độ m
 2. **Hỏi lịch / Đăng ký (3 câu)** — "e muốn book lịch khám cuối tuần đc k ạ", "ad cho e xin sđt tư vấn vs ạ"
 3. **Tag bạn bè (3 câu)** — "@tên ơi cái này hay nè", "tag đứa bạn cận 10 độ vào đây 😂"
 4. **Bày tỏ quan tâm (3 câu)** — "ôi giảm 50% thiệt hả", "e tính mổ lâu r mà chưa dám, giờ thấy ưu đãi ngon quá"
-5. **Chia sẻ đã mổ ở đây (4 câu)** — "e mổ bên này r, bs tuấn mổ cho, ổn lắm mn", "mình mổ tháng trước r, recommend luôn nha"
+5. **Chia sẻ đã mổ ở đây (4 câu)** — "e mổ bên này r, bs Tuấn mổ cho, ổn lắm mn", "mình mổ tháng trước r, recommend luôn nha"
 6. **Hỏi thêm về trải nghiệm (3 câu)** — "ai mổ r cho e xin review với", "mổ có đau k mng", "bao lâu đi làm lại đc ạ"
 
 ### Quy tắc riêng mode `ads`
@@ -182,12 +188,50 @@ Giả sử câu hỏi gốc: _"mọi người ơi cận 5 độ loạn 2 độ m
 - "e muốn đk khám free đc k ạ, cuối tuần có làm k ad"
 - "@LanNguyen ê m cận nặng vậy đi khám chỗ này đi 😂"
 - "ôi giảm 50% thật á, chỉ từ 13tr thui hả 😳"
-- "mình mổ chỗ này tháng trước r nè mn, bs tuấn mổ nhẹ nhàng lắm, giờ 10/10 r, recommend lun 👍"
+- "mình mổ chỗ này tháng trước r nè mn, bs Tuấn mổ nhẹ nhàng lắm, giờ 10/10 r, recommend lun 👍"
 - "mổ có đau k mng 🥲"
 - "e ở bình dương lên mổ trong ngày về luôn đc k ạ"
 - "đã inbox ad r ạ ❤️"
 - "e tính mổ lâu r mà sợ, giờ thấy ưu đãi ngon quá tính liều lun hihi"
 - "@MinhTran xem cái này đi bro"
+
+---
+
+# MODE 4: `/dnd-seeding live (nội dung content live)`
+
+**Mục đích:** Tạo ~20 comment seeding dùng nick ảo để bình luận trực tiếp trên livestream (workshop/hội thảo của DND). Đóng vai người xem live thật, comment real-time tạo không khí sôi động, kéo người thật tương tác theo.
+
+### Cách hoạt động
+- AI đọc nội dung content live user paste vào (nguyên văn caption/thông tin sự kiện)
+- Tự detect từ nội dung: tên + chức danh bác sĩ diễn giả (không giới hạn BS Tuấn/Linh/Hoàng Lan — có thể là bác sĩ chi nhánh khác như DND Hà Nội), tên/chủ đề hội thảo, loại hội thảo (mổ cận, kiểm soát cận thị trẻ em, phaco...), ưu đãi nếu content có nhắc
+- Sinh ~20 comment phù hợp, dùng đúng tên bác sĩ/chủ đề detect được — không bịa thêm bác sĩ ngoài nội dung được cung cấp
+
+### 6 nhóm comment (phân bổ đều ~20 câu)
+
+1. **Hỏi/khen bác sĩ diễn giả (4 câu)** — Hỏi tay nghề, khen chuyên môn dựa trên tên + chức danh bác sĩ detect được trong content.
+2. **Hỏi ưu đãi/chi phí (3 câu)** — Hỏi ưu đãi khi tham gia workshop, chi phí mổ/khám liên quan chủ đề buổi hội thảo.
+3. **Hỏi về loại hội thảo (4 câu)** — Hỏi hội thảo khác cùng chuỗi chương trình DND (VD: hội thảo mổ cận người lớn, hội thảo kiểm soát cận thị trẻ em, hội thảo phaco...), có tổ chức thường xuyên không, khi nào có buổi tiếp theo.
+4. **Hỏi lịch/cách đăng ký (3 câu)** — Hỏi cách đăng ký tham gia, còn nhận đăng ký không, có online không hay phải đến trực tiếp.
+5. **Tag bạn bè đi cùng (3 câu)** — "@tên ơi vào coi nè", tag người quen đang cận/quan tâm chủ đề.
+6. **Cảm xúc quan tâm/mong chờ (3 câu)** — Bày tỏ hào hứng, đang theo dõi live, mong được giải đáp thắc mắc.
+
+### Quy tắc riêng mode `live`
+- Văn phong giống mode `ads`: ngắn 1-2 câu, có emoji, tự nhiên như bình luận real-time khi đang xem trực tiếp
+- Dùng ngữ cảnh "đang xem live", "vừa vào coi", "đang nghe bs nói" — không dùng từ ngữ kiểu bài post/bài viết
+- Tên bác sĩ/chủ đề hội thảo phải khớp đúng nội dung content live được cung cấp, không tự thêm bác sĩ khác
+
+### Ví dụ mode `live`
+(Giả sử content live nhắc BS.CKII Phạm Thị Hằng và workshop SMILE Pro)
+- "bs Hằng nói dễ hiểu quá, nghe xong hiểu rõ luôn á"
+- "cho e hỏi bs Hằng khám ở DND Sài Gòn hay chỉ ở Hà Nội ạ"
+- "tham gia workshop này có đc ưu đãi gì k ạ 👀"
+- "DND có hay tổ chức workshop kiểm soát cận thị cho trẻ em k ạ, con e mới lớp 5 cận tăng nhanh"
+- "hội thảo mổ phaco thì bên DND có tổ chức k ạ, mẹ e bị đục thủy tinh thể"
+- "muốn đăng ký tham gia thì làm sao ạ, còn nhận k"
+- "có phải đến trực tiếp k hay xem online cũng đk ạ"
+- "@ThaoNguyen ơi vào coi nè, đúng cái m đang tìm hiểu"
+- "đang xem mà thấy đúng vấn đề mình đang gặp luôn 😍"
+- "hồi hộp quá, đang nghe bs nói mà thấy đúng tình trạng mắt mình"
 
 ---
 
@@ -199,10 +243,11 @@ Giả sử câu hỏi gốc: _"mọi người ơi cận 5 độ loạn 2 độ m
 - Không có tham số hoặc `group` → chạy Mode 1
 - `reply-group "..."` → chạy Mode 2, parse câu hỏi gốc từ dấu ngoặc kép
 - `ads` → chạy Mode 3
+- `live (nội dung content live)` → chạy Mode 4, parse toàn bộ nội dung live, detect bác sĩ/chủ đề/ưu đãi từ đó
 
 **Bước 2: Chọn Persona & Sinh nội dung**
 - Chọn ngẫu nhiên 5-6 persona từ Persona Pool
-- Sinh đúng số câu theo cấu trúc của mode tương ứng (mode `group` ~28 câu, mode `reply-group`/`ads` ~20 câu)
+- Sinh đúng số câu theo cấu trúc của mode tương ứng (mode `group` ~28 câu, mode `reply-group`/`ads`/`live` ~20 câu)
 - Đảm bảo đa dạng persona, cấu trúc câu, cách xưng hô
 
 **Bước 3: Áp dụng Tone & Viết tắt**
@@ -213,6 +258,7 @@ Giả sử câu hỏi gốc: _"mọi người ơi cận 5 độ loạn 2 độ m
 **Bước 4: Xuất kết quả ra Chat**
 - Hiển thị rõ ràng theo nhóm/kiểu để dễ copy
 - Mode `reply-group`: hiện lại câu hỏi gốc ở đầu để tiện đối chiếu
+- Mode `live`: hiện lại tên bác sĩ/chủ đề hội thảo đã detect được ở đầu để tiện đối chiếu
 
 **Bước 5: Lưu file scratch**
 Lưu vào: `C:/tmp/seeding_<mode>_<timestamp>.md`
@@ -224,11 +270,15 @@ Lưu vào: `C:/tmp/seeding_<mode>_<timestamp>.md`
 
 | Sai lầm | Cách khắc phục |
 |---------|----------------|
-| Viết hoa, chấm phẩy trang trọng | Chữ thường, gõ tự nhiên, bỏ bớt dấu câu |
+| Viết hoa đầu câu / chấm phẩy trang trọng | Chữ thường, gõ tự nhiên, bỏ bớt dấu câu — TRỪ tên riêng |
+| Viết thường tên riêng: "bs tuấn", "dnd", "dnd sg" | LUÔN viết hoa: bs **Tuấn**, **DND**, **DND SG**, **DND Sài Gòn**, **Trương Định** |
+| Câu nào cũng "bv" | Xen kẽ "bv mắt" / "bệnh viện mắt" / "bên viện" cho đa dạng |
 | Nhồi từ marketing quảng cáo | Dùng: "máy xịn", "khám kỹ", "ổn áp", "nhẹ nhàng" |
-| Nhắc tên DND quá nhiều trong 1 câu | Tối đa 1 lần/câu, đôi khi chỉ nói "chỗ trương định q3" |
+| Nhắc tên DND quá nhiều trong 1 câu | Tối đa 1 lần/câu, đôi khi chỉ nói "chỗ Trương Định q3" |
 | Trùng cấu trúc câu | Đổi chủ ngữ + cách kết câu liên tục |
 | Copy nguyên Example Bank | Chỉ tham khảo style — viết câu MỚI mỗi lần |
 | Reply không liên quan câu hỏi gốc (mode reply-group) | Phải đọc kỹ câu hỏi gốc, reply đúng ngữ cảnh |
 | Comment ads quá dài/chuyên nghiệp (mode ads) | Comment ngắn 1-2 câu, có emoji, giống comment nhanh trên đt |
 | Tất cả comment ads đều khen | Phải xen kẽ hỏi giá, tag bạn, hỏi lịch — đa dạng kiểu tương tác |
+| Bịa thêm bác sĩ/chủ đề không có trong content live (mode live) | Chỉ dùng tên bác sĩ/chủ đề đã detect từ nội dung content được paste |
+| Dùng từ "bài viết/bài post" cho comment live (mode live) | Dùng ngữ cảnh "đang xem live", "vừa vào coi", "đang nghe bs nói" |
