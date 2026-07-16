@@ -1,5 +1,5 @@
 ---
-name: dnd-seeding
+name: seeding-dnd
 description: >
   Tạo danh sách ~20 content seeding ngắn dạng câu hỏi cho Bệnh viện Mắt Quốc tế DND Sài Gòn.
   Trigger khi user gõ "/dnd-seeding", "dnd-seeding", "seeding-dnd", "content seeding dnd", hoặc yêu cầu
@@ -14,11 +14,12 @@ Tạo content seeding tự nhiên cho Bệnh viện Mắt Quốc tế DND Sài G
 
 Skill này được đồng bộ với repo GitHub riêng: https://github.com/minhtranquang1993/dnd-seeding (nhánh `main`, chỉ có file `SKILL.md`).
 - **Push cập nhật lên repo:** copy `SKILL.md` vào clone local của repo trên, commit, push.
-- **Pull về máy:** lấy `SKILL.md` từ repo trên, ghi đè vào `C:\Users\Admin\.claude\skills\dnd-seeding\SKILL.md`.
+- **Pull về máy:** lấy `SKILL.md` từ repo trên, ghi đè vào `C:\Users\Admin\.gemini\config\skills\seeding-dnd\SKILL.md` và `C:\Users\Admin\.claude\skills\dnd-seeding\SKILL.md`.
 
 ## When to Use
 
 - `/dnd-seeding group` — Tạo ~28 bài đăng seeding trên group mổ cận
+- `/dnd-seeding group story` (hoặc `/dnd-seeding story`) — Nhánh con: chỉ sinh ~15 bài **story kể chuyện**, bỏ 7 góc còn lại
 - `/dnd-seeding reply-group "câu hỏi gốc"` — Tạo ~20 comment reply vào bài người khác trên group
 - `/dnd-seeding ads` — Tạo ~20 comment seeding dưới bài quảng cáo của mình
 - `/dnd-seeding live (nội dung content live)` — Tạo ~20 comment seeding dùng nick ảo để bình luận trên livestream (workshop/hội thảo)
@@ -129,6 +130,57 @@ Xáo trộn persona mỗi lần chạy. Không dùng quá 3 câu cùng 1 persona
 
 ---
 
+# MODE 1B (sub-mode): `/dnd-seeding group story` (hoặc `/dnd-seeding story`)
+
+**Mục đích:** Nhánh con của Mode `group`. Chỉ sinh **~15 bài story kể chuyện** — KHÔNG sinh 7 góc còn lại của Mode 1. Dùng khi chỉ cần content dạng kể chuyện dài để đăng group.
+
+**Kích hoạt:** tham số `story` đứng sau `group` (`group story`), hoặc gõ tắt `story` ngay sau lệnh. Nếu chỉ có `group` (không kèm `story`) → chạy Mode 1 đầy đủ 8 góc như thường.
+
+### Đặc trưng story (kế thừa Góc 7)
+- **Bài dài hơn hẳn comment thường:** mỗi bài 1 đoạn 4-6 câu, kể mạch trải nghiệm thật, có cảm xúc.
+- **Luôn đặt bối cảnh ở DND Sài Gòn / DND Trương Định** — không dùng tên bệnh viện khác làm nơi mổ (trừ chủ đề 7/15 có thể nhắc viện khác như nơi "đã đi khám trước" rồi mới tới DND).
+- **Kết bài bằng 1 câu hỏi xin chia sẻ/động lực/kinh nghiệm** từ mọi người — KHÔNG phải câu hỏi thông tin khô khan.
+- Áp dụng đủ Tone & Writing Style + Persona Pool + quy tắc tên bác sĩ như các mode khác.
+
+### Pool 19 chủ đề — xáo trộn mỗi lần chạy, chọn ~15 câu, phân bổ ĐỀU 4 nhóm (~3-4 câu/nhóm)
+
+**Nhóm A — Trước mổ (tâm lý/quyết định):**
+1. Tâm lý lo lắng/rén trước ngày mổ
+2. Buổi khám chuyên sâu 12 bước diễn ra thế nào
+3. Băn khoăn trước khi quyết định mổ
+8. Vượt nỗi sợ đụng vào mắt (sợ dao kéo, nhìn máy là run)
+9. Chần chừ nhiều năm mới quyết mổ, tiếc sao không làm sớm
+
+**Nhóm B — Sau mổ (hồi phục/đổi đời):**
+4. Hành trình hậu phẫu — hồi phục ngày 1/ngày 3, sáng mắt dần
+5. Kể chuyện thoát kính sau nhiều năm đeo kính dày
+17. Cuộc sống đổi sau mổ (bơi, thể thao, trang điểm, sáng dậy k quờ tìm kính)
+10. Cảm động vì được bs/điều dưỡng chăm sóc, dặn dò, hỏi thăm sau mổ
+
+**Nhóm C — Theo đối tượng:**
+11. Sinh viên dành dụm tiền mổ, "đầu tư cho đôi mắt"
+12. Người tỉnh lên SG mổ trong ngày (Biên Hòa/Long An/Bình Dương)
+13. Mẹ có con cận đưa đi Ortho-K, tâm sự làm mẹ
+14. Nghề cần bỏ kính (công an/quân đội/phi công/tiếp viên)
+6. Dẫn người thân đi mổ/khám (góc người nhà)
+16. Kể thay ba mẹ mổ Phaco (đục thủy tinh thể, mắt sáng lại)
+
+**Nhóm D — Y khoa đặc biệt / cách biết đến DND:**
+15. Cận nặng từng bị từ chối laser → được tư vấn Phakic ICL
+7. Quá trình chọn viện & chốt DND SG
+18. Tình cờ biết DND (bạn giới thiệu / xem livestream / lướt fanpage)
+19. Tiktoker/KOC quay hành trình review, nhận cashback 3tr khi share
+
+### Cách xuất kết quả (mode story)
+In **gộp theo 4 nhóm A/B/C/D**, mỗi nhóm là 1 tiêu đề, dưới liệt kê các bài story của nhóm đó. Mỗi lần chạy chọn chủ đề khác nhau trong pool để không trùng ý.
+
+### Ví dụ mode `story`
+(2 ví dụ này chính là style Góc 7 — viết bài MỚI mỗi lần, chỉ tham khảo giọng)
+- (Nhóm A) "e vừa đặt lịch mổ cận tuần sau ở DND Sài Gòn xong mà từ hôm qua đến giờ tự nhiên lại thấy rén 😅. lúc đi khám thì quyết tâm lắm, bs bảo mắt e đủ điều kiện, cũng chọn được phương pháp r. về nhà bố mẹ lại hỏi đủ thứ, có đau k, nhỡ sau này có vấn đề thì sao, làm e cũng dao động theo. anh/chị nào từng mổ ở DND SG r cho e xin ít động lực với ạ, k biết trước ngày mổ mn có bị tâm lý giống e k"
+- (Nhóm B) "mình đeo kính từ năm lớp 6, tới giờ hơn 10 năm cận 6 độ, sáng nào dậy cũng quờ quạng tìm kính mới thấy đường 🥲. tuần trước mổ smile pro bên DND Trương Định, bs Tuấn mổ cho, sáng hôm sau mở mắt ra nhìn rõ luôn mà cứ ngỡ đang mơ. giờ đi tắm, bơi, ngủ dậy đều nhìn rõ, cảm giác lạ lắm mn ạ. ai mổ xong r có bị 'quen tay' đưa lên dụi mắt tìm kính giống mình k huhu"
+
+---
+
 # MODE 2: `/dnd-seeding reply-group "câu hỏi gốc"`
 
 **Mục đích:** Tạo ~20 comment reply vào bài viết của người khác trên group. Đóng vai **người từng trải nghiệm** hoặc **người cũng đang tìm hiểu** mà biết DND, dẫn dắt tự nhiên về DND Sài Gòn.
@@ -207,7 +259,6 @@ Giả sử câu hỏi gốc: _"mọi người ơi cận 5 độ loạn 2 độ m
 - Sinh ~20 comment phù hợp, dùng đúng tên bác sĩ/chủ đề detect được — không bịa thêm bác sĩ ngoài nội dung được cung cấp
 
 ### 6 nhóm comment (phân bổ đều ~20 câu)
-
 1. **Hỏi/khen bác sĩ diễn giả (4 câu)** — Hỏi tay nghề, khen chuyên môn dựa trên tên + chức danh bác sĩ detect được trong content.
 2. **Hỏi ưu đãi/chi phí (3 câu)** — Hỏi ưu đãi khi tham gia workshop, chi phí mổ/khám liên quan chủ đề buổi hội thảo.
 3. **Hỏi về loại hội thảo (4 câu)** — Hỏi hội thảo khác cùng chuỗi chương trình DND (VD: hội thảo mổ cận người lớn, hội thảo kiểm soát cận thị trẻ em, hội thảo phaco...), có tổ chức thường xuyên không, khi nào có buổi tiếp theo.
@@ -239,15 +290,16 @@ Giả sử câu hỏi gốc: _"mọi người ơi cận 5 độ loạn 2 độ m
 
 ### Khi nhận lệnh `/dnd-seeding [mode] [tham số]`:
 
-**Bước 1: Xác định mode**
-- Không có tham số hoặc `group` → chạy Mode 1
+**Bước 1: Xác định mode** (check theo thứ tự này)
+- `group story` HOẶC `story` (đứng ngay sau lệnh) → chạy **Mode 1B** (sub-mode story), CHỈ sinh ~15 bài story
+- `group` (không kèm `story`) hoặc không có tham số → chạy Mode 1 đầy đủ 8 góc
 - `reply-group "..."` → chạy Mode 2, parse câu hỏi gốc từ dấu ngoặc kép
 - `ads` → chạy Mode 3
 - `live (nội dung content live)` → chạy Mode 4, parse toàn bộ nội dung live, detect bác sĩ/chủ đề/ưu đãi từ đó
 
 **Bước 2: Chọn Persona & Sinh nội dung**
 - Chọn ngẫu nhiên 5-6 persona từ Persona Pool
-- Sinh đúng số câu theo cấu trúc của mode tương ứng (mode `group` ~28 câu, mode `reply-group`/`ads`/`live` ~20 câu)
+- Sinh đúng số câu theo cấu trúc của mode tương ứng (mode `group` ~28 câu, sub-mode `story` ~15 câu, mode `reply-group`/`ads`/`live` ~20 câu)
 - Đảm bảo đa dạng persona, cấu trúc câu, cách xưng hô
 
 **Bước 3: Áp dụng Tone & Viết tắt**
@@ -261,7 +313,7 @@ Giả sử câu hỏi gốc: _"mọi người ơi cận 5 độ loạn 2 độ m
 - Mode `live`: hiện lại tên bác sĩ/chủ đề hội thảo đã detect được ở đầu để tiện đối chiếu
 
 **Bước 5: Lưu file scratch**
-Lưu vào: `C:/tmp/seeding_<mode>_<timestamp>.md`
+Lưu vào: `C:\Users\Admin\.gemini\antigravity-ide\scratch\seeding_<mode>_<timestamp>.md`
 (timestamp định dạng `yyyyMMdd_HHmmss`). In đường dẫn file.
 
 ---
