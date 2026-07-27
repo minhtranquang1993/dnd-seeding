@@ -56,3 +56,12 @@ e muốn đo độ cắt kính mới thôi, khám bên DND bao nhiêu ạ	kinh	F
 e mổ cận ở viện khác 2 năm trước, giờ muốn qua DND tái khám có free k	fu_other	False	written
 e bị glaucoma muốn khám bên DND, phí khám bao nhiêu ạ	khac	False	written
 e cận 18 độ giác mạc mỏng, bs bảo đặt phakic ICL, khám có free k ạ	kx	True	written
+# GATE 3 (answered 2026-07-27): presbyopia treated via Phaco + multifocal IOL has
+# no priced policy, so it is its own bucket routing to the hotline - NOT kx/T0.
+# The set had no row on this path, so it scored 24/24 while never testing it. The
+# neighbouring rows are the ones that make the distinction load-bearing: presbyopia
+# alone, and presbyopia + glasses, both stay kx/free.
+mẹ e lão thị, bs nói mổ phaco đặt IOL đa tiêu, khám có free k ạ	lt_phaco	False	written
+ba e lão thị nặng, bs tư vấn thay thủy tinh thể đa tiêu, khám bên DND bao nhiêu	lt_phaco	False	written
+mẹ e lão thị muốn mổ presbyond laser, khám 12 bước có free k ạ	kx	True	written
+e bị lão thị thôi, khám bên DND có mất phí k ạ	kx	True	written
