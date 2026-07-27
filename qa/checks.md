@@ -18,6 +18,8 @@ Mọi con số ngưỡng dưới đây đọc từ script, không phải chép t
 
 Draft phải qua `--check` **trước** khi ghi file. Ghi trước rồi check thì script chỉ thấy lịch sử, không gác được cái đang xuất.
 
+`--check` không kèm FILE thì đọc stdin. Pipe rỗng → **exit 2 kèm `FAIL: empty input`**, không phải PASS: một gate xanh mà chưa soi gì thì tệ hơn là không có gate.
+
 ## Các gate
 
 | Code | Loại | Gác gì | Ngưỡng |
@@ -26,6 +28,7 @@ Draft phải qua `--check` **trước** khi ghi file. Ghi trước rồi check t
 | `M3` | fail | Claim hết đau (regex mở rộng) | 0 hit |
 | `M5` | fail | 5 góc reply mới: Kiểu 6 phải có điểm dở thật, Kiểu 7 không nhắc brand, 10/10 chỉ ở Kiểu 1 | đủ 5 góc khi run ≥10 item |
 | `5A` | fail | `10/10` ngoài góc được phép, hoặc vượt hạn ngạch | ≤20% item/run, `live` = 0 |
+| `5A` | fail / warn | Mode không khai được (`unknown`): có `10/10` → **fail** (không có luật nào xử được); không có `10/10` → warn | khai `**Mode:** <tên>` hoặc `--mode` |
 | `5C` | fail | Cấm chung: hết đau · superlative VN/EN · so sánh viện · cam kết · khỏi cận | 0 hit |
 | `FOOTER-A` | fail | Có nêu thông tin phí mà **không có footer** | bắt buộc có footer |
 | `FOOTER-B` | fail | Footer khai tier không khớp con số/claim trong draft | xem dưới |

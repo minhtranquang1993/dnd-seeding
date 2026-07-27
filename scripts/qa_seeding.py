@@ -1014,9 +1014,22 @@ def check_quota_10_10(mode, items, rep):
     cfg = QUOTA_10_10.get(mode)
     if cfg is None:
         # An unknown mode used to get a NOTE, which reads as "checked, fine" in a
-        # PASS report. It is not checked at all, so it is a WARN.
-        rep.warn("5A", "mode %r has no quota row - 10/10 was NOT checked for this "
-                       "mode. Add a row to QUOTA_10_10 (or mark it exempt)." % mode)
+        # PASS report. It is not checked at all, so it is a WARN -- and when the
+        # draft actually carries 10/10 there is something to adjudicate and no
+        # rule to adjudicate it with, which is a FAIL. Warning and returning 0
+        # there is ISSUE-5's exact shape: a guardrail reporting PASS for
+        # something it never inspected.
+        hits = [it for it in items if "10/10" in it.text]
+        if hits:
+            rep.fail("5A", "mode %r has no quota row and the draft carries %d "
+                           "'10/10' claim(s) (first at line %d), so 10/10 could "
+                           "not be adjudicated. Declare the mode ('**Mode:** "
+                           "<name>' or --mode), or add a row to QUOTA_10_10."
+                     % (mode, len(hits), hits[0].line))
+        else:
+            rep.warn("5A", "mode %r has no quota row - 10/10 was NOT checked for "
+                           "this mode. Add a row to QUOTA_10_10 (or mark it "
+                           "exempt)." % mode)
         return
     if cfg.get("exempt"):
         n_hits = sum(1 for it in items if "10/10" in it.text)
@@ -1168,6 +1181,13 @@ def run_check(text, mode=None, fees_path=None, label="<stdin>", require_policy=T
     """Check one draft. rep_out, if a list, receives the Report so a caller can
     assert on WHICH gate fired - 'it failed' is not evidence the intended gate
     works."""
+    # `--check` with no FILE reads stdin, so an empty pipe used to print PASS:
+    # a green gate that inspected nothing. Same failure shape as 5A below.
+    if not text or not text.strip():
+        print("check: %s" % label)
+        print("FAIL: empty input - nothing was checked. Pass a FILE or pipe a "
+              "draft into --check.")
+        return 2
     rep = Report()
     if rep_out is not None:
         rep_out.append(rep)
@@ -1184,7 +1204,10 @@ def run_check(text, mode=None, fees_path=None, label="<stdin>", require_policy=T
 
     check_m2(items or [Item(0, None, text, 1)], rep)
     check_footer(text, items or [Item(0, None, text, 1)], rep, fees_path)
-    check_quota_10_10(mode, items, rep)
+    # whole-text fallback, same as check_m2/check_footer above: an unparseable
+    # draft must not be able to hide a 10/10 from 5A just by carrying no
+    # numbered items.
+    check_quota_10_10(mode, items or [Item(0, None, text, 1)], rep)
     check_new_angles(mode, items, rep)
     check_bans(mode, text, items, rep)
     check_antirepeat(items, rep)
@@ -1332,6 +1355,12 @@ SELFTEST_MODE_EXEMPT = [
     ("koc: superlative VN NOT exempt", "koc", "bs giỏi nhất Sài Gòn luôn á", "5C"),
     ("group: pain-claim NOT exempt", "group", "mổ xong ko đau gì hết", "5C"),
     ("group: 20/20 NOT exempt", "group", "vision is 20/20 now", "5C"),
+    # unknown mode: nothing in QUOTA_10_10 can adjudicate 10/10, so a draft
+    # carrying it must FAIL rather than pass with a warning nobody reads.
+    ("unknown mode + 10/10 -> 5A", "brand_new_mode",
+     "mắt e giờ 10/10 lun nha", "5A"),
+    ("unknown mode, no 10/10 -> warn only, no fail", "brand_new_mode",
+     "bs khám kỹ, giải thích rõ từng bước", None),
 ]
 
 _FB_HEAD = "# Seeding Reply-Group - DND\n**Mode:** reply-group\n\n"
