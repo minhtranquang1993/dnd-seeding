@@ -52,15 +52,60 @@ Skill này được đồng bộ với repo GitHub riêng: https://github.com/mi
 - **Crosslinking:** Làm bền vững giác mạc, kết hợp thêm.
 
 ### 4. Ưu đãi SmileDays 2026
-- Khám chuyên sâu 12 bước miễn phí (trị giá 1.000.000đ, kể cả Ortho-K).
+- **Khám chuyên sâu 12 bước miễn phí (trị giá 1.000.000đ) — CHỈ áp dụng cho khám mổ cận / khúc xạ** (gồm lão thị, Phakic ICL). **KHÔNG áp dụng cho Ortho-K, Phaco, cắt kính, khám bệnh lý, khám tổng quát** — xem bảng phí ở §6.
 - Hỗ trợ đến 50%++ chi phí mổ cận, giá chỉ từ 13 triệu/2 mắt.
 - Cashback 3.000.000đ khi share hành trình. Thẻ Family 5.000.000đ.
-- Miễn phí tái khám & đồng hành hậu phẫu 3 năm. Check-in nhận quà mùa hè.
+- **Miễn phí tái khám & đồng hành hậu phẫu 3 năm — CHỈ cho người đã mổ tại DND.** Người mổ ở viện khác đến tái khám: **có tính phí, không báo số → chuyển hotline.**
+- Check-in nhận quà mùa hè.
 
 ### 5. Dịch vụ khác
-- **Ortho-K:** Kính đeo đêm kiểm soát cận thị trẻ em.
-- **Phaco:** Mổ đục thủy tinh thể, 3-5 phút/mắt, 500.000+ ca.
-- **Thẩm mỹ mắt:** Cắt mí, lấy mỡ bọng, chỉnh sụp mi.
+- **Ortho-K:** Kính đeo đêm kiểm soát cận thị trẻ em. **Khám Ortho-K CÓ PHÍ** (T2).
+- **Phaco:** Mổ đục thủy tinh thể, 3-5 phút/mắt, 500.000+ ca. **Khám Phaco CÓ PHÍ** (T2).
+- **Thẩm mỹ mắt:** Cắt mí, lấy mỡ bọng, chỉnh sụp mi. **Khám CÓ PHÍ** (T2).
+- **Lão thị:** điều trị được — Presbyond (laser) hoặc Phaco + IOL đa tiêu. Người lão thị **không phải chỉ có đường đi cắt kính**. Khám lão thị theo đường khúc xạ/laser = **T0 free**; nếu ca đó đi đường **Phaco + IOL đa tiêu** thì **không báo phí khám → hotline** (chưa có chính sách).
+
+---
+
+## 6. Phí khám & luật báo phí
+
+> Bảng này là **nguồn duy nhất** cho mọi câu nói về phí khám trong skill. Cập nhật: **2026-07**.
+> Ưu đãi **mổ** thì đọc `dnd-ads/promotions.md`, KHÔNG copy số sang đây.
+
+| Tier | Phí | Sau CT 50% | Áp cho |
+|---|---|---|---|
+| **T-FU** | **0đ** | — | Tái khám hậu phẫu, **đã mổ tại DND**, trong 3 năm |
+| **T0** | **0đ** (gói 12 bước, trị giá 1.000.000đ) | — | Khám mổ cận/viễn/loạn, **lão thị** (đường khúc xạ/laser), **Phakic ICL** |
+| **T1** | 160.000đ | 80.000đ | Khám đo độ - cắt kính |
+| **T2** | 350.000đ | 175.000đ | Phaco · Ortho-K/kiểm soát cận · võng mạc-dịch kính, glaucoma · thẩm mỹ mắt · khám tổng quát |
+
+**Điều kiện CT 50%:** (check-in/share post HOẶC đánh giá 5* Google Maps) VÀ (like fanpage HOẶC quan tâm Zalo OA DND).
+
+### Luật ưu tiên — áp theo thứ tự, dừng ở match đầu tiên
+
+| Ưu tiên | Điều kiện | Kết quả |
+|---|---|---|
+| **P1** | Có token hậu phẫu (`tái khám`, `sau mổ`, `hậu phẫu`, `mổ ... tháng/năm r`) | Mổ tại DND → **T-FU free**. Mổ viện khác → **có phí, không báo số, hotline** |
+| **P2** | Có ý định mổ/khúc xạ (`mổ`, `smile`, `lasik`, `phaco`, `ortho`, `icl`) | Theo service → T0 hoặc T2 |
+| **P3** | Chỉ có ý định cắt kính/đo độ | **T1** |
+| **P4** | Chỉ nói bệnh trạng (`cận`, `viễn`, `loạn`) mà không nêu ý định | **không báo giá → hotline** |
+
+**Nguyên tắc:** ý định thắng bệnh trạng; hậu phẫu thắng tất cả.
+
+### Luật cứng về câu nói free
+
+- **Mỗi câu nói khám free phải tự mang ngữ cảnh service** thuộc T0 hoặc T-FU. Không được nói free chung chung.
+- Câu có token chặn (`phaco`, `thủy tinh thể`, `ortho`, `kiểm soát cận`, `cắt kính`, `đo độ`, `đo mắt`, `thay kính`, `võng mạc`, `glaucoma`, `cắt mí`, `sụp mi`, `tổng quát`) → **không được nói free**, dù câu đó có nhắc cận/khúc xạ.
+- **Ngoại lệ duy nhất:** `lão thị` + `cắt kính` → vẫn free (người lão thị không bị đẩy sang cắt kính). `lão thị` + `phaco` thì **không** — chuyển hotline.
+- "Free / 0đ / miễn phí / tặng gói khám / trị giá 1.000.000đ" đều là **thông tin phí**, chịu luật này y như con số.
+- Không detect được service → **không báo giá, chuyển hotline 0775.147.147**.
+
+### Footer khi có nêu phí
+
+Run nào có nêu thông tin phí thì in ở cuối file: `[fees: 2026-07 · <tier>]` (ví dụ `[fees: 2026-07 · T0]`).
+
+### Tự kiểm trước khi xuất
+
+Chạy: `python scripts/qa_seeding.py --check draft.md` (hoặc pipe draft qua stdin). Script gác item-level: câu nào nói free mà không đủ điều kiện sẽ fail kèm số dòng.
 
 ---
 
@@ -72,7 +117,7 @@ Xáo trộn persona mỗi lần chạy. Không dùng quá 3 câu cùng 1 persona
 |---------|---------------------|
 | **Sinh viên** | "e là sv", "ba mẹ cho tiền mổ", "tc eo hẹp" |
 | **Dân văn phòng** | "e làm văn phòng", "ngồi máy tính cả ngày", "sợ khô mắt" |
-| **Mẹ bỉm** | "con e cận tăng nhanh", "cho bé đi khám ortho-k", "con mới lớp 5" |
+| **Mẹ bỉm** | "con e cận tăng nhanh", "cho bé đi khám ortho-k", "con mới lớp 5" — **khám Ortho-K có phí (T2), persona này KHÔNG được nói khám free** |
 | **Người tỉnh lên SG** | "e ở biên hòa/bình dương/long an", "lên sg mổ về luôn trong ngày" |
 | **Tiktoker / KOC** | "e muốn quay review", "share đc cashback 3tr k", "làm content" |
 | **Người cận nặng** | "e cận 12 độ", "giác mạc mỏng", "bs bảo k bắn laser đc" |
@@ -111,9 +156,9 @@ Xáo trộn persona mỗi lần chạy. Không dùng quá 3 câu cùng 1 persona
 ### Phân bổ 8 góc (tổng ~28 câu)
 
 1. **Góc 1: Hỏi review Bác sĩ (3 câu)** — Hỏi tay nghề/khám của BS Tuấn (mổ chính), BS Linh, BS Hoàng Lan (khám). Ai mát tay, ai khám kỹ.
-2. **Góc 2: Chi phí & Ưu đãi (3 câu)** — Hỏi khám 12 bước 0đ, SmileDays giảm 50%, giá trọn gói.
+2. **Góc 2: Chi phí & Ưu đãi (3 câu)** — Hỏi khám 12 bước 0đ **(chỉ trong ngữ cảnh mổ cận/khúc xạ — xem §6)**, SmileDays giảm 50%, giá trọn gói.
 3. **Góc 3: So sánh Công nghệ (3 câu)** — SMILE Pro vs SmartSight, SmartSurfACE cho mắt mỏng, Phakic ICL cho cận nặng.
-4. **Góc 4: Dịch vụ & CSVC (3 câu)** — Quy trình trong ngày, phòng ốc, Ortho-K cho trẻ.
+4. **Góc 4: Dịch vụ & CSVC (3 câu)** — Quy trình trong ngày, phòng ốc, Ortho-K cho trẻ. **Câu Ortho-K không được nhắc khám free** (Ortho-K = T2 có phí); hỏi phí thì để ngỏ/hotline.
 5. **Góc 5: Hậu phẫu (3 câu)** — Hồi phục, khô mắt, tái khám, kiêng cữ.
 6. **Góc 6: Social proof — Người đã mổ xong (5 câu)** — Chia sẻ trải nghiệm tích cực, kể chi tiết (BS, thị lực, số ngày hồi phục).
 7. **Góc 7: Story kể chuyện (4 câu)** — Bài dài hơn hẳn các góc khác (1 đoạn 4-6 câu, kể mạch trải nghiệm thật). Chủ đề: tâm lý lo lắng/rén trước ngày mổ, buổi khám chuyên sâu 12 bước diễn ra thế nào, băn khoăn trước khi quyết định mổ. Luôn đặt bối cảnh ở DND Sài Gòn/DND Trương Định — không dùng tên bệnh viện khác. Kết bài bằng 1 câu hỏi xin chia sẻ/động lực/kinh nghiệm từ mọi người, không phải câu hỏi thông tin khô khan.
@@ -160,7 +205,7 @@ Xáo trộn persona mỗi lần chạy. Không dùng quá 3 câu cùng 1 persona
 **Nhóm C — Theo đối tượng:**
 11. Sinh viên dành dụm tiền mổ, "đầu tư cho đôi mắt"
 12. Người tỉnh lên SG mổ trong ngày (Biên Hòa/Long An/Bình Dương)
-13. Mẹ có con cận đưa đi Ortho-K, tâm sự làm mẹ
+13. Mẹ có con cận đưa đi Ortho-K, tâm sự làm mẹ — **story này KHÔNG được nhắc khám free** (Ortho-K = T2)
 14. Nghề cần bỏ kính (công an/quân đội/phi công/tiếp viên)
 6. Dẫn người thân đi mổ/khám (góc người nhà)
 16. Kể thay ba mẹ mổ Phaco (đục thủy tinh thể, mắt sáng lại)
@@ -193,7 +238,7 @@ In **gộp theo 4 nhóm A/B/C/D**, mỗi nhóm là 1 tiêu đề, dưới liệt
 ### 5 kiểu reply (phân bổ đều ~4 câu/kiểu)
 
 1. **Trả lời từ kinh nghiệm bản thân** — "mình cx từng bị vậy, cuối cùng chọn mổ bên DND SG..."
-2. **Gợi ý/Recommend tự nhiên** — "bạn thử qua DND Trương Định q3 khám free xem, mình thấy ổn lắm"
+2. **Gợi ý/Recommend tự nhiên** — "bạn thử qua DND Trương Định q3 khám xem, mình thấy ổn lắm" (chỉ thêm chữ *free* khi câu hỏi gốc thuộc T0/T-FU — xem §6)
 3. **Bổ sung thông tin hữu ích** — "theo mình biết thì bên DND SG đang có smiledays giảm 50% nè"
 4. **Đồng cảm + dẫn dắt** — "e cx sợ vậy nè, nhưng mổ xong thấy nhẹ nhàng lắm, bs Tuấn bên DND SG khéo tay lắm"
 5. **Tag bạn / Rủ đi cùng** — "cái này giống case đứa bạn mình mổ bên DND SG nè, để mình hỏi rồi rep lại"
@@ -209,7 +254,7 @@ Giả sử câu hỏi gốc: _"mọi người ơi cận 5 độ loạn 2 độ m
 
 - "case mình cx tương tự bạn nè, cận 4.5 loạn 1.75, mổ smile pro bên DND SG, giờ 10/10 r nha"
 - "cận 5 loạn 2 thì làm smile pro đc bạn ơi, quan trọng là giác mạc đủ dày, bạn đi khám chuyên sâu trước đi"
-- "bạn qua DND Trương Định q3 khám 12 bước free luôn á, bs sẽ tư vấn phương pháp phù hợp cho bạn"
+- "bạn qua DND Trương Định q3 khám 12 bước trước mổ cận free luôn á, bs sẽ tư vấn phương pháp phù hợp cho bạn" ← chữ *free* hợp lệ vì câu tự mang ngữ cảnh **mổ cận** (T0). Bỏ 2 chữ "mổ cận" ra là câu này vi phạm §6.
 - "e cx loạn 2 độ nè, bs Tuấn bên DND SG bảo e làm smile pro đc, mổ xong k thấy loạn nữa lun"
 - "loạn 2 độ thì smile pro máy visumax 800 xử lý tốt lắm bạn, nó có OcuLign bù trừ trục loạn thị"
 
@@ -237,7 +282,7 @@ Giả sử câu hỏi gốc: _"mọi người ơi cận 5 độ loạn 2 độ m
 
 ### Ví dụ mode `ads`
 - "ad ơi mổ smile pro trọn gói hết bao nhiêu ạ"
-- "e muốn đk khám free đc k ạ, cuối tuần có làm k ad"
+- "e muốn đk khám mổ cận free đc k ạ, cuối tuần có làm k ad" ← có chữ **mổ cận** nên chữ *free* mới hợp lệ
 - "@LanNguyen ê m cận nặng vậy đi khám chỗ này đi 😂"
 - "ôi giảm 50% thật á, chỉ từ 13tr thui hả 😳"
 - "mình mổ chỗ này tháng trước r nè mn, bs Tuấn mổ nhẹ nhàng lắm, giờ 10/10 r, recommend lun 👍"
@@ -270,6 +315,7 @@ Giả sử câu hỏi gốc: _"mọi người ơi cận 5 độ loạn 2 độ m
 - Văn phong giống mode `ads`: ngắn 1-2 câu, có emoji, tự nhiên như bình luận real-time khi đang xem trực tiếp
 - Dùng ngữ cảnh "đang xem live", "vừa vào coi", "đang nghe bs nói" — không dùng từ ngữ kiểu bài post/bài viết
 - Tên bác sĩ/chủ đề hội thảo phải khớp đúng nội dung content live được cung cấp, không tự thêm bác sĩ khác
+- **Comment hỏi ưu đãi/chi phí (nhóm 2) chịu luật §6:** hội thảo kiểm soát cận thị trẻ em / Ortho-K / Phaco đều là **T2 có phí** — không comment "khám free" cho các chủ đề này. Chỉ chủ đề **mổ cận/khúc xạ** mới được nhắc gói khám 12 bước free.
 
 ### Ví dụ mode `live`
 (Giả sử content live nhắc BS.CKII Phạm Thị Hằng và workshop SMILE Pro)
@@ -312,6 +358,11 @@ Giả sử câu hỏi gốc: _"mọi người ơi cận 5 độ loạn 2 độ m
 - Mode `reply-group`: hiện lại câu hỏi gốc ở đầu để tiện đối chiếu
 - Mode `live`: hiện lại tên bác sĩ/chủ đề hội thảo đã detect được ở đầu để tiện đối chiếu
 
+**Bước 4B: Gác phí trước khi lưu**
+- Đối chiếu từng câu có chữ free/0đ/miễn phí với luật §6. Câu nào không đủ điều kiện → sửa hoặc bỏ chữ free.
+- Có nêu phí → in footer `[fees: 2026-07 · <tier>]`.
+- Chạy `python scripts/qa_seeding.py --check <file>` (hoặc pipe draft qua stdin trước khi ghi). Fail thì sửa rồi chạy lại.
+
 **Bước 5: Lưu file scratch**
 Lưu vào: `C:\Users\Admin\.gemini\antigravity-ide\scratch\seeding_<mode>_<timestamp>.md`
 (timestamp định dạng `yyyyMMdd_HHmmss`). In đường dẫn file.
@@ -334,3 +385,8 @@ Lưu vào: `C:\Users\Admin\.gemini\antigravity-ide\scratch\seeding_<mode>_<times
 | Tất cả comment ads đều khen | Phải xen kẽ hỏi giá, tag bạn, hỏi lịch — đa dạng kiểu tương tác |
 | Bịa thêm bác sĩ/chủ đề không có trong content live (mode live) | Chỉ dùng tên bác sĩ/chủ đề đã detect từ nội dung content được paste |
 | Dùng từ "bài viết/bài post" cho comment live (mode live) | Dùng ngữ cảnh "đang xem live", "vừa vào coi", "đang nghe bs nói" |
+| **Nói "khám free" cho Ortho-K / Phaco / cắt kính / khám bệnh lý / tổng quát** | Free CHỈ cho khám mổ cận-khúc xạ (T0) và tái khám hậu phẫu đã mổ tại DND (T-FU). Xem §6 |
+| **Nói "khám free" chung chung, không gắn service** | Mỗi câu phải tự mang ngữ cảnh T0/T-FU. Không có → không nói free |
+| **Hứa miễn phí tái khám cho người mổ ở viện khác** | Chỉ người đã mổ tại DND. Ca viện khác: có phí, không báo số, chuyển hotline |
+| **Đẩy người lão thị sang cắt kính** | Lão thị điều trị được (Presbyond / Phaco + IOL đa tiêu). Khám lão thị đường khúc xạ = free |
+| **Nêu phí mà không in footer** | Có nêu phí → in `[fees: 2026-07 · <tier>]` ở cuối file |
