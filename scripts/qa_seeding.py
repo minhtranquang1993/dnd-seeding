@@ -157,10 +157,18 @@ TOK = {
     # P1 - post-op, highest priority
     "fu": r"tái khám|sau mổ|hậu phẫu|mổ .{0,10}(tháng|năm) r|mới mổ|vừa mổ|đã mổ",
     # marker that the surgery happened somewhere else -> not T-FU (GATE 2-A)
-    "fu_elsewhere": (r"mổ ((ở|bên|tại) )?(viện|bv|bệnh viện|chỗ|nơi) khác"
-                     r"|mổ (ở|bên|tại) (mắt sài gòn|mắt sg|mắt tphcm|việt nhật)"
+    # `mo` and the place can be separated by the service ("mo can o vien khac"), so
+    # a gap is allowed - but it is TEMPERED against `dnd` and kept comma-free. Both
+    # guards are load-bearing: "mo ben DND roi qua vien khac kham lai" says the
+    # surgery WAS at DND, and an untempered gap reads it as elsewhere, wrongly
+    # denying a free follow-up. Competitor names take an optional facility prefix
+    # because "o bv mat sai gon" otherwise slips past and returns fu_dnd -> free,
+    # promising a free exam to someone operated on elsewhere (GATE 2-A).
+    "fu_elsewhere": (r"mổ(?:(?!dnd)[^,.\n]){0,20}?((ở|bên|tại) )?(viện|bv|bệnh viện|chỗ|nơi) khác"
+                     r"|mổ(?:(?!dnd)[^,.\n]){0,20}?(ở|bên|tại) ((bv|bệnh viện|viện|phòng khám|pk) )?"
+                     r"(mắt sài gòn|mắt sg|mắt tphcm|việt nhật)"
                      r"|(viện|bv|bệnh viện|chỗ|nơi) khác mổ"
-                     r"|mổ (ở|bên|tại) đâu khác"),
+                     r"|mổ(?:(?!dnd)[^,.\n]){0,20}?(ở|bên|tại) đâu khác"),
     # P2 - surgical / refractive intent
     "kx": (r"mổ cận|mổ khúc xạ|smile|lasik|smartsight|smartsurface|"
            r"clear|femto|icl|phakic|khúc xạ|mổ viễn|mổ loạn|lão thị"),
@@ -744,6 +752,13 @@ SELFTEST_BUCKETS = [
     ("e mổ smile pro bên DND 2 tháng r, giờ khô mắt đi tái khám free k", "fu_dnd", True),
     # GATE 2-A: post-op elsewhere -> charged, and no number may be quoted
     ("e mổ ở viện khác giờ muốn qua DND tái khám, khám free k ạ", "fu_other", False),
+    # fu_elsewhere gap, both directions. Service word between `mo` and the place:
+    ("e mổ cận ở viện khác 2 năm trước, giờ qua DND tái khám có free k", "fu_other", False),
+    # Facility prefix before a competitor name - was returning fu_dnd -> free:
+    ("e mổ loạn ở bv mắt sài gòn giờ qua DND tái khám có free k", "fu_other", False),
+    # ...and the tempering that keeps a DND mention inside the gap from reading as
+    # elsewhere. Surgery WAS at DND, so the follow-up stays free:
+    ("e mổ bên DND rồi qua viện khác khám lại, giờ về DND tái khám", "fu_dnd", True),
     # GATE 2-B follow-on: presbyopia named with the phaco path -> open slot, hotline
     ("mẹ e lão thị, bs nói mổ phaco đặt IOL đa tiêu, khám free k ạ", "kx", False),
     # presbyopia via the laser path is unambiguous T0
@@ -922,6 +937,135 @@ def run_selftest():
     return 0
 
 
+DOC_BUCKET_ROW_RX = re.compile(
+    r"^\|\s*`(fu_dnd|fu_other|kx|kinh|pc|or|khac|ambiguous|none)`\s*\|"
+    r"[^|]*\|\s*\*{0,2}([^|*]+?)\*{0,2}\s*\|\s*([^|]*?)\s*\|\s*$")
+
+# What the doc's "free?" column is allowed to say, mapped to a bool.
+_DOC_FREE = {"✅": True, "❌": False}
+
+
+def run_docsync(skill_path):
+    """Parse the section-6 bucket table out of SKILL.md and diff it against POLICY.
+
+    The table is a human-readable copy of TOK/POLICY, and copies drift. This makes
+    drift a test failure instead of a wrong fee quote six weeks from now.
+    """
+    rows = {}
+    for line in read_text(skill_path).splitlines():
+        m = DOC_BUCKET_ROW_RX.match(line.strip())
+        if m:
+            bucket, tier, free = m.group(1), m.group(2).strip(), m.group(3).strip()
+            rows[bucket] = (tier, free)
+    if not rows:
+        print("FAIL: no bucket table found in %s" % skill_path)
+        print("      (expected rows like: | `kx` | ...tokens... | **T0** | ✅ |)")
+        return 2
+
+    expected = dict(POLICY["buckets"])
+    expected["fu_other"] = POLICY["fu_other_hospital_tier"]
+    for k in ("ambiguous", "none"):
+        expected[k] = "HOTLINE"
+
+    problems = []
+    print("doc-sync: %d bucket row(s) in %s" % (len(rows), os.path.basename(skill_path)))
+    for bucket in sorted(expected):
+        if bucket not in rows:
+            problems.append("%s: missing from doc table" % bucket)
+            continue
+        doc_tier, doc_free = rows[bucket]
+        want_tier = expected[bucket]
+        # doc writes hotline as the word; POLICY writes it as HOTLINE
+        norm = doc_tier.lower().replace("*", "").strip()
+        tier_ok = (norm == "hotline") if want_tier == "HOTLINE" else (doc_tier == want_tier)
+
+        want_free = want_tier in POLICY["free_exam_tiers"]
+        got_free = None
+        for glyph, val in _DOC_FREE.items():
+            if glyph in doc_free:
+                got_free = val
+                break
+        free_ok = (got_free == want_free)
+
+        if not tier_ok:
+            problems.append("%s: doc tier %r, POLICY %r" % (bucket, doc_tier, want_tier))
+        if not free_ok:
+            problems.append("%s: doc free %r, POLICY says %s"
+                            % (bucket, doc_free or "(blank)", want_free))
+        print("  %-4s %-10s tier %-8s free %s"
+              % ("ok" if (tier_ok and free_ok) else "FAIL", bucket, doc_tier, doc_free or "-"))
+
+    extra = sorted(set(rows) - set(expected))
+    for bucket in extra:
+        problems.append("%s: in doc table but not in POLICY" % bucket)
+
+    print("")
+    if problems:
+        for p in problems:
+            print("  drift: %s" % p)
+        print("")
+        print("DOCSYNC: FAIL")
+        return 1
+    print("DOCSYNC: PASS - doc table matches POLICY on all %d buckets" % len(expected))
+    return 0
+
+
+def run_heldout(path):
+    """M1: score bucket detection against the held-out labelled set."""
+    rows = []
+    for raw in read_text(path).splitlines():
+        if not raw.strip() or raw.lstrip().startswith("#"):
+            continue
+        parts = raw.split("\t")
+        if len(parts) < 4:
+            print("FAIL: malformed row (needs 4 tab-separated fields): %r" % raw[:60])
+            return 2
+        text, bucket, free, source = (p.strip() for p in parts[:4])
+        rows.append((text, bucket, free.lower() == "true", source))
+    if not rows:
+        print("FAIL: no cases in %s" % path)
+        return 2
+
+    print("held-out set: %d case(s) from %s" % (len(rows), os.path.basename(path)))
+    by_source = {}
+    for _t, _b, _f, s in rows:
+        by_source[s] = by_source.get(s, 0) + 1
+    print("  sources: %s" % ", ".join("%s=%d" % kv for kv in sorted(by_source.items())))
+    print("")
+
+    n_bucket_ok = n_free_ok = 0
+    wrong = []
+    for text, exp_bucket, exp_free, source in rows:
+        got_bucket, tier, _reason = detect_bucket(text)
+        got_free, why = free_exam_allowed(text)
+        b_ok, f_ok = (got_bucket == exp_bucket), (got_free == exp_free)
+        n_bucket_ok += int(b_ok)
+        n_free_ok += int(f_ok)
+        if not (b_ok and f_ok):
+            wrong.append((text, exp_bucket, got_bucket, exp_free, got_free, why, source))
+        print("  %-4s %-9s %-9s free %-5s %-5s %-9s %s"
+              % ("ok" if (b_ok and f_ok) else "FAIL",
+                 exp_bucket, got_bucket, exp_free, got_free, source, text[:44]))
+
+    n = len(rows)
+    print("")
+    print("bucket accuracy    %d/%d" % (n_bucket_ok, n))
+    print("free-gate accuracy %d/%d" % (n_free_ok, n))
+    if wrong:
+        print("")
+        print("misses:")
+        for text, eb, gb, ef, gf, why, source in wrong:
+            print("  [%s] %s" % (source, text))
+            print("      bucket expected %s got %s | free expected %s got %s (%s)"
+                  % (eb, gb, ef, gf, why))
+        print("")
+        print("M1: FAIL")
+        return 1
+    print("")
+    print("M1: PASS - all %d cases correct on both bucket and free-gate" % n)
+    return 0
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(
         prog="qa_seeding.py",
@@ -932,12 +1076,26 @@ def main(argv=None):
     g.add_argument("--check", metavar="FILE", nargs="?", const="-",
                    help="check a draft; omit FILE or pass - to read stdin")
     g.add_argument("--selftest", action="store_true", help="run built-in fixtures")
+    g.add_argument("--heldout", metavar="FILE",
+                   help="score bucket detection against a labelled held-out set (M1)")
+    g.add_argument("--docsync", metavar="SKILL_MD", nargs="?", const="SKILL.md",
+                   help="check the section-6 bucket table in SKILL.md against POLICY")
     ap.add_argument("--mode", help="force mode instead of detecting it")
     ap.add_argument("--fees", help="path to fees-promos.md for footer layer (b)")
     args = ap.parse_args(argv)
 
     if args.selftest:
         return run_selftest()
+    if args.heldout:
+        if not os.path.exists(args.heldout):
+            print("FAIL: no such file %s" % args.heldout)
+            return 2
+        return run_heldout(args.heldout)
+    if args.docsync:
+        if not os.path.exists(args.docsync):
+            print("FAIL: no such file %s" % args.docsync)
+            return 2
+        return run_docsync(args.docsync)
     if args.baseline:
         return run_baseline(args.baseline)
     src = args.check

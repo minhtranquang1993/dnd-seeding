@@ -1,0 +1,58 @@
+# Held-out service-detect set for M1 (brief v4 section 4).
+#
+# Labels were assigned from the section 6 fee table in SKILL.md - i.e. from
+# hospital policy - NOT by reading the token lists in scripts/qa_seeding.py.
+# That ordering is the whole point of a held-out set: if the labels came from the
+# regexes, the test would only prove the regexes match themselves.
+#
+# COLUMN free_allowed means "is a free-exam claim PERMITTED on this item", not
+# "should the reply mention a free exam". Those differ: a kx question about
+# recovery time permits a free-exam claim but does not call for one. Whether to
+# mention it is editorial; whether it is allowed is the gate. The first version of
+# this file conflated the two and produced 11 false misses.
+#
+# source column:
+#   real      verbatim from a seeding_*.md output file in scratch/ (pre-fix corpus)
+#   collision one of the 4 mandatory collision cases named in brief section 4 M1
+#   written   written for this set to cover a bucket the local corpus does not reach
+#
+# NOTE ON COVERAGE: brief M1 asks for 20 real + 4 collision. Only 4 of the 217
+# output files are on this machine, and they yield 14 fee-relevant real questions.
+# The remaining 6 real slots are marked `written` rather than fabricated as real.
+# When the full corpus is available, replace them with real questions and re-run.
+#
+# NOTE ON `none` vs `ambiguous`: P4 fires only when a condition token
+# (cận|viễn|loạn|lão thị) is present with no intent. An item with no service token
+# at all yields `none`. Both route to hotline, so the fee outcome is identical;
+# they are kept distinct for diagnostics.
+#
+# NOTE ON PRE-OP vs POST-OP: "mổ cận xong cần kiêng cữ gì" and "mổ xong bao lâu
+# đi làm lại" carry no post-op token - they read equally as someone pre-op asking
+# what to expect. Labelled kx, not fu_dnd. Both tiers are free anyway, so the
+# free-gate outcome does not depend on resolving the ambiguity.
+#
+# text	bucket	free_allowed	source
+mọi người ơi cận 5 độ loạn 2 độ mổ smile pro có ổn không ạ	kx	True	real
+cho e hỏi bs Tuấn DND SG mổ smile pro oke k ạ, tay nghề bác ntn ạ	kx	True	real
+e là sv tc tầm 20-25tr thì mổ cận bên DND SG đc gói nào ngon bổ rẻ k ạ	kx	True	real
+gói khám 12 bước free bên DND Trương Định có cần dk trước k mng hay cứ qua là đc ạ	none	False	real
+smartsight vs smile pro khác j nhau nhiều k mng, thấy DND SG có cả 2 công nghệ này lun	kx	True	real
+quy trình khám mổ trong ngày bên DND SG có nhanh k mng, e ở tỉnh lên định làm luôn trong ngày	kx	True	real
+tái khám sau mổ bên DND SG có mất phí k mng ơi	fu_dnd	True	real
+mổ cận xong cần kiêng cữ gì nhiều k ạ, có đc dùng đt lun k mng	kx	True	real
+ad ơi mổ smile pro trọn gói hết bao nhiêu ạ	kx	True	real
+mổ smile pro có phát sinh thêm chi phí j nữa k ạ	kx	True	real
+e muốn đk khám free cuối tuần này đc k ad, có cần đặt lịch trc k ạ	none	False	real
+mổ cận có đau k mng ơi, e nhát gan quá	kx	True	real
+mổ xong bao lâu thì đi làm lại bình thường đc vậy ạ	kx	True	real
+ai mổ smile pro ở đây r cho e xin review thực tế vs ạ	kx	True	real
+e lão thị muốn đi cắt kính đọc sách, khám bên DND bao nhiêu ạ	kx	True	collision
+cận nhẹ thì cắt kính hay mổ ạ, khám bên DND free k	kx	False	collision
+e mổ smile pro bên DND 2 tháng r giờ khô mắt, đi tái khám có mất phí k ạ	fu_dnd	True	collision
+e bị cận, khám bên DND free k ạ	ambiguous	False	collision
+con e lớp 5 cận tăng nhanh, cho bé đeo Ortho-K bên DND khám bao nhiêu ạ	or	False	written
+mẹ e 68t bị đục thủy tinh thể, mổ phaco bên DND khám có free k ạ	pc	False	written
+e muốn đo độ cắt kính mới thôi, khám bên DND bao nhiêu ạ	kinh	False	written
+e mổ cận ở viện khác 2 năm trước, giờ muốn qua DND tái khám có free k	fu_other	False	written
+e bị glaucoma muốn khám bên DND, phí khám bao nhiêu ạ	khac	False	written
+e cận 18 độ giác mạc mỏng, bs bảo đặt phakic ICL, khám có free k ạ	kx	True	written

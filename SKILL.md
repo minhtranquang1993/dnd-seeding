@@ -91,6 +91,28 @@ Skill này được đồng bộ với repo GitHub riêng: https://github.com/mi
 
 **Nguyên tắc:** ý định thắng bệnh trạng; hậu phẫu thắng tất cả.
 
+### Bảng nhóm dịch vụ — dùng để phân loại 1 câu hỏi
+
+> Token lấy từ `TOK` trong `scripts/qa_seeding.py`. **File script là nguồn đúng**; bảng này là bản đọc cho người. Sửa token thì sửa script trước, rồi cập nhật bảng.
+
+| Nhóm | Token nhận diện | Tier | Được nói free? |
+|---|---|---|---|
+| `fu_dnd` | `tái khám`, `sau mổ`, `hậu phẫu`, `mới/vừa/đã mổ`, `mổ ... tháng/năm r` — **và không** có dấu hiệu mổ viện khác | **T-FU** | ✅ |
+| `fu_other` | như trên **+** `mổ ... (ở/bên/tại) viện khác`, `mổ ... ở BV Mắt Sài Gòn / Việt Nhật`, `viện khác mổ` | **hotline** | ❌ không báo số |
+| `kx` | `mổ cận`, `mổ viễn`, `mổ loạn`, `khúc xạ`, `smile`, `lasik`, `smartsight`, `smartsurface`, `clear`, `femto`, `icl`, `phakic`, `lão thị` | **T0** | ✅ |
+| `kinh` | `cắt kính`, `đo độ`, `đo mắt`, `thay kính`, `mua kính`, `kính mới` | **T1** | ❌ |
+| `pc` | `phaco`, `thủy tinh thể`, `đục thủy tinh` | **T2** | ❌ |
+| `or` | `ortho`, `ortho-k`, `kiểm soát cận`, `kính đêm`, `đeo đêm` | **T2** | ❌ |
+| `khac` | `võng mạc`, `dịch kính`, `glaucoma`, `tăng nhãn áp`, `cắt mí`, `sụp mi`, `bọng mắt`, `thẩm mỹ mắt`, `tổng quát` | **T2** | ❌ |
+| `ambiguous` | chỉ có `cận`/`viễn`/`loạn`/`lão thị`, không nêu ý định (P4) | **hotline** | ❌ |
+| `none` | không có token dịch vụ nào | **hotline** | ❌ |
+
+**Ba cái bẫy hay sai:**
+
+1. **`mổ` trơn không tự động là T0.** Phải thử `pc`/`or`/`khac` trước rồi mới cho `mổ` rơi về `kx`. Nếu không thì `mổ phaco` lọt vào T0-free — đúng con lỗi cũ ở `:55`.
+2. **`cận` trơn → hotline, nhưng `lão thị` trơn → free.** Nhìn lệch nhưng đúng: lão thị đi đường nào cũng free (cắt kính theo G2-B, laser theo T0), chỉ còn đường phaco là chưa chốt và đã bị chặn riêng. Còn `cận` thì cắt kính **T1 160k** mà mổ lại **T0 free** — hai giá khác nhau nên buộc phải hỏi.
+3. **Nói được nhiều nhóm trong 1 câu thì nhóm chặn thắng.** `lão thị` + `phaco` → hotline, không phải free.
+
 ### Luật cứng về câu nói free
 
 - **Mỗi câu nói khám free phải tự mang ngữ cảnh service** thuộc T0 hoặc T-FU. Không được nói free chung chung.
