@@ -26,7 +26,7 @@ Draft phải qua `--check` **trước** khi ghi file. Ghi trước rồi check t
 |---|---|---|---|
 | `M2` | fail | Câu nói khám free mà service không thuộc T0/T-FU | 0 vi phạm |
 | `M3` | fail | Claim hết đau (regex mở rộng) | 0 hit |
-| `M5` | fail | 5 góc reply mới: Kiểu 6 phải có điểm dở thật, Kiểu 7 không nhắc brand, 10/10 chỉ ở Kiểu 1 | đủ 5 góc khi run ≥10 item |
+| `M5` | fail | Góc reply mới: Kiểu 6 phải có điểm dở thật, Kiểu 7 không nhắc brand, 10/10 chỉ ở Kiểu 1 | **Kiểu 6 + 7** bắt buộc khi run ≥10 item; Kiểu 8/9/10 optional → note |
 | `5A` | fail | `10/10` ngoài góc được phép, hoặc vượt hạn ngạch | ≤20% item/run, `live` = 0 |
 | `5A` | fail / warn | Mode không khai được (`unknown`): có `10/10` → **fail** (không có luật nào xử được); không có `10/10` → warn | khai `**Mode:** <tên>` hoặc `--mode` |
 | `5C` | fail | Cấm chung: hết đau · superlative VN/EN · so sánh viện · cam kết · khỏi cận | 0 hit |
@@ -74,7 +74,10 @@ Luật phí **không** có ngoại lệ mode nào. `maps`/`koc` vẫn chịu M2 
 | B3b | footer lớp (b) cấp draft, đối chiếu với `fees-promos.md` thật |
 | B4 | sàn hạn ngạch `10/10` — instance đầu trong run ngắn phải hợp lệ |
 | B5 | ranh giới đính chính — Kiểu 8 được phép nhắc niềm tin sai để sửa nó |
+| E2 | run đủ 10 item có sàn 6+7 mà **không** có 8/9/10 → phải PASS (kiểu chọn theo ngữ cảnh) |
 | C–F | draft biết-sai phải fail **đúng gate**, draft đúng phải pass |
+
+Cặp fixture khoá **sàn M5 là 6+7 cụ thể**, không phải "bất kỳ góc mới nào": `E2` chứng minh thiếu 8/9/10 vẫn pass, còn negative `full run with 8/9/10 but no 6 or 7` chứng minh 3 góc kia không thay thế được cặp chống-toàn-khen.
 
 Fixture negative kiểm cả **code gate nào bắn**, không chỉ "có fail hay không". Fail sai gate = fixture xanh mà gate thật đang hỏng.
 

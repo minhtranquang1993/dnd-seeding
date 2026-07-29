@@ -362,9 +362,22 @@ In **gộp theo 4 nhóm A/B/C/D**, mỗi nhóm là 1 tiêu đề, dưới liệt
 - Phân tích ý chính của câu hỏi (hỏi về giá? về BS? về công nghệ? về hồi phục?)
 - Sinh ra ~20 comment reply phù hợp ngữ cảnh, tự nhiên
 
-### 10 kiểu reply (phân bổ đều ~2 câu/kiểu, tổng ~20)
+### 10 kiểu reply — chọn theo ngữ cảnh câu hỏi gốc, tổng ~20 item
 
 In section header đúng dạng `### Kiểu N: <tên>` — QA script attribute item theo header này để chấm hạn ngạch.
+
+**Không phải run nào cũng dùng đủ 10 kiểu.** Đọc câu hỏi gốc rồi chọn kiểu nào trả lời đúng thứ người ta đang hỏi; kiểu không hợp thì bỏ, dồn số item sang kiểu hợp.
+
+| Kiểu | Bắt buộc? | Khi nào dùng |
+|---|---|---|
+| 1-5 | tuỳ ngữ cảnh | Kiểu nào trả lời đúng câu hỏi gốc |
+| **6** (mixed) | ✅ **luôn có ≥1** | Mọi thread — sàn chống "reply toàn khen" |
+| **7** (hỏi lại, k nhắc DND) | ✅ **luôn có ≥1** | Mọi thread — sàn để thread trông như thread thật |
+| 8 (đính chính) | tuỳ ngữ cảnh | **Chỉ khi** bài gốc có nhận định sai cần sửa. Bài hỏi giá thuần → bỏ |
+| 9 (quy trình) | tuỳ ngữ cảnh | Chỉ khi người ta hỏi/lo về quy trình, thời gian, hậu cần |
+| 10 (đang cân nhắc) | tuỳ ngữ cảnh | Chỉ khi bài gốc đang so sánh nhiều chỗ hoặc chưa quyết |
+
+Kiểu 6 và 7 là sàn cứng vì chúng không phải "nội dung" — chúng tồn tại để thread không toàn khen. Bỏ 2 kiểu này là quay lại đúng fingerprint mà guardrail §7 dựng ra để chặn. QA script fail nếu run ≥10 item mà thiếu 1 trong 2.
 
 **5 kiểu gốc (giữ nguyên cú pháp cũ):**
 
@@ -386,22 +399,25 @@ In section header đúng dạng `### Kiểu N: <tên>` — QA script attribute i
 - Phải **liên quan trực tiếp** đến câu hỏi gốc, không trả lời lạc đề
 - Không nhắc DND quá lộ liễu — tối đa nhắc tên 1 lần/comment, có comment chỉ nói "chỗ mình mổ bên Trương Định q3" mà không nhắc DND
 - Một số reply **không nhắc DND** — chỉ trả lời câu hỏi thuần túy, tạo cảm giác tự nhiên cho cả thread. Kiểu 7 luôn thuộc nhóm này
-- Độ dài: ngắn hơn mode group, 1-3 câu/reply (comment thường ngắn hơn bài đăng)
+- **Độ dài: đúng 1 câu/reply.** Đây là reply để copy-paste, không phải bài đăng. Ngoại lệ duy nhất: **Kiểu 6** (phải mang điểm dở thật) và **Kiểu 9** (thông tin hậu cần) được tối đa 2 câu.
+  > Đừng viết reply 3-4 câu kể cả khi thấy "còn nhiều thứ hay để nói". Câu thứ 2 trở đi làm reply trông như bài PR, không như người thật gõ trên điện thoại. Thà cắt ý còn hơn dài.
 - **`10/10` chỉ được xuất hiện ở Kiểu 1**, tối đa 20% số item trong run (~4/20). Kiểu 6-10 không mang `10/10` — xem §7
 
 ### Ví dụ mode `reply-group`
 Giả sử câu hỏi gốc: _"mọi người ơi cận 5 độ loạn 2 độ mổ smile pro có ổn không ạ"_
 
+> Để ý độ dài: **mọi ví dụ dưới đây đúng 1 câu**, trừ Kiểu 6 và 9 là 2 câu. Đây là mức cần bám — không phải mức tối thiểu để nới ra.
+
 - (Kiểu 1) "case mình cx tương tự bạn nè, cận 4.5 loạn 1.75, mổ smile pro bên DND SG, giờ 10/10 r nha" ← `10/10` hợp lệ vì đây là Kiểu 1 và còn trong hạn ngạch 20%
-- (Kiểu 2) "cận 5 loạn 2 thì làm smile pro đc bạn ơi, quan trọng là giác mạc đủ dày, bạn đi khám chuyên sâu trước đi"
-- (Kiểu 2) "bạn qua DND Trương Định q3 khám 12 bước trước mổ cận free luôn á, bs sẽ tư vấn phương pháp phù hợp cho bạn" ← chữ *free* hợp lệ vì câu tự mang ngữ cảnh **mổ cận** (T0). Bỏ 2 chữ "mổ cận" ra là câu này vi phạm §6.
-- (Kiểu 4) "e cx loạn 2 độ nè, bs Tuấn bên DND SG bảo e làm smile pro đc, giờ sinh hoạt thoải mái hơn nhiều"
-- (Kiểu 3) "loạn 2 độ thì smile pro máy visumax 800 xử lý tốt lắm bạn, nó có OcuLign bù trừ trục loạn thị"
-- (Kiểu 6 - mixed) "mình mổ smile pro bên DND SG cx cận 5 loạn 2. nói thật hôm khám đông, chờ hơi lâu vì qua nhiều bước, xong về khô mắt tầm 3-4 tuần đầu phải nhỏ nước mắt nhân tạo liên tục, hơi phiền. còn lại thì mình k tiếc tiền bỏ ra" ← có điểm dở THẬT (chờ lâu + khô mắt), không xoá đi
-- (Kiểu 7 - hỏi lại, k nhắc DND) "bạn khám chuyên sâu chưa v, giác mạc bạn dày bn r? cùng độ mà giác mạc khác nhau là bs tư vấn khác nhau đó"
-- (Kiểu 8 - đính chính) "cho mình góp ý nhẹ, mổ khúc xạ là chỉnh độ hiện tại thôi chứ k phải khỏi cận mãi mãi nha, sau này vẫn cần khám định kỳ. bạn cứ hỏi kỹ bs về cái này"
-- (Kiểu 9 - quy trình) "hôm mình đi thì buổi khám mất gần cả buổi sáng vì có nhỏ thuốc giãn xong đợi đo lại. nên nhờ ai chở về, mắt nhoè k tự đi đc. nghỉ ngơi thì tuỳ người, tầm mấy ngày đầu là hạn chế màn hình"
-- (Kiểu 10 - đang cân nhắc) "e cx đang tìm hiểu giống bạn, mới khám 1 chỗ, tính khám thêm DND Trương Định q3 nữa cho có cái so. chưa mổ nên chưa dám nói j, ai mổ r vào chia sẻ giúp 2 đứa mình vs"
+- (Kiểu 2) "cận 5 loạn 2 thì làm smile pro đc bạn ơi, quan trọng là giác mạc đủ dày nên đi khám chuyên sâu trước đi"
+- (Kiểu 2) "bạn qua DND Trương Định q3 khám 12 bước trước mổ cận free luôn á" ← chữ *free* hợp lệ vì câu tự mang ngữ cảnh **mổ cận** (T0). Bỏ 2 chữ "mổ cận" ra là câu này vi phạm §6.
+- (Kiểu 4) "e cx loạn 2 độ nè, bs Tuấn bên DND SG bảo e làm smile pro đc"
+- (Kiểu 3) "loạn 2 độ thì smile pro máy visumax 800 có OcuLign bù trừ trục loạn thị đó bạn"
+- (Kiểu 6 - mixed) "mình mổ smile pro bên DND SG cx cận 5 loạn 2, nói thật hôm khám đông nên chờ hơi lâu với khô mắt mấy tuần đầu hơi phiền. còn lại thì mình k tiếc tiền bỏ ra" ← 2 câu, có điểm dở THẬT (đông + chờ lâu + khô mắt), không xoá đi
+- (Kiểu 7 - hỏi lại, k nhắc DND) "bạn khám chuyên sâu chưa v, giác mạc bạn dày bn r?"
+- (Kiểu 8 - đính chính) "cho mình góp ý nhẹ, mổ khúc xạ là chỉnh độ hiện tại thôi chứ k phải khỏi cận mãi mãi nha"
+- (Kiểu 9 - quy trình) "hôm mình đi thì buổi khám mất gần cả buổi sáng vì nhỏ thuốc giãn xong phải đợi đo lại. nên nhờ ai chở về nha, mắt nhoè k tự đi đc" ← 2 câu, mốc hồi phục nói theo khoảng
+- (Kiểu 10 - đang cân nhắc) "e cx đang tìm hiểu giống bạn, tính khám thêm DND Trương Định q3 nữa cho có cái so"
 
 ---
 
@@ -585,6 +601,8 @@ Lưu vào: `C:\Users\Admin\.gemini\antigravity-ide\scratch\seeding_<mode>_<times
 | Trùng cấu trúc câu | Đổi chủ ngữ + cách kết câu liên tục |
 | Copy nguyên Example Bank | Chỉ tham khảo style — viết câu MỚI mỗi lần |
 | Reply không liên quan câu hỏi gốc (mode reply-group) | Phải đọc kỹ câu hỏi gốc, reply đúng ngữ cảnh |
+| **Reply dài 3-4 câu (mode reply-group)** | Đúng **1 câu/reply** để copy-paste ngay; chỉ Kiểu 6 và 9 được 2 câu. Reply dài đọc như bài PR, không như người thật gõ trên đt |
+| **Xuất đủ 10 kiểu dù câu hỏi gốc không hợp (mode reply-group)** | Chọn kiểu theo ngữ cảnh. Kiểu 8 chỉ khi bài gốc có nhận định sai; Kiểu 9 chỉ khi có hỏi về quy trình. Kiểu 6 và 7 thì luôn giữ |
 | Comment ads quá dài/chuyên nghiệp (mode ads) | Comment ngắn 1-2 câu, có emoji, giống comment nhanh trên đt |
 | Tất cả comment ads đều khen | Phải xen kẽ hỏi giá, tag bạn, hỏi lịch — đa dạng kiểu tương tác |
 | Bịa thêm bác sĩ/chủ đề không có trong content live (mode live) | Chỉ dùng tên bác sĩ/chủ đề đã detect từ nội dung content được paste |

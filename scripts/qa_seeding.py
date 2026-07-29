@@ -458,12 +458,22 @@ ANTIREPEAT_WATCH = ("nhẹ nhàng", "ổn áp", "10/10", "nhanh gọn", "máy x�
 ANTIREPEAT_WARN_PER_ITEM = 0.15   # warn above this share of items
 ANTIREPEAT_BLOCK_PER_ITEM = 0.30  # block above this share
 
-# M5 - the 5 new reply-group angles. Verify on OUTPUT: each new angle needs >=1
-# item, and the mixed angle must really carry a dissatisfaction point rather than
-# praise in disguise.
+# M5 - the 5 new reply-group angles. Verify on OUTPUT: the anti-fingerprint
+# angles need >=1 item, and the mixed angle must really carry a dissatisfaction
+# point rather than praise in disguise.
 NEW_REPLY_SECTIONS = {6: "mixed review", 7: "hỏi lại, không nhắc DND",
                       8: "đính chính", 9: "quy trình/hậu cần",
                       10: "đang cân nhắc"}
+# Coverage floor. 6 and 7 are not content angles - they exist so the thread is
+# not all-praise, and they fit any thread (anyone can have a mixed experience,
+# anyone can ask a clarifying question), so requiring them never forces an
+# off-topic reply. 8/9/10 are context-dependent: a correction only makes sense
+# when the original post carries a false belief, and process detail only when
+# someone asked about logistics. Requiring those on a pure price question buys a
+# passing gate at the cost of an irrelevant reply, so they are optional and
+# reported as a note.
+REQUIRED_REPLY_SECTIONS = {6, 7}
+OPTIONAL_REPLY_SECTIONS = {8, 9, 10}
 MIXED_SECTION = 6
 # a mixed item must hit one of these to count as carrying a real downside
 DISSATISFACTION_RX = (r"chờ (hơi )?lâu|đông|khô mắt|hơi phiền|bất tiện|đi xa|"
@@ -1070,10 +1080,15 @@ def check_quota_10_10(mode, items, rep):
 def check_new_angles(mode, items, rep):
     """M5 - the 5 new reply-group angles, verified on OUTPUT.
 
-    Coverage (every new angle >=1 item) only *fails* on a full-length run. A
-    short draft or fixture legitimately carries a couple of angles, and failing
-    those would make the gate untrustworthy for the case it was built for.
-    Per-item rules below apply whenever the angle is present, at any run length.
+    Coverage splits by why each angle exists. REQUIRED_REPLY_SECTIONS (6, 7) are
+    the anti-fingerprint floor and *fail* when missing from a full-length run.
+    OPTIONAL_REPLY_SECTIONS (8, 9, 10) depend on what the original post asked, so
+    a missing one is a note - the skill picks angles by context.
+
+    Coverage only *fails* on a full-length run. A short draft or fixture
+    legitimately carries a couple of angles, and failing those would make the
+    gate untrustworthy for the case it was built for. Per-item rules below apply
+    whenever the angle is present, at any run length.
     """
     if mode != "reply-group":
         return
@@ -1082,11 +1097,16 @@ def check_new_angles(mode, items, rep):
         by_section.setdefault(it.section, []).append(it)
 
     present = sorted(s for s in NEW_REPLY_SECTIONS if by_section.get(s))
-    missing = [s for s in NEW_REPLY_SECTIONS if not by_section.get(s)]
+    missing_req = [s for s in sorted(REQUIRED_REPLY_SECTIONS) if not by_section.get(s)]
+    missing_opt = [s for s in sorted(OPTIONAL_REPLY_SECTIONS) if not by_section.get(s)]
     full_run = len(items) >= M5_FULL_RUN_MIN_ITEMS
-    if missing:
-        msg = ("new angles missing: %s (present: %s)"
-               % (", ".join("Kiểu %d (%s)" % (s, NEW_REPLY_SECTIONS[s]) for s in missing),
+
+    def names(secs):
+        return ", ".join("Kiểu %d (%s)" % (s, NEW_REPLY_SECTIONS[s]) for s in secs)
+
+    if missing_req:
+        msg = ("required angles missing: %s (present: %s)"
+               % (names(missing_req),
                   ", ".join("Kiểu %d" % s for s in present) or "none"))
         if full_run:
             rep.fail("M5", msg)
@@ -1094,8 +1114,12 @@ def check_new_angles(mode, items, rep):
             rep.note("M5: %s -- not failed, draft has %d item(s) (< %d, not a full run)"
                      % (msg, len(items), M5_FULL_RUN_MIN_ITEMS))
     else:
-        rep.note("M5: all 5 new angles present (Kiểu %s)"
-                 % ", ".join(str(s) for s in present))
+        rep.note("M5: required angles present (Kiểu %s)"
+                 % ", ".join(str(s) for s in sorted(REQUIRED_REPLY_SECTIONS)))
+
+    if missing_opt:
+        rep.note("M5: context-dependent angles absent: %s -- allowed, these are "
+                 "picked by the original question" % names(missing_opt))
 
     # the mixed angle must carry a real downside, not praise in disguise
     for it in by_section.get(MIXED_SECTION, []):
@@ -1462,6 +1486,39 @@ SELFTEST_DRAFT_M5_GOOD = """# Seeding Reply-Group - DND
 [fees: 2026-07 · T0]
 """
 
+# M5 context-picking: a full-length run that carries the required floor (6, 7)
+# but skips the context-dependent angles (8, 9, 10) must PASS. This is the shape
+# a price-only question produces - there is no false belief to correct and nobody
+# asked about logistics, so forcing those angles would only buy an off-topic
+# reply. Pairs with the "full run missing the anti-fingerprint floor" negative:
+# together they pin *which* angles are load-bearing.
+SELFTEST_DRAFT_M5_CONTEXT = """# Seeding Reply-Group - DND
+**Mode:** reply-group
+
+### Kiểu 1: Trả lời từ kinh nghiệm bản thân (2 bình luận)
+1. case mình cx tương tự nè, cận 4.5 loạn 1.75, mổ smile pro bên DND SG r
+2. e mổ hồi tháng 3 bên DND Trương Định, giờ sinh hoạt thoải mái hơn
+
+### Kiểu 2: Gợi ý/Recommend tự nhiên (2 bình luận)
+3. bạn thử qua DND Trương Định q3 khám xem, bs Linh khám kỹ lắm
+4. cận 5 loạn 2 thì làm smile pro đc bạn ơi, quan trọng là giác mạc đủ dày
+
+### Kiểu 3: Bổ sung thông tin hữu ích (2 bình luận)
+5. loạn 2 độ thì smile pro máy visumax 800 có OcuLign bù trừ trục loạn thị đó bạn
+6. theo mình biết bên DND SG đang có smiledays nè, b ib hỏi thử
+
+### Kiểu 4: Đồng cảm + dẫn dắt (2 bình luận)
+7. e cx rén vậy nè, bs Tuấn bên DND SG khéo tay nên e cũng bớt lo
+8. e cx loạn 2 độ nè, bs bên DND SG bảo e làm smile pro đc
+
+### Kiểu 6: Review có điểm chưa hài lòng (1 bình luận)
+9. mình mổ bên DND SG cx cận 5 loạn 2, hôm khám đông nên chờ hơi lâu với khô mắt
+   mấy tuần đầu hơi phiền. còn lại thì mình k tiếc tiền bỏ ra
+
+### Kiểu 7: Hỏi lại người đăng (1 bình luận)
+10. bạn khám chuyên sâu chưa v, giác mạc bạn dày bn r?
+"""
+
 # Refutation boundary: a Kiểu 8 correction may name the false belief it corrects,
 # but the exemption must not become a loophole. (text, should_fail_5C).
 SELFTEST_REFUTE = [
@@ -1490,7 +1547,8 @@ SELFTEST_M5_BAD = [
 ### Kiểu 9: Chi tiết quy trình/hậu cần (1 bình luận)
 1. buổi khám mất cả buổi sáng, nhờ ai chở về nha, mình mổ xong giờ 10/10 r
 """),
-    ("full run missing new angles", "M5", """**Mode:** reply-group
+    # The floor is what this pins: all-praise Kiểu 1 with no 6 and no 7.
+    ("full run missing required angles", "M5", """**Mode:** reply-group
 
 ### Kiểu 1: Trả lời từ kinh nghiệm bản thân (10 bình luận)
 1. case mình cx tương tự nè, mổ smile pro bên DND SG, thị lực giờ ổn
@@ -1503,6 +1561,30 @@ SELFTEST_M5_BAD = [
 8. mình mổ tháng trước, sinh hoạt bình thường
 9. e cx cận nặng mà mổ đc nha bạn
 10. mình mổ bên DND SG, bs Tuấn mổ chính
+"""),
+    # The floor is 6+7 specifically, not "any new angle". This run carries three
+    # new angles (8, 9, 10) and must still fail: 8/9/10 do not substitute for the
+    # anti-fingerprint pair. Without this the required/optional split could
+    # regress to ">=1 new angle" and the selftest would not notice.
+    ("full run with 8/9/10 but no 6 or 7", "M5", """**Mode:** reply-group
+
+### Kiểu 1: Trả lời từ kinh nghiệm bản thân (4 bình luận)
+1. case mình cx tương tự nè, mổ smile pro bên DND SG, thị lực giờ ổn
+2. e mổ hồi tháng 3, bs tư vấn kỹ lắm
+3. mình mổ bên DND Trương Định, hài lòng
+4. cận 5 loạn 2 mình mổ smile pro đc nha
+
+### Kiểu 8: Đính chính nhầm lẫn kỹ thuật (2 bình luận)
+5. cho mình góp ý nhẹ, mổ khúc xạ là chỉnh độ hiện tại thôi chứ k phải khỏi cận mãi mãi nha
+6. cận nặng vẫn có hướng xử lý nha bạn, k phải cứ nặng là bó tay
+
+### Kiểu 9: Chi tiết quy trình/hậu cần (2 bình luận)
+7. buổi khám mất gần cả buổi sáng vì nhỏ thuốc xong đợi đo lại, nên nhờ ai chở về nha
+8. mang theo cmnd với ít tiền tạm ứng, xong nhỏ thuốc theo lịch bs kê
+
+### Kiểu 10: Người đang cân nhắc, chưa mổ (2 bình luận)
+9. e cx đang tìm hiểu giống bạn, tính khám thêm DND Trương Định q3 cho có cái so
+10. e mới khám 1 chỗ, chưa mổ nên chưa dám nói j, ai mổ r vào chia sẻ vs
 """),
 ]
 
@@ -1687,6 +1769,15 @@ def run_selftest():
     if rc_m5 != 0:
         nfail += 1
         print("  FAIL: full 10-angle run was rejected")
+
+    print("")
+    print("E2. M5 - full run with the 6+7 floor but no 8/9/10 must PASS")
+    print("-" * 68)
+    rc_m5ctx = run_check(SELFTEST_DRAFT_M5_CONTEXT, label="<selftest m5 context>",
+                         require_policy=False)
+    if rc_m5ctx != 0:
+        nfail += 1
+        print("  FAIL: context-picked run was rejected (8/9/10 are optional)")
 
     print("")
     print("F. M5 negatives - each must fail ON THE M5 GATE, not incidentally")
