@@ -17,19 +17,21 @@ Trước khi sinh nội dung, đọc theo nhu cầu:
 | Khi nào | Bắt buộc đọc |
 |---|---|
 | **Mọi run có thể nêu thông tin phí hoặc số ưu đãi** (kể cả chữ "free", "miễn phí", "tặng gói khám") | **`fees-promos.md`** — chưa đọc thì không được nêu, phải chuyển hotline |
+| **Mode `reply-group` mà câu hỏi gốc KHÔNG phải mổ cận/khúc xạ** (phaco, lão thị, kiểm soát cận/Ortho-K, cắt kính, glaucoma, võng mạc, lác, mộng, thẩm mỹ, tổng quát) | **`services.md`** — fact pack theo service. Chưa đọc thì không có dữ kiện gì để trả lời ngoài mổ cận, và đó chính là con bug M6 gác |
 | Trước khi ghi file scratch | chạy `scripts/qa_seeding.py --check` (pipe draft qua stdin) |
 | Muốn biết script gác gì / ngưỡng bao nhiêu | `qa/checks.md` |
 
 `fees-promos.md` là **file duy nhất có số tiền**. SKILL.md chỉ có `fee-tier-id` / `promo-key`.
+`services.md` là fact pack **phi-tiền** — có số tiền trong đó là fail `--selftest` (gate M6-E).
 
 ## Repo & đồng bộ
 
 Repo GitHub: https://github.com/minhtranquang1993/dnd-seeding (nhánh `main`).
 
-Layout 4 file: `SKILL.md` · `fees-promos.md` · `qa/` · `scripts/`.
+Layout 5 file: `SKILL.md` · `fees-promos.md` · `services.md` · `qa/` · `scripts/`.
 
-- **Push:** copy cả 4 path vào clone local, commit, push.
-- **Pull về máy:** ghi đè cả 4 path vào **cả 3 runtime** (đường dẫn macOS):
+- **Push:** copy cả 5 path vào clone local, commit, push.
+- **Pull về máy:** ghi đè cả 5 path vào **cả 3 runtime** (đường dẫn macOS):
   - `~/.claude/skills/dnd-seeding/`
   - `~/.commandcode/skills/dnd-seeding/`
   - `~/.gemini/config/skills/seeding-dnd/`
@@ -56,9 +58,12 @@ Layout 4 file: `SKILL.md` · `fees-promos.md` · `qa/` · `scripts/`.
 
 ### 1. Thông tin Bệnh viện & Địa chỉ
 - **Tên:** Bệnh viện Mắt Quốc tế DND Sài Gòn (viết tắt: DND Sài Gòn, DND SG, DND Trương Định).
-- **Địa chỉ:** 147 - 147B - 147Bis Trương Định, Võ Thị Sáu, Quận 3, TP.HCM.
+- **Địa chỉ:** 147 - 147B - 147Bis Trương Định, **Phường Nhiêu Lộc**, TP.HCM (Phường 9, Quận 3 cũ).
+  > Vẫn nói "q3" trong content seeding được — người ta tìm đường theo Quận 3. Nhưng địa chỉ
+  > đầy đủ thì dùng Phường Nhiêu Lộc (cập nhật 2026-08 theo script chat của bệnh viện).
 - **Hotline:** 0775.147.147 / 1900 8195.
-- **Giờ làm việc:** Thứ 2–7: 08h00–17h00, Chủ nhật: 08h00–12h00.
+- **Giờ làm việc:** Thứ 2–7: sáng 08h00–12h00, chiều 13h00–17h00 (**nghỉ trưa 12h–13h**); Chủ nhật: **chỉ sáng** 08h00–12h00.
+- **BHYT:** DND **có** hỗ trợ BHYT (Phaco, mộng, cườm nước). Được nói "có BHYT hỗ trợ" — **số tiền hoặc % chi trả thì chuyển hotline** (gate M6-D chặn).
 
 ### 2. Đội ngũ Bác sĩ
 - **BSNT Bùi Quang Tuấn (Giám đốc):** 13 năm kinh nghiệm, BS Nội trú ĐH Y Dược Huế, 10 năm Trưởng khoa DND Hà Nội trước khi vào làm GĐ DND Sài Gòn. Chuyên Phaco, khúc xạ, dịch kính - võng mạc. Nổi tiếng khéo tay, tận tâm, hàng chục nghìn ca thành công. **Phụ trách mổ chính** (có khám luôn).
@@ -88,10 +93,18 @@ Layout 4 file: `SKILL.md` · `fees-promos.md` · `qa/` · `scripts/`.
 - Check-in nhận quà mùa hè. (không có số)
 
 ### 5. Dịch vụ khác
+
+> 📎 Mục này chỉ là **danh sách có gì**. Dữ kiện để *viết được reply* (quy trình, thời gian,
+> chuẩn bị, mốc tái khám) nằm ở **`services.md`** — mode `reply-group` với câu hỏi không phải
+> mổ cận thì bắt buộc đọc file đó.
+
 - **Ortho-K:** Kính đeo đêm kiểm soát cận thị trẻ em. **Khám Ortho-K CÓ PHÍ** (T2).
 - **Phaco:** Mổ đục thủy tinh thể, 3-5 phút/mắt, 500.000+ ca. **Khám Phaco CÓ PHÍ** (T2).
 - **Thẩm mỹ mắt:** Cắt mí, lấy mỡ bọng, chỉnh sụp mi. **Khám CÓ PHÍ** (T2).
 - **Lão thị:** điều trị được — Presbyond (laser) hoặc Phaco + IOL đa tiêu. Người lão thị **không phải chỉ có đường đi cắt kính**. Khám lão thị theo đường khúc xạ/laser = **T0 free**; nếu ca đó đi đường **Phaco + IOL đa tiêu** thì **không báo phí khám → hotline** (chưa có chính sách).
+- **Kiểm soát cận thị trẻ em:** 4 hướng — tròng kính KSCT, Ortho-K, atropine nồng độ thấp, ánh sáng đỏ theo chỉ định. **Khám CÓ PHÍ** (T2).
+- **Bệnh lý:** glaucoma/cườm nước, võng mạc - dịch kính, lác, mộng. **Khám CÓ PHÍ** (T2).
+- **Khám tổng quát:** **CÓ PHÍ** (T2) — gói 12 bước free KHÔNG áp cho tổng quát.
 
 ---
 
@@ -359,8 +372,54 @@ In **gộp theo 4 nhóm A/B/C/D**, mỗi nhóm là 1 tiêu đề, dưới liệt
 
 ### Cách hoạt động
 - AI đọc `"câu hỏi gốc"` mà user paste vào
-- Phân tích ý chính của câu hỏi (hỏi về giá? về BS? về công nghệ? về hồi phục?)
-- Sinh ra ~20 comment reply phù hợp ngữ cảnh, tự nhiên
+- **Bước 0 — phân loại service (BẮT BUỘC, làm trước khi chọn kiểu).** Xem §Bước 0 ngay dưới
+- Sinh ra ~20 comment reply **trả lời đúng service đó**, tự nhiên
+
+### Bước 0 — phân loại service câu hỏi gốc
+
+> ⛔ Bỏ bước này là quay lại đúng con bug đang sửa: hỏi Phaco/cắt kính/lão thị/tổng quát mà
+> reply vẫn kéo về mổ cận. QA script gác bằng gate **M6**, không phải chỉ khuyên.
+
+**1. In 2 dòng này ở đầu output** (script parse để gác — sai format là fail M6-A):
+
+```
+**Câu hỏi gốc:** <paste nguyên câu hỏi>
+**Topic:** <service> / <phase>
+```
+
+**2. Bảng service** — đọc câu hỏi, chọn theo ladder, **dừng ở match đầu tiên**:
+
+| service | Dấu hiệu trong câu hỏi |
+|---|---|
+| `lao_thi` | lão thị, mắt lão, nhìn gần mờ, đeo kính lão, Presbyond, PresbyMAX |
+| `phaco` | phaco, thủy tinh thể, đục thủy tinh, cườm khô, mổ cườm, IOL |
+| `ksct` | ortho, Ortho-K, kiểm soát cận, kính đêm, đeo đêm, tròng kính KSCT, atropine, trục nhãn cầu |
+| `glaucoma` | glaucoma, glocom, tăng nhãn áp, cườm nước, cắt bè, thiên đầu thống |
+| `vong_mac` | võng mạc, dịch kính, bong võng mạc, hoàng điểm, đáy mắt |
+| `lac` | lác, lé, mắt lệch |
+| `mong` | mộng, mộng thịt |
+| `tham_my` | cắt mí, sụp mi, bọng mắt, thẩm mỹ mắt, lấy mỡ |
+| `kinh` | cắt kính, đo độ, đo mắt, thay kính, mua kính, kính mới, đo kính |
+| `tong_quat` | tổng quát, tổng quan, khám định kỳ, kiểm tra sức khỏe mắt |
+| `kx` | mổ cận/viễn/loạn, khúc xạ, SMILE, Lasik, SmartSight, SmartSurfACE, CLEAR, Femto, Phakic, ICL |
+| `none` | không có dấu hiệu nào |
+
+**Thứ tự ladder có lý do, đừng đảo:**
+- `kx` đứng **cuối** — để chữ `mổ` trơn không nuốt service khác. `mổ phaco` phải ra `phaco`,
+  không phải `kx`. Cùng cái bẫy §6 #1.
+- `lao_thi` đứng **trước** `phaco` — người hỏi lão thị cần nghe Presbyond / IOL đa tiêu, không
+  phải bài Phaco thường. (Phí thì vẫn theo §6: `lão thị` + `phaco` → hotline. Hai hệ thống khác nhau.)
+- `tong_quat` đứng **sau** các nhóm cụ thể — "khám tổng quát xem có bị cườm không" là câu hỏi về cườm.
+
+**3. `phase`:** câu hỏi có `tái khám` / `sau mổ` / `hậu phẫu` / `mới-vừa-đã mổ` → `fu`, còn lại → `pre`.
+
+> `phase` **không** thay `service`. "mẹ e mới mổ phaco tái khám sao ạ" là `phaco` / `fu` — vẫn
+> là câu hỏi về Phaco, và reply nói mốc hậu phẫu **mổ cận** vẫn bị M6-B chặn. Hậu phẫu Phaco
+> khác mổ cận thật: thẻ Family 2 năm vs 3 năm, nhịn ăn xét nghiệm, mang thẻ BHYT.
+
+**4. `service` ≠ `kx`/`none` → ĐỌC `services.md`**, lấy section `## <service>` + tiểu mục
+`### pre` hoặc `### fu`. Không đọc thì không có dữ kiện, và không có dữ kiện thì chỉ nói được
+về mổ cận — đúng con bug.
 
 ### 10 kiểu reply — chọn theo ngữ cảnh câu hỏi gốc, tổng ~20 item
 
@@ -395,8 +454,54 @@ Kiểu 6 và 7 là sàn cứng vì chúng không phải "nội dung" — chúng 
 9. **Chi tiết quy trình/hậu cần** — thực dụng: mất bao lâu, có cần người đưa về, nghỉ mấy ngày, mang theo gì, nhỏ thuốc bao lâu. Số liệu quy trình thì được; **mốc hồi phục phải nói theo khoảng**, không số cứng.
 10. **Người đang cân nhắc, chưa mổ** — chưa trải nghiệm, đang xem 2-3 chỗ. Kiểu này **không được** claim kết quả sau mổ (chưa mổ thì không có kết quả) và không mang `10/10`.
 
+### Kiểu 8 / 9 / 10 nói gì theo service
+
+Ba kiểu này ở trên **chỉ mô tả phiên bản mổ cận** — đó chính là lý do reply hay trôi. Câu hỏi
+service khác thì nội dung phải đổi theo, không phải dịch lại bài mổ cận. Dữ kiện lấy ở
+`services.md`.
+
+| service | Kiểu 8 đính chính cái gì | Kiểu 9 hậu cần gì | Kiểu 10 đang cân nhắc gì |
+|---|---|---|---|
+| `phaco` | "nhỏ thuốc cho tan cườm" (không tan được, phải mổ) · "để chín rồi mổ luôn thể" (để chín mổ khó hơn) | nhịn ăn sáng để xét nghiệm nếu mổ trong ngày · mang thẻ BHYT · người lớn tuổi cần người đi cùng | đang xem vài chỗ mổ cho ba mẹ, hỏi loại thủy tinh thể nào hợp |
+| `lao_thi` | "lão thị chỉ có nước đeo kính lão" (điều trị được: Presbyond hoặc IOL đa tiêu) | nhỏ tê bề mặt không tiêm · tầm 10-15 phút/mắt · về trong ngày · vài tiếng đầu cộm xốn | đang cân nhắc giữa đường laser và đường thay thủy tinh thể |
+| `ksct` | "cho bé đeo kính là xong" (KSCT là kiểm soát tốc độ tăng độ, khác cắt kính) · "Ortho-K hại mắt" | khám 60-90 phút, có nhỏ liệt điều tiết thì 90-120 · **Ortho-K phải ngưng 1 tháng** trước khám | đang so tròng kính KSCT vs Ortho-K vs atropine cho con |
+| `kinh` | "đo độ ở đâu chả giống nhau" (đo máy + thử kính khác nhau) | lens mềm ngưng 1 tuần trước đo · đo xong mới ra đơn | đang phân vân cắt kính hay tìm hiểu mổ luôn |
+| `glaucoma` | "cườm nước với cườm khô là một" (hai bệnh khác nhau) | cần theo dõi định kỳ, không phải khám 1 lần là xong | đang tìm chỗ theo dõi lâu dài |
+| `vong_mac` | "mắt còn nhìn được là chưa sao" (võng mạc hỏng âm thầm) | khám đáy mắt phải nhỏ giãn, mắt nhoè vài tiếng, đừng tự lái xe | tiểu đường nên đi tầm soát định kỳ |
+| `lac` | "lác thì phải mổ" (phải khám tìm nguyên nhân trước) | khám tìm nguyên nhân trước rồi bs mới chỉ định | đang tìm hiểu cho con / cho bản thân |
+| `mong` | "mộng nhỏ kệ nó" (mộng lan vào tròng đen thì phiền hơn) | có hỗ trợ BHYT (số → hotline) | đang xem mổ ở đâu |
+| `tham_my` | "sụp mi chỉ là xấu thôi" (có thể che tầm nhìn) | khám tư vấn trước | đang tìm hiểu cắt mí |
+| `tong_quat` | "mắt không mờ thì khỏi khám" (nhiều bệnh tiến triển âm thầm) | khám định kỳ, ra vấn đề thì bs chuyển chuyên sâu | đang tìm chỗ khám định kỳ cho cả nhà |
+
+**Luật phí theo service — đọc kỹ, sai chỗ này là tái tạo bug `:55`:**
+
+| service | Được nói khám free? |
+|---|---|
+| `kx`, `lao_thi` (đường laser) | ✅ T0 |
+| `phaco`, `ksct`, `glaucoma`, `vong_mac`, `lac`, `mong`, `tham_my`, `tong_quat` | ❌ T2 **có phí** |
+| `kinh` | ❌ T1 **có phí** — trừ khi người hỏi là **lão thị** |
+| `lao_thi` + `phaco` cùng câu | ❌ hotline, chưa có chính sách |
+
+**BHYT:** được nói "có BHYT hỗ trợ" (Phaco, mộng, cườm nước). **Số hoặc % chi trả → hotline**
+(gate M6-D chặn).
+
 ### Quy tắc riêng mode `reply-group`
 - Phải **liên quan trực tiếp** đến câu hỏi gốc, không trả lời lạc đề
+- **Bám đúng service đã phân loại ở Bước 0.** Câu hỏi Phaco thì reply nói Phaco; đừng chèn
+  SMILE/mổ cận vào cho có. Gate M6-B chặn từng item, M6-C chặn cả run
+  - Trôi **không cần nhắc tên** cũng bị chặn: nói giọng mổ cận ("đo bản đồ giác mạc", "ngưng
+    lens", "vạt giác mạc", "thoát kính") trong thread Phaco vẫn fail
+  - Nhưng cụm **dùng chung** thì được: nhỏ thuốc giãn, mắt nhoè nhờ chở về, khám chuyên sâu,
+    nhãn áp — Phaco / võng mạc / khám bé đều nhỏ giãn thật, không tính là trôi
+  - Item nhắc **cả hai** service chỉ hợp lệ khi **có dấu hiệu so sánh** ("mẹ e mổ phaco **còn**
+    e mổ cận, 2 ca khác nhau"). Rắc tên service vào rồi nói chuyện service khác thì **vẫn fail** —
+    nhắc một lần không hợp lệ hoá được nội dung lạc đề
+  - Gate xét **từng câu**: một câu so sánh hợp lệ không bảo lãnh được câu lạc đề bên cạnh
+  - Nhắc nhãn **hàng xóm** cùng với service đang hỏi thì **không sao** — "mổ phaco xong vẫn phải
+    đeo kính lão", "mổ phaco xong 1 tháng mới đo độ cắt kính" là nội dung đúng, không phải lạc đề.
+    Gate chỉ gác hướng trôi thật sự rủi ro (chủ yếu là sang **mổ cận**)
+- **≥60% item thực chất phải chạm đúng service** (Kiểu 7 không tính vào mẫu số). Trả lời chung
+  chung để né token cũng là lạc đề — M6-C bắt
 - Không nhắc DND quá lộ liễu — tối đa nhắc tên 1 lần/comment, có comment chỉ nói "chỗ mình mổ bên Trương Định q3" mà không nhắc DND
 - Một số reply **không nhắc DND** — chỉ trả lời câu hỏi thuần túy, tạo cảm giác tự nhiên cho cả thread. Kiểu 7 luôn thuộc nhóm này
 - **Độ dài: đúng 1 câu/reply.** Đây là reply để copy-paste, không phải bài đăng. Ngoại lệ duy nhất: **Kiểu 6** (phải mang điểm dở thật) và **Kiểu 9** (thông tin hậu cần) được tối đa 2 câu.
@@ -404,7 +509,16 @@ Kiểu 6 và 7 là sàn cứng vì chúng không phải "nội dung" — chúng 
 - **`10/10` chỉ được xuất hiện ở Kiểu 1**, tối đa 20% số item trong run (~4/20). Kiểu 6-10 không mang `10/10` — xem §7
 
 ### Ví dụ mode `reply-group`
-Giả sử câu hỏi gốc: _"mọi người ơi cận 5 độ loạn 2 độ mổ smile pro có ổn không ạ"_
+
+> **Ba ví dụ dưới đây là BA câu hỏi gốc khác nhau, cố ý.** Bản cũ chỉ có đúng 1 ví dụ về SMILE
+> Pro — mà mục Tone đã ghi rõ skill đang chỉ thị model bắt chước example và chỉ thị đó có hiệu
+> lực đo được (`10/10` 167 hit, `nhẹ nhàng` 281 hit). Một example bank toàn mổ cận **chính là**
+> thứ dạy model trả lời câu hỏi Phaco bằng bài mổ cận. Đọc cả ba trước khi viết.
+
+#### Ví dụ A — câu hỏi `kx` (mổ cận)
+
+**Câu hỏi gốc:** _"mọi người ơi cận 5 độ loạn 2 độ mổ smile pro có ổn không ạ"_
+**Topic:** `kx` / `pre`
 
 > Để ý độ dài: **mọi ví dụ dưới đây đúng 1 câu**, trừ Kiểu 6 và 9 là 2 câu. Đây là mức cần bám — không phải mức tối thiểu để nới ra.
 
@@ -418,6 +532,43 @@ Giả sử câu hỏi gốc: _"mọi người ơi cận 5 độ loạn 2 độ m
 - (Kiểu 8 - đính chính) "cho mình góp ý nhẹ, mổ khúc xạ là chỉnh độ hiện tại thôi chứ k phải khỏi cận mãi mãi nha"
 - (Kiểu 9 - quy trình) "hôm mình đi thì buổi khám mất gần cả buổi sáng vì nhỏ thuốc giãn xong phải đợi đo lại. nên nhờ ai chở về nha, mắt nhoè k tự đi đc" ← 2 câu, mốc hồi phục nói theo khoảng
 - (Kiểu 10 - đang cân nhắc) "e cx đang tìm hiểu giống bạn, tính khám thêm DND Trương Định q3 nữa cho có cái so"
+
+#### Ví dụ B — câu hỏi `phaco` (KHÔNG được trả lời bằng bài mổ cận)
+
+**Câu hỏi gốc:** _"mẹ e 68t bị đục thủy tinh thể, mổ phaco ở đâu ổn ạ"_
+**Topic:** `phaco` / `pre`
+
+> So với ví dụ A: **không một câu nào nhắc SMILE / mổ cận / 12 bước free.** Persona đổi từ
+> người tự đi mổ sang **con cháu dẫn ba mẹ đi**. Hậu cần đổi hẳn: nhịn ăn sáng, thẻ BHYT.
+
+- (Kiểu 1) "mẹ mình cx 70t mổ phaco bên DND Trương Định q3, bs Tuấn mổ, giờ bà đọc báo lại đc r"
+- (Kiểu 2) "bạn cho bác qua DND Trương Định q3 khám thử xem, bên đó mổ phaco nhiều"
+- (Kiểu 3) "mổ phaco nhanh lắm b, tầm 3-5 phút 1 mắt à, khám với mổ trong ngày luôn đc"
+- (Kiểu 3) "phaco bên đó có hỗ trợ BHYT nha, số cụ thể b gọi 0775.147.147 hỏi cho chắc" ← nói "có BHYT" được, **số thì hotline** (M6-D)
+- (Kiểu 4) "nhà e cx lo y chang hồi đưa ba đi, mà bs giải thích kỹ nên cũng đỡ căng"
+- (Kiểu 6 - mixed) "mẹ mình mổ phaco bên DND SG, nói thật hôm khám đông nên chờ khá lâu, bà lớn tuổi ngồi đợi hơi mệt. còn ca mổ thì nhanh, mình k tiếc" ← điểm dở thật, hợp ngữ cảnh người già
+- (Kiểu 7 - hỏi lại, k nhắc DND) "bác nhà b mắt mờ lâu chưa v, có tiểu đường hay huyết áp j k?"
+- (Kiểu 8 - đính chính) "cho mình góp ý nhẹ, cườm khô là k nhỏ thuốc cho tan đc đâu b, tới lúc thì phải mổ thôi"
+- (Kiểu 9 - quy trình) "hôm dẫn mẹ đi, muốn mổ luôn trong ngày thì phải nhịn ăn sáng để lấy máu xét nghiệm. nhớ mang thẻ BHYT với CCCD nha" ← hậu cần **riêng của Phaco**, không phải bài mổ cận
+- (Kiểu 10 - đang cân nhắc) "e cx đang xem vài chỗ cho ba, chưa quyết loại thủy tinh thể nào nên tính đi khám cho bs tư vấn"
+
+#### Ví dụ C — câu hỏi `kinh` (cắt kính — T1 CÓ PHÍ, tuyệt đối không nói free)
+
+**Câu hỏi gốc:** _"mn ơi e muốn đo độ cắt kính mới thì đi đâu uy tín ạ"_
+**Topic:** `kinh` / `pre`
+
+> Cạm bẫy ở đây là **phí**: cắt kính là T1 **có phí**, nói "khám free" là vi phạm §6. Và đừng
+> biến câu hỏi đo độ thành bài chào mổ cận — gợi mổ tối đa **một câu** ở Kiểu 10.
+
+- (Kiểu 1) "e đo độ cắt kính bên DND Trương Định q3, máy đo xong bs thử kính lại nên đeo êm"
+- (Kiểu 2) "bạn qua bên viện mắt q3 đo thử đi, đo độ có phí nhưng đo kỹ hơn tiệm kính"
+- (Kiểu 3) "đang đeo lens thì nhớ ngưng trước 1 tuần r hẵng đi đo nha, k là ra sai độ đó"
+- (Kiểu 4) "e cx từng cắt kính ở tiệm r nhức đầu hoài, đi đo lại ở bv mới biết lệch độ"
+- (Kiểu 6 - mixed) "mình đo bên DND SG, phí đo độ thì có tính chứ k free nha, với hôm đó phải chờ tới lượt hơi lâu. bù lại kính đeo đúng độ, k nhức mắt như cũ" ← nói thẳng **có phí**, đúng T1
+- (Kiểu 7 - hỏi lại, k nhắc DND) "b đo độ lần gần nhất cách đây bao lâu r, có thấy nhìn xa mờ thêm k?"
+- (Kiểu 8 - đính chính) "đo ở đâu cx như nhau là k đúng đâu b, đo máy xong còn phải thử kính mới ra đúng độ"
+- (Kiểu 9 - quy trình) "đo xong họ đưa đơn, mình cầm đơn đi cắt chỗ nào cx đc nha, k bắt buộc cắt tại chỗ"
+- (Kiểu 10 - đang cân nhắc) "e cx đang phân vân cắt kính tiếp hay tìm hiểu mổ luôn, chắc đi khám hỏi bs cho rõ" ← **một câu duy nhất** chạm tới mổ, không nhiều hơn
 
 ---
 
@@ -553,13 +704,14 @@ Chỉ đọc **token đầu tiên**, và chỉ phần **trước** dấu ngoặc
 
 - `group story` HOẶC `story` (đứng ngay sau lệnh) → chạy **Mode 1B** (sub-mode story), CHỈ sinh ~15 bài story
 - `group` (không kèm `story`) hoặc không có tham số → chạy Mode 1 đầy đủ 8 góc
-- `reply-group "..."` → chạy Mode 2, parse câu hỏi gốc từ dấu ngoặc kép
+- `reply-group "..."` → chạy Mode 2, parse câu hỏi gốc từ dấu ngoặc kép, rồi **làm Bước 0 phân loại service trước khi chọn kiểu**
 - `ads` → chạy Mode 3
 - `live (nội dung content live)` → chạy Mode 4, parse toàn bộ nội dung live, detect bác sĩ/chủ đề/ưu đãi từ đó
 - `maps` / `maps_foreigner` / `koc` → chạy Mode 5A / 5B / 5C, áp ngoại lệ §7B đúng theo mode
 - token đầu không khớp mode nào → chạy `group`. **Không suy diễn mode từ chữ trong câu hỏi của user.**
 
 **Bước 2: Chọn Persona & Sinh nội dung**
+- **Mode `reply-group`: làm Bước 0 (phân loại service) TRƯỚC.** Service ≠ `kx`/`none` → đọc `services.md` lấy dữ kiện, rồi mới viết
 - Chọn ngẫu nhiên 5-6 persona từ Persona Pool
 - Sinh đúng số câu theo cấu trúc của mode tương ứng (mode `group` ~28 câu, sub-mode `story` ~15 câu, mode `reply-group`/`ads`/`live` ~20 câu)
 - Đảm bảo đa dạng persona, cấu trúc câu, cách xưng hô
@@ -571,7 +723,7 @@ Chỉ đọc **token đầu tiên**, và chỉ phần **trước** dấu ngoặc
 
 **Bước 4: Xuất kết quả ra Chat**
 - Hiển thị rõ ràng theo nhóm/kiểu để dễ copy
-- Mode `reply-group`: hiện lại câu hỏi gốc ở đầu để tiện đối chiếu
+- Mode `reply-group`: in **`**Câu hỏi gốc:**`** và **`**Topic:** <service> / <phase>`** ở đầu output (bắt buộc — thiếu là fail M6-A)
 - Mode `live`: hiện lại tên bác sĩ/chủ đề hội thảo đã detect được ở đầu để tiện đối chiếu
 
 **Bước 4B: Gác phí trước khi lưu**
@@ -601,6 +753,15 @@ Lưu vào: `C:\Users\Admin\.gemini\antigravity-ide\scratch\seeding_<mode>_<times
 | Trùng cấu trúc câu | Đổi chủ ngữ + cách kết câu liên tục |
 | Copy nguyên Example Bank | Chỉ tham khảo style — viết câu MỚI mỗi lần |
 | Reply không liên quan câu hỏi gốc (mode reply-group) | Phải đọc kỹ câu hỏi gốc, reply đúng ngữ cảnh |
+| **Câu hỏi Phaco / cắt kính / lão thị / Ortho-K / tổng quát mà reply kéo về mổ cận** | Làm **Bước 0** phân loại service trước, đọc `services.md`, rồi viết theo service đó. Gate M6-B/M6-C chặn — xem MODE 2 |
+| **Trôi chủ đề không cần nhắc tên** (thread Phaco mà nói "bản đồ giác mạc", "ngưng lens", "vạt giác mạc") | Đó vẫn là giọng mổ cận, M6-B bắt qua `KX_CONTEXT`. Nói hậu cần **của service đang hỏi** |
+| **Trả lời chung chung để né gate** ("bên đó ổn lắm", "b ib hỏi thử") | ≥60% item thực chất phải chạm đúng service, M6-C bắt. Chung chung cũng là lạc đề |
+| **Thiếu dòng `**Câu hỏi gốc:**` ở đầu output (mode reply-group)** | In cả `**Câu hỏi gốc:**` và `**Topic:**`. Thiếu là fail M6-A — không khai câu hỏi thì không gác được gì |
+| **Nêu số / % BHYT** | Nói "có BHYT hỗ trợ" thôi, số thì chuyển hotline 0775.147.147 (M6-D) |
+| **Lẫn cườm nước (glaucoma) với cườm khô (Phaco)** | Hai bệnh khác nhau. Cườm khô = đục thủy tinh thể = mổ Phaco. Cườm nước = tăng nhãn áp = thuốc/laser/cắt bè |
+| **Lẫn mốc ngưng kính áp tròng** | Lens mềm ngưng ≥ **1 tuần**; Ortho-K ngưng ≥ **1 tháng** |
+| **Lẫn thời hạn thẻ Family** | Sau mổ **khúc xạ: 3 năm**; sau mổ **Phaco: 2 năm** |
+| **Đưa giá Phaco / Ortho-K / lác / mộng / cườm nước vào `services.md`** | Những giá đó KHÔNG có trong `fees-promos.md` → seeding chuyển hotline. `services.md` là fact pack phi-tiền, gate M6-E fail nếu có số tiền |
 | **Reply dài 3-4 câu (mode reply-group)** | Đúng **1 câu/reply** để copy-paste ngay; chỉ Kiểu 6 và 9 được 2 câu. Reply dài đọc như bài PR, không như người thật gõ trên đt |
 | **Xuất đủ 10 kiểu dù câu hỏi gốc không hợp (mode reply-group)** | Chọn kiểu theo ngữ cảnh. Kiểu 8 chỉ khi bài gốc có nhận định sai; Kiểu 9 chỉ khi có hỏi về quy trình. Kiểu 6 và 7 thì luôn giữ |
 | Comment ads quá dài/chuyên nghiệp (mode ads) | Comment ngắn 1-2 câu, có emoji, giống comment nhanh trên đt |

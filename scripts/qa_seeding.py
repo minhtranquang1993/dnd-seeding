@@ -213,6 +213,472 @@ TOK = {
 # M2 blockers: tokens that forbid a free-exam claim on the same item
 BLOCK_TOKENS = ("pc", "or", "kinh", "khac")
 
+# ---------------------------------------------------------------------------
+# M6 - topic fit. SEPARATE from the fee ladder above, on purpose.
+#
+# TOK/detect_bucket answer "what does this cost?". TOPIC_TOK/detect_topic answer
+# "what is this about?". They are different questions and must not share a
+# table: detect_bucket groups retina + glaucoma + lac + mong + cosmetic +
+# general into one `khac` cell because all six cost the same (T2). Reusing that
+# for topic fit means a reply about cuom nuoc satisfies a question about lac -
+# the exact drift users reported, one notch narrower.
+#
+# Same money, different content. So the six get their own labels here while the
+# fee table keeps `khac` untouched.
+# ---------------------------------------------------------------------------
+TOPIC_TOK = {
+    "kx": (r"mổ cận|mổ viễn|mổ loạn|mổ khúc xạ|khúc xạ|smile|lasik|smartsight|"
+           r"smartsurface|clear|femto|phakic|icl"),
+    "phaco": r"phaco|thủy tinh thể|đục thủy tinh|cườm khô|mổ cườm|\biol\b",
+    "lao_thi": r"lão thị|presbyond|presbymax|mắt lão|nhìn gần mờ|đeo kính lão",
+    "ksct": (r"ortho|ortho-k|orthok|kiểm soát cận|kính đêm|đeo đêm|"
+             r"tròng kính ksct|atropine|trục nhãn cầu"),
+    "kinh": r"cắt kính|đo độ|đo mắt|thay kính|mua kính|kính mới|đo kính",
+    "glaucoma": r"glaucoma|glocom|tăng nhãn áp|cườm nước|cắt bè|thiên đầu thống",
+    "vong_mac": r"võng mạc|dịch kính|bong võng mạc|hoàng điểm|đáy mắt",
+    "lac": r"\blác\b|\blé\b|mắt lệch",
+    "mong": r"\bmộng\b|mộng thịt",
+    "tham_my": r"cắt mí|sụp mi|bọng mắt|thẩm mỹ mắt|lấy mỡ",
+    "tong_quat": r"tổng quát|tổng quan|khám định kỳ|kiểm tra sức khỏe mắt",
+}
+
+# Ladder, first match wins. Order is load-bearing:
+#   - `kx` LAST so bare refractive words never swallow a named service. Same trap
+#     as SKILL.md section 6 "Ba cai bay hay sai" #1.
+#   - `lao_thi` BEFORE `phaco`: someone asking about presbyopia needs Presbyond /
+#     multifocal IOL, not the standard cataract pitch. The fee side still routes
+#     lao_thi+phaco to `lt_phaco` -> hotline; the two ladders never call each other.
+#   - `tong_quat` AFTER the specific ones: "kham tong quat xem co bi cuom khong"
+#     is a question about cataract.
+TOPIC_LADDER = ("lao_thi", "phaco", "ksct", "glaucoma", "vong_mac", "lac",
+                "mong", "tham_my", "kinh", "tong_quat", "kx")
+
+# Post-op marker. This is a PHASE, not a topic: "me moi mo phaco tai kham sao"
+# is still a question about Phaco. Keeping `fu` as a standalone topic label and
+# exempting it from M6-B would let a reply drift to post-op *refractive* advice
+# and still pass - and post-op guidance for Phaco / Ortho-K / presbyopia differs
+# from mo can (fasting for bloodwork, Family card 2 vs 3 years, review schedule).
+#
+# `ngày|tuần` are included alongside `tháng|năm`: "mổ 5 ngày rồi" and "mổ 2 tuần
+# rồi" are the commonest post-op phrasings on a seeding thread, and phase picks
+# which half of a services.md section gets used - missing them serves pre-op
+# facts to someone who already had surgery.
+TOPIC_FU_RX = (r"tái khám|sau mổ|hậu phẫu|mới mổ|vừa mổ|đã mổ|"
+               r"mổ .{0,15}(ngày|tuần|tháng|năm) *(rồi|r)\b")
+
+# Refractive-specific phrasing that carries drift WITHOUT naming a service.
+# Most real drift does not say "SMILE" - it speaks in mo-can register. These are
+# pulled from the existing MODE 2 example block and the Kieu 9 description.
+#
+# Exclusion criterion, applied strictly: if Phaco / retina / paediatric exams
+# also say it legitimately, it is OUT. Deliberately excluded, with reasons:
+#   `nho thuoc gian`      - Phaco, fundus/retina and cycloplegic paediatric exams
+#                           all dilate. quick_replies confirms: LICHPHACO, qt-ksct.
+#   `cho ve` + `mat nhoe` - downstream of dilation, so it inherits the same problem.
+#   `kham chuyen sau`     - Phaco, Ortho-K and presbyopia all use this exact phrase.
+#   `nhan ap`            - glaucoma uses it more than refractive does.
+#   `ngung lens`         - services.md PRESCRIBES this for `kinh` (do do) and
+#                           `ksct` (Ortho-K before khám). Gating it would fail the
+#                           fact pack's own advice - the gate and the reference
+#                           would contradict each other.
+# A narrow gate that is right beats a wide one that cries wolf: false positives
+# here would push writers to keyword-stuff the service name into every reply.
+KX_CONTEXT_RX = (r"bản đồ giác mạc|độ dày giác mạc|giác mạc mỏng|giác mạc dày|"
+                 r"sau laser|vạt giác mạc|thoát kính|k đeo kính nữa|"
+                 r"không đeo kính nữa|12 bước")
+
+# M6-B escape hatch. An item may name two services when it genuinely compares
+# them ("mẹ e mổ phaco còn e mổ cận") - that is normal thread behaviour and
+# failing it would be a false positive.
+#
+# But the hatch must not be "contains the target token once". Without a contrast
+# marker, "phaco thì bs khám, e mổ cận SMILE xong thoát kính" launders a fully
+# drifted item by sprinkling the asked service into it - the gate degrades into a
+# keyword-presence check, which is exactly the failure mode it was built to stop.
+#
+# Nor may the marker be a bare connector anywhere in the body. `còn`, `cũng` and
+# `chứ` are among the commonest words in Vietnamese, so an item-wide search for
+# them reopens the same bypass one step removed: "phaco CŨNG cần bs khám kỹ, e mổ
+# cận SMILE xong thoát kính" carries target + drift + `cũng` and would pass while
+# drifting outright.
+#
+# So the hatch is STRUCTURAL: a weak connector counts only when it introduces
+# the SECOND service mention - i.e. it sits in the short run of text immediately
+# before it. That is what a contrast looks like ("mổ phaco CÒN E mổ cận"), and it
+# separates the bypass shape, where the connector attaches to the first mention
+# and the drift arrives in its own clause ("phaco CŨNG cần bs khám kỹ, e mổ cận
+# SMILE xong thoát kính" - `cũng` describes phaco, not the contrast).
+# Unambiguous phrases are accepted anywhere, because they cannot be incidental
+# connectors. `2 ca` is NOT one of them on its own - it counts cases, shifts or
+# appointment slots ("phaco bên đó có 2 ca mổ buổi sáng, e mổ cận SMILE...") and
+# item-wide acceptance would relaunch the same laundering. It only counts when
+# something marks the two as differing.
+# `2 ca` must name the two SERVICES as the two cases, so the differing-word has
+# to follow immediately ("2 ca khác nhau"). Allowing filler ("2 ca mổ khác giờ
+# buổi sáng" - scheduling) turned it back into an incidental marker.
+#
+# Strong markers are ANCHORED like the other two paths: the marker must reach
+# mention #2 through the bridge allowlist. Unanchored, "phaco khác với hôm
+# trước, e mổ cận SMILE" passes while comparing times, not services - the same
+# fail-open shape that `còn` and `chứ` each went through.
+# Weak markers are split by what the word DOES, not by where it sits - position
+# cannot separate the two shapes, because a real comparison also puts its
+# connector right after mention #1 ("phaco CÒN chị gái em mổ cận").
+#
+#   `còn`, `chứ` are CONTRASTIVE - they bind forward and introduce a second,
+#     different subject. "mổ phaco còn e mổ cận" = whereas.
+#   `cũng` means "also/too". It binds BACKWARD onto the thing already named, so
+#     it never marks a contrast on its own: "phaco cũng cần bs khám kỹ" says
+#     something about phaco, and the drift that follows is a separate clause.
+#     This is precisely the laundering shape, so `cũng` is not a marker at all.
+#
+# `còn` needs two more conditions. It is contrastive only when a SUBJECT follows
+# ("còn E mổ cận", "còn CHỊ GÁI EM mổ cận"); followed by a verb it is the adverb
+# "still", which binds backward exactly like `cũng` - "phaco CÒN CẦN bs khám kỹ,
+# e mổ cận SMILE..." is the laundering shape again.
+#
+# Subject alone is not enough either, because the clause can wander off before
+# the drift arrives: "phaco còn E THẤY CẦN khám kỹ mổ cận SMILE...". Length does
+# not separate these - the legit tail "gái em năm ngoái " is 17 chars and the
+# bypass tail " thấy cần khám kỹ " is 18.
+#
+# The run between `còn <subj>` and mention #2 is therefore checked against an
+# ALLOWLIST, not a verb blacklist. A blacklist fails OPEN: every predicate it
+# forgets (`khám`, `đo`, `tư vấn`, ...) is a bypass, and Vietnamese has more
+# predicates than anyone will enumerate. An allowlist fails CLOSED - an unknown
+# word means "not a comparison", M6-B fires, and the writer rewrites the reply.
+# For a gate whose whole job is catching drift, closed is the safe direction.
+#
+# What may appear between the subject and the second service is only material
+# that CONTINUES the subject phrase - kinship tails, time expressions, aspect
+# markers, and `đi` in "đi mổ cận". Any real predicate ("thấy cần khám kỹ")
+# is excluded by construction rather than by listing.
+_TAIL_WORD = (r"(gái|trai|ruột|họ|ấy|đó|kia|nó|ta|mình|e|em|chị|anh|mẹ|má|ba|bố|"
+              r"con|cháu|bạn|tôi|vợ|chồng|ông|bà|cô|chú|dì|bác|"          # subject tail
+              r"năm|tháng|tuần|ngày|hôm|ngoái|trước|qua|nay|giờ|hồi|lúc|"  # time
+              r"đã|đang|sẽ|mới|vừa|rồi|r|thì|lại|cũng|đi|"                 # aspect / đi mổ
+              r"[0-9]+)")
+_TAIL_MAX_WORDS = 6
+# `chứ` gets the same treatment. Bare `chứ` is a discourse particle
+# ("phaco chứ không phải cứ khám là mổ, e mổ cận...") and does not tie the two
+# services together. Only the corrective form `chứ (k) phải` does, and it must
+# also reach mention #2 through the same allowlisted run.
+#
+# Word boundaries are mandatory: `chứ` is a substring of `chứng` ("triệu chứng",
+# "chứng minh") and `còn` of `còng`. norm() keeps diacritics, so the ASCII \b
+# does not fire between two Vietnamese letters - hence explicit lookarounds.
+_VN_W = r"a-zA-Zàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ0-9"
+_NB = r"(?<![" + _VN_W + r"])"   # left boundary
+_NA = r"(?![" + _VN_W + r"])"    # right boundary
+# Personal / kinship subjects a contrastive `còn` may introduce. Deliberately
+# NOT including classifiers and place fillers (`cái`, `ca`, `bên`, `nhà`,
+# `người`, `ai`): those form ordinary continuation clauses, not a second case.
+_SUBJ = (r"(e|em|mình|t|tui|tớ|con|cháu|chị|anh|bạn|b|mẹ|má|ba|bố|cha|dì|cô|chú|"
+         r"bác|ông|bà|vợ|chồng)")
+# allowlisted run from the subject to mention #2, then end of gap
+_TAIL = r"(?: +" + _TAIL_WORD + _NA + r"){0," + str(_TAIL_MAX_WORDS) + r"} *$"
+# `chứ (k) phải` is an explicit refutation, so what follows is the thing being
+# refuted - a description of the OTHER service ("chứ k phải chỉnh giác mạc như
+# mổ cận"). It gets a fail-closed BRIDGE allowlist rather than free text: an open
+# window let "phaco chứ không phải cứ khám là mổ cận SMILE" through, which
+# refutes a way of examining, not phaco-vs-refractive.
+_CHU_BRIDGE = (r"(như|kiểu|giống|dạng|chỉnh|thay|bắn|laser|mổ|phẫu thuật|"
+               r"giác|mạc|thủy|tinh|thể|kính|mắt|độ|vạt|cái|của|bên|đi|làm|thì|là)")
+COMPARE_CHU_RX = (_NB + r"chứ" + _NA + r" *(k|ko|không|chẳng) *phải"
+                  + r"(?: +" + _CHU_BRIDGE + _NA + r"){0,4} *$")
+COMPARE_CON_RX = _NB + r"còn" + _NA + r" +" + _SUBJ + _NA + _TAIL
+# `còn` may also introduce the SERVICE itself rather than a person: "phaco thay
+# thủy tinh thể CÒN mổ cận chỉnh giác mạc" - "as for refractive surgery...".
+#
+# Bare `còn` before the mention is not enough, because the drift service is
+# itself a verb phrase: "phaco CÒN mổ cận SMILE xong thoát kính" is the "still
+# also does" reading, i.e. the laundering shape. Nor is a bare predicate enough -
+# `thay`, `đặt`, `lấy` are ordinary verbs ("phaco ĐẶT LỊCH còn mổ cận SMILE...").
+#
+# What marks a definitional contrast is a predicate bound to the ANATOMY OR
+# DISEASE THAT SERVICE ACTUALLY TREATS: "phaco THAY THỦY TINH THỂ còn mổ cận
+# CHỈNH GIÁC MẠC". Two ways to get this wrong, both closed here:
+#   - `đặt lịch` / `thay thuốc` / `lấy số` - real verbs, but `lịch`/`thuốc`/`số`
+#     are not what any surgery operates on.
+#   - `phaco CẮT MÍ` / `phaco XỬ LÝ VÕNG MẠC` - real anatomy, but not Phaco's.
+#     So the object table is keyed BY SERVICE, not global: an object only
+#     validates a definition of the service it belongs to.
+_SVC_DEF_VERB = (r"(thay|chỉnh|sửa|bắn|cắt|đặt|tán|hút|ghép|xử lý|điều trị|"
+                 r"can thiệp|mổ|chữa|trị|là)")
+SVC_DEF_OBJ = {
+    "phaco": r"(thủy tinh thể|đục thủy tinh thể|cườm khô|cườm chín|cườm|iol|thấu kính)",
+    "kx": r"(giác mạc|laser|tật khúc xạ|khúc xạ|độ cận|độ loạn|vạt)",
+    "lao_thi": r"(lão thị|thủy tinh thể|giác mạc|laser|đa tiêu)",
+    "ksct": r"(trục nhãn cầu|giác mạc|độ cận|tăng độ)",
+    "kinh": r"(độ cận|độ loạn|khúc xạ|tròng kính|đơn kính)",
+    "glaucoma": r"(nhãn áp|bè|thần kinh thị)",
+    "vong_mac": r"(võng mạc|dịch kính|hoàng điểm|đáy mắt)",
+    "lac": r"(cơ vận nhãn|trục nhãn cầu|lác|lé)",
+    "mong": r"(mộng|kết mạc)",
+    "tham_my": r"(mí|bọng mắt|mỡ|sụp mi)",
+    "tong_quat": r"(mắt)",
+}
+
+
+def _svc_def_rx(service):
+    """Predicate + an object that service actually treats, or None."""
+    obj = SVC_DEF_OBJ.get(service)
+    if not obj:
+        return None
+    return _NB + _SVC_DEF_VERB + r" *(lại )? *" + obj
+
+
+def _is_con_definition(gap, after2, svc1, svc2):
+    """`còn` introducing the second service in a definitional contrast:
+    "phaco THAY THỦY TINH THỂ còn mổ cận CHỈNH GIÁC MẠC".
+
+    BOTH sides must be defined, and each against the object table of the service
+    on THAT side. Checking only the left side let a valid Phaco definition excuse
+    a bare refractive claim ("phaco thay thủy tinh thể còn mổ cận SMILE xong
+    thoát kính"), which is the laundering shape again.
+
+    svc1/svc2 are the services in text order, so a reversed sentence
+    ("mổ cận chỉnh giác mạc còn phaco thay thủy tinh thể") is handled by the
+    same code rather than being asymmetrically rejected.
+    """
+    left, right = _svc_def_rx(svc1), _svc_def_rx(svc2)
+    if not left or not right:
+        return False
+    if not rx(r"^[^,.;\n]*" + left + r"[^,.;\n]*" + _NB + r"còn" + _NA + r" *$").search(gap):
+        return False
+    # the second definition follows its mention, within the same clause
+    return bool(rx(r"^[^,.;\n]{0,40}?" + right).search(after2))
+# Every strong marker is ANCHORED to mention #2 through the bridge allowlist,
+# `2 ca` included. Unanchored, "phaco khác với hôm trước, e mổ cận SMILE" passes
+# while comparing times, and "2 ca khác giờ / khác ngày / khác phòng" while
+# comparing schedules - the same fail-open shape `còn` and `chứ` each went
+# through. `2 ca` additionally needs `khác NHAU`: bare "khác" takes a noun after
+# it and becomes "a different <something>".
+_STRONG_HEAD = (r"(khác với|so với|so sánh|k giống|không giống|thì khác"
+                r"|(2|hai) ca +(khác|k giống|không giống) +nhau)")
+COMPARE_STRONG_RX = _STRONG_HEAD + _NA + r"(?: +" + _CHU_BRIDGE + _NA + r"){0,4} *$"
+# A comparison may also close AFTER both mentions ("mổ phaco với mổ cận là 2 ca
+# khác nhau"). Only the CLOSING form belongs here, not the whole marker set: a
+# between-mentions marker appearing after the drift is describing whatever comes
+# next, not the two services ("e mổ cận TRONG KHI đang phân vân...", "e mổ cận
+# SO VỚI hồi trước thì đỡ hơn"). Reusing _STRONG_HEAD here reopened exactly that.
+#
+# The bridge here is its OWN narrow list, not _CHU_BRIDGE. _CHU_BRIDGE carries
+# nominal fillers (`bên`, `của`, `cái`) that are right for a refutation but wrong
+# here: "mổ phaco với mổ cận BÊN khác nhau" contrasts the sides/places, not the
+# services. Only copula and intensifier material may sit in this slot.
+_STRONG_CLOSE = (r"((2|hai) ca +(khác|k giống|không giống) +nhau"
+                 r"|(khác|k giống|không giống) +nhau)")
+_CLOSE_BRIDGE = r"(là|thì|đều|vốn|hoàn toàn|về bản chất|bản chất|2|hai)"
+# `khác nhau` must not be re-qualified into a non-service difference: "khác nhau
+# VỀ BÊN", "khác nhau hoàn toàn VỀ BÊN", "khác nhau LÀ BÊN khác". A one-token
+# lookahead only guarded the first position, so the qualifier moved one word
+# right and passed. The whole remaining tail is therefore validated: after the
+# closing phrase only intensifiers and punctuation may appear, to end of clause.
+# `về bản chất` is the one qualifier that keeps the difference about the services
+# themselves; `về bên`, `về giờ`, `ở chỗ` and friends re-aim it at place/time.
+#
+# The tail is validated in CODE, not by lookahead. Lookaheads guarded one
+# position at a time, so the qualifier just stepped right: past the comma, then
+# past an intensifier after the comma. Scanning the whole clause ends that class
+# of bypass instead of patching each offset.
+_CLOSE_QUAL_RX = r"(về|ở|tại|chỗ|nơi|phòng|ngày|giờ|bên|buổi|ca)"
+_CLOSE_TAIL_STOP = r"[.;!?\n]"          # clause end; a comma does NOT end it
+_CLOSE_OK_WORD = (r"(về bản chất|hoàn toàn|nhiều|hẳn|lắm|rồi|r|nha|nhé|nhen|nghen|á|ạ|đó|đấy|"
+                  r"mà|luôn|nhưng|nên|chứ|và|với|đều|ổn|tốt|thì|là|"
+                  r"b|bạn|e|em|mn|mình|cân|nhắc|xem|nhá)")
+# a comma may sit between mention #2 and the closing phrase: "mổ phaco với mổ
+# cận, là 2 ca khác nhau"
+COMPARE_STRONG_AFTER_RX = (r"^ *,? *(?: *" + _CLOSE_BRIDGE + _NA + r" +){0,3}"
+                           + _STRONG_CLOSE + _NA)
+
+
+def _has_fresh_drift(tail, target_rx, drift_rx, service=None, drift_service=None):
+    """True when the text after a comparison starts a NEW off-topic claim.
+
+    A comparison licenses the contrast it makes, not whatever follows it. Drift
+    in the tail is fresh unless the tail is itself another valid comparison
+    (spelling out the difference is normal Kiểu 8 behaviour).
+    """
+    clause = norm(tail)
+    has_drift = (drift_rx is not None and rx(drift_rx).search(clause)) \
+        or rx(KX_CONTEXT_RX).search(clause)
+    if not has_drift:
+        return False
+    if target_rx is not None and rx(target_rx).search(clause) \
+            and _is_comparison(clause, target_rx, drift_rx, service, drift_service):
+        return False
+    return True
+
+
+def _close_tail_ok(tail, target_rx=None, drift_rx=None, service=None,
+                   drift_service=None):
+    """True when nothing after a closing comparison re-aims it off the services.
+
+    `khác nhau` says the two services differ. "khác nhau VỀ BÊN" says the sides
+    differ - a different claim wearing the same words. The qualifier may sit
+    anywhere in the rest of the clause, including after a comma or after filler,
+    so the whole clause is examined rather than one offset being guarded.
+
+    Two rules, because the two positions carry different risk:
+      - up to the first comma, every token must be allowlisted. This is where a
+        re-qualification binds to `khác nhau`, so it is fail-closed.
+      - after a comma the writer is on to something else ("khác nhau hoàn toàn,
+        b đừng nhầm nha"). An explicit qualifier is rejected there, and so is
+        FRESH DRIFT: "khác nhau, e mổ cận SMILE xong thoát kính" is the
+        cross-sentence laundering shape with a comma instead of a full stop.
+        A comma tail that is ITSELF a comparison is fine, though - spelling out
+        the difference is the natural Kiểu 8 correction ("khác nhau, phaco thay
+        thủy tinh thể còn mổ cận chỉnh giác mạc").
+    `về bản chất` is allowlisted, so it passes anywhere; other `về ...` do not.
+    """
+    clause = norm(re.split(_CLOSE_TAIL_STOP, tail, 1)[0])
+    head, _, rest = clause.partition(",")
+    if not re.match(r"^(?: *" + _CLOSE_OK_WORD + _NA + r")* *$", head):
+        return False
+    rest = re.sub(r"về bản chất", " ", rest)
+    if rx(_CLOSE_QUAL_RX + _NA).search(rest):
+        return False
+    has_drift = (drift_rx is not None and rx(drift_rx).search(rest)) \
+        or rx(KX_CONTEXT_RX).search(rest)
+    if not has_drift:
+        return True
+    return (target_rx is not None
+            and bool(rx(target_rx).search(rest))
+            and _is_comparison(rest, target_rx, drift_rx, service, drift_service))
+
+
+# `trong khi <subject> <service>` is the same contrast shape as `còn <subject>`,
+# so it gets the same subject+noun-tail allowlist. Without it a natural
+# "mẹ mổ phaco trong khi em mổ cận" was rejected, because _CHU_BRIDGE holds no
+# personal subjects.
+COMPARE_TRONGKHI_RX = _NB + r"trong khi" + _NA + r" +" + _SUBJ + _NA + _TAIL
+COMPARE_SPAN = 90   # max chars between the two service mentions
+
+
+def _is_comparison(body, target_rx, drift_rx, service=None, drift_service=None):
+    """True when body contrasts the two services rather than just naming both.
+
+    Strong phrases, `còn <subject>` and `chứ (k) phải` all count only inside the
+    gap BETWEEN the two mentions - never item-wide. An item-wide search let an
+    incidental "2 ca mổ khác giờ" (scheduling, not services) launder drift, the
+    same fail-open shape as every earlier version of this rule.
+    """
+    tgt = [m.span() for m in rx(target_rx).finditer(body)]
+    dft = [m.span() for m in rx(drift_rx).finditer(body)]
+    for a in tgt:
+        for b in dft:
+            lo, hi = (a[1], b[0]) if a[1] <= b[0] else (b[1], a[0])
+            if not 0 <= hi - lo <= COMPARE_SPAN:
+                continue
+            gap = body[lo:hi]
+            later = max(a[1], b[1])
+            after = body[later:]
+
+            # Whichever path matches, what follows mention #2 must not carry
+            # FRESH drift. The comma-tail defence was originally built only for
+            # the closing-marker path, so "mổ phaco khác với mổ cận nha b, e mổ
+            # cận SMILE xong thoát kính" walked straight through the other three
+            # - the same laundering shape, just a more idiomatic opener.
+            #
+            # "Fresh" excludes the run of drift tokens belonging to mention #2
+            # itself: "mổ cận SMILE" is one naming, not a naming plus a relapse,
+            # so the tail starts after any adjacent drift tokens.
+            tail_at = later
+            while True:
+                nxt = rx(drift_rx).search(body[tail_at:tail_at + 12])
+                if not nxt:
+                    break
+                tail_at += nxt.end()
+            after_tail = body[tail_at:]
+
+            def _clean_tail():
+                # Only the FRESH-DRIFT half of the tail rule applies here. The
+                # qualifier half (`về bên`, `ở chỗ`) exists to stop `khác nhau`
+                # being re-aimed, so it belongs to the closing-marker path alone;
+                # applying it here failed "còn e mổ cận, cùng BÊN DND Trương
+                # Định" where nothing is being re-qualified at all.
+                return not _has_fresh_drift(after_tail, target_rx, drift_rx,
+                                            service, drift_service)
+
+            if rx(COMPARE_STRONG_RX).search(gap):
+                if _clean_tail():
+                    return True
+            # marker after both mentions, e.g. "mổ phaco với mổ cận là 2 ca khác nhau"
+            m = rx(COMPARE_STRONG_AFTER_RX).search(after[:40])
+            if m and _close_tail_ok(after[m.end():], target_rx, drift_rx, service,
+                                    drift_service):
+                return True
+            # both anchored at the end of the gap, i.e. immediately before mention #2
+            if rx(COMPARE_CHU_RX).search(gap) or rx(COMPARE_CON_RX).search(gap):
+                if _clean_tail():
+                    return True
+            # definitional `còn`, in text order so either mention may come first
+            if a[1] <= b[0]:
+                svc1, svc2 = service, drift_service
+            else:
+                svc1, svc2 = drift_service, service
+            if _is_con_definition(gap, after, svc1, svc2):
+                return True
+            if rx(COMPARE_TRONGKHI_RX).search(gap):
+                if _clean_tail():
+                    return True
+    return False
+
+
+# Which services a question can realistically DRIFT to. Not "every other label":
+# the reported bug is replies sliding into mổ cận, and `kx` is the register the
+# whole example bank was written in, so that is the risky direction.
+#
+# Neighbouring topics named ALONGSIDE the target are usually not drift at all -
+# they are what a correct reply says. "mẹ e mổ phaco xong vẫn phải đeo kính lão
+# để đọc" (monofocal IOL leaves near vision needing glasses) and "mổ phaco xong
+# 1 tháng bs mới cho đo độ cắt kính" are the two commonest true Phaco replies
+# there are, and a global "any other label is drift" rule failed both. A gate
+# that fires on the correct answer teaches writers to strip true clinical detail.
+#
+# So a sentence naming BOTH the target and a near neighbour passes; only the
+# listed drift targets need the comparison hatch. A sentence naming a neighbour
+# and NOT the target is still caught - that is genuine off-topic.
+SERVICE_DRIFT_TARGETS = {
+    "phaco": ("kx",),
+    "lao_thi": ("kx",),
+    "ksct": ("kx",),
+    "kinh": ("kx",),
+    "glaucoma": ("kx", "phaco"),
+    "vong_mac": ("kx", "phaco"),
+    "lac": ("kx", "phaco"),
+    "mong": ("kx", "phaco"),
+    "tham_my": ("kx", "phaco"),
+    "tong_quat": ("kx",),
+}
+
+
+# M6-A: the draft must declare what it is answering. Without it M6-B/C have
+# nothing to compare against.
+ORIGINAL_Q_RX = re.compile(r"^\*\*Câu hỏi gốc:\*\*\s*(.+)$",
+                           re.IGNORECASE | re.MULTILINE)
+
+# M6-C: share of *substantive* items that must touch the asked service.
+# Kieu 7 is excluded from the denominator - it exists to name nothing (section
+# 7's anti-all-praise floor), so forcing a token into it would break that floor.
+# 60%, not 100%: Kieu 6 (mixed) and Kieu 10 (still deciding) may speak about the
+# experience without repeating the service name every line.
+TOPIC_COVERAGE_MIN = 0.60
+TOPIC_NEUTRAL_SECTIONS = {7}
+
+# M6-D: BHYT may be mentioned, its numbers may not - they are not in
+# fees-promos.md, so they route to the hotline like every other unpriced number.
+BHYT_RX = r"bhyt|bảo hiểm y tế"
+BHYT_NUMBER_RX = r"[0-9][0-9.,]* *%|[0-9][0-9.,]* *(triệu|tr\b|nghìn|k\b|đ\b|đồng|vnđ)"
+
+# M6-E: services.md is a fact pack, not a second copy of the fee table. Allow
+# numbers whose unit suffix proves they are not money.
+SERVICES_FILENAME = "services.md"
+NON_MONEY_UNIT_RX = (r"[0-9][0-9.,\-–]* *"
+                     r"(giờ|phút|tiếng|ngày|tuần|tháng|năm|h[0-9]*|mm|diop|độ|tuổi|"
+                     r"bước|lần|mắt|loại|phương pháp)")
+
 # free-exam mention, both word and digit forms. Section 6 measured 664 word-form
 # vs 13 digit-form hits, so the word forms carry the rule.
 # ZERO_D: "0đ" must not be allowed to match the tail of a real price.
@@ -704,6 +1170,31 @@ def detect_bucket(text):
     return ("none", None, "no service token")
 
 
+def detect_topic(text):
+    """Return (phase, service) - what the text is ABOUT. Not a fee decision.
+
+    Deliberately independent of detect_bucket(). That function answers "what
+    does this cost?" and groups six unrelated pathologies into `khac` because
+    they share tier T2. This one answers "what is this about?", where those six
+    are not interchangeable at all - a reply about cuom nuoc does not answer a
+    question about lac. Same price, different content.
+
+    The two never call each other, and the fee ladder is not modified. A test
+    pins the divergence: "lao thi + phaco" is bucket `lt_phaco` (hotline) but
+    service `lao_thi` (talk about Presbyond / multifocal IOL).
+
+    phase is 'fu' or 'pre'; service is a TOPIC_LADDER label or 'none'. `fu`
+    deliberately does NOT collapse the service - a post-op question about Phaco
+    is still about Phaco, and M6-B keys off the service alone.
+    """
+    t = norm(text)
+    phase = "fu" if rx(TOPIC_FU_RX).search(t) else "pre"
+    for name in TOPIC_LADDER:
+        if rx(TOPIC_TOK[name]).search(t):
+            return (phase, name)
+    return (phase, "none")
+
+
 def free_exam_allowed(text):
     """Item-level M2 gate. Returns (allowed, reason)."""
     t = norm(text)
@@ -1141,6 +1632,161 @@ def check_new_angles(mode, items, rep):
                          % (it.number, it.line, sec))
 
 
+def check_topic_fit(mode, text, items, rep):
+    """M6 - reply-group must answer the service that was actually asked about.
+
+    Built because SKILL.md had no service-classification step in MODE 2, every
+    one of the 10 angles was written in mo-can language, and the whole example
+    block used a single SMILE Pro question. The skill states it instructs the
+    model to imitate examples and that the instruction measurably lands
+    (10/10: 167 hits). Prose alone cannot hold this - without a gate the drift
+    returns silently, which is how :55 lasted 13 months.
+    """
+    if mode != "reply-group":
+        return
+
+    m = ORIGINAL_Q_RX.search(text)
+    if not m:
+        # Applies at ANY length, unlike M5's full-run coverage rule. A short
+        # draft can still drift, and exempting fixtures by name would create a
+        # class of draft the gate never looks at - exactly what
+        # SELFTEST_MODE_EXEMPT exists to prevent.
+        rep.fail("M6-A", "reply-group draft has no '**Câu hỏi gốc:**' line, so there "
+                         "is nothing to check the replies against. Print the original "
+                         "question at the top of the output.")
+        return
+
+    question = m.group(1).strip()
+    phase, service = detect_topic(question)
+    rep.note("M6: câu hỏi gốc -> service=%s phase=%s" % (service, phase))
+
+    # M6-D runs BEFORE the topic early-return. It is a fee rule wearing an M6
+    # number, not a topic rule: "BHYT chi tra 80%" is an unpriced number
+    # regardless of what was asked, and fees-promos.md does not carry it. Behind
+    # the early return it would have been unreachable for `kx` questions - i.e.
+    # for the most common thread on the page.
+    for it in items:
+        body = norm(it.text)
+        if rx(BHYT_RX).search(body) and rx(BHYT_NUMBER_RX).search(body):
+            rep.fail("M6-D", "item %s (line %d): nhắc BHYT kèm số. Được nói 'có BHYT "
+                             "hỗ trợ', số thì chuyển hotline" % (it.number, it.line))
+
+    if service in ("kx", "none"):
+        # `kx` is the default register, so there is nothing to drift away from;
+        # a mo-can question mentioning phaco is legitimate Kieu 8/10 behaviour
+        # and gating that direction buys coverage at the price of false
+        # positives. `none` (incl. bare post-op) has no service to hold onto.
+        rep.note("M6-B/C skipped: service=%s carries no drift risk" % service)
+        return
+
+    target_rx = TOPIC_TOK[service]
+    others = [(k, v) for k, v in TOPIC_TOK.items() if k != service]
+
+    substantive = 0
+    on_topic = 0
+    for it in items:
+        body = norm(it.text)
+        hits_target = bool(rx(target_rx).search(body))
+
+        if it.section not in TOPIC_NEUTRAL_SECTIONS:
+            substantive += 1
+            if hits_target:
+                on_topic += 1
+
+        # Drift is judged PER SENTENCE. Judging the item as a whole let a valid
+        # comparison in one sentence excuse drift in the next ("mổ phaco với mổ
+        # cận khác nhau. e mổ cận SMILE xong thoát kính") - the comparison hatch
+        # is meant to permit a contrast, not to launder a separate off-topic
+        # claim that happens to share the item.
+        for sent in re.split(r"[.;!?\n]+", body):
+            if not sent.strip():
+                continue
+            sent_target = bool(rx(target_rx).search(sent))
+
+            drift = None
+            drift_rx = None
+            drift_svc = None
+            for name, pat in others:
+                if rx(pat).search(sent):
+                    drift = "token nhóm %s" % name
+                    drift_rx = pat
+                    drift_svc = name
+                    break
+            if drift is None and rx(KX_CONTEXT_RX).search(sent):
+                drift = "giọng khúc xạ (KX_CONTEXT)"
+                drift_rx = KX_CONTEXT_RX
+                # this IS the refractive register, so it is `kx` drift - without
+                # the label the per-service drift check would skip it
+                drift_svc = "kx"
+
+            if drift is None:
+                continue
+            if sent_target:
+                # Naming the target AND a neighbour is normal ("mổ phaco xong
+                # vẫn phải đeo kính lão"). Only the listed drift targets need to
+                # justify themselves through the comparison hatch.
+                if drift_svc not in SERVICE_DRIFT_TARGETS.get(service, ()):
+                    continue
+                if _is_comparison(sent, target_rx, drift_rx, service, drift_svc):
+                    continue
+                rep.fail("M6-B", "item %s (line %d): câu hỏi về %s nhưng item vừa nhắc %s "
+                                 "vừa nói %s mà không phải so sánh — nhắc %s một lần không "
+                                 "đủ để hợp lệ hoá nội dung lạc service"
+                         % (it.number, it.line, service, service, drift, service))
+                break
+            rep.fail("M6-B", "item %s (line %d): câu hỏi về %s nhưng item nói %s và "
+                             "không nhắc %s" % (it.number, it.line, service, drift, service))
+            break
+
+    if len(items) >= M5_FULL_RUN_MIN_ITEMS and substantive:
+        share = float(on_topic) / substantive
+        if share < TOPIC_COVERAGE_MIN:
+            rep.fail("M6-C", "chỉ %d/%d item thực chất (%.0f%%) chạm service %s, dưới "
+                             "ngưỡng %.0f%%. Kiểu 7 không tính vào mẫu số."
+                     % (on_topic, substantive, share * 100, service,
+                        TOPIC_COVERAGE_MIN * 100))
+        else:
+            rep.note("M6-C: %d/%d item thực chất (%.0f%%) chạm service %s"
+                     % (on_topic, substantive, share * 100, service))
+
+
+def default_services_path():
+    return os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                        SERVICES_FILENAME)
+
+
+def check_services_no_money(path=None):
+    """M6-E - services.md must not become a second copy of the fee table.
+
+    fees-promos.md is the single file that carries money. A fact pack that
+    quietly accumulates prices rebuilds the class of bug section 6 just fixed,
+    only relocated. Enforced in --selftest rather than by eyeball.
+
+    Allowlisting is by UNIT SUFFIX, not by value: "3-5 phút" and "3 năm" are
+    fine, "3 triệu" is not. Checking values would have to guess.
+    """
+    path = path or default_services_path()
+    if not os.path.exists(path):
+        return ["%s not found at %s" % (SERVICES_FILENAME, path)]
+    problems = []
+    for lineno, raw in enumerate(read_text(path).splitlines(), start=1):
+        line = raw.strip()
+        if not line or line.startswith(">"):
+            # blockquotes hold the "do not put money here" warning, which names
+            # the very tokens being banned.
+            continue
+        stripped = re.sub(NON_MONEY_UNIT_RX, " ", norm(line))
+        # The currency suffix needs a word boundary. Without it "T0, được nói
+        # free" matched "0, đ" (the đ of `được`) and "45-55 đọc" matched "55 đ" -
+        # a gate that cries wolf on ordinary Vietnamese prose gets switched off.
+        hit = (MONEY_TOKEN_RX.search(stripped)
+               or rx(r"[0-9][0-9.,]* *(đ|đồng|vnd)\b(?!\w)").search(stripped))
+        if hit:
+            problems.append("%s:%d money token %r in %r"
+                            % (SERVICES_FILENAME, lineno, hit.group(0), line[:60]))
+    return problems
+
+
 def count_unrefuted(key, pattern, text):
     """Count ban hits, skipping ones a refutation marker directly precedes.
 
@@ -1233,6 +1879,7 @@ def run_check(text, mode=None, fees_path=None, label="<stdin>", require_policy=T
     # numbered items.
     check_quota_10_10(mode, items or [Item(0, None, text, 1)], rep)
     check_new_angles(mode, items, rep)
+    check_topic_fit(mode, text, items, rep)
     check_bans(mode, text, items, rep)
     check_antirepeat(items, rep)
 
@@ -1387,7 +2034,11 @@ SELFTEST_MODE_EXEMPT = [
      "bs khám kỹ, giải thích rõ từng bước", None),
 ]
 
-_FB_HEAD = "# Seeding Reply-Group - DND\n**Mode:** reply-group\n\n"
+_FB_HEAD = ("# Seeding Reply-Group - DND\n**Mode:** reply-group\n"
+            # M6-A applies at any length. These fixtures assert FEE behaviour, so
+            # the question is deliberately service-less: service='none' makes
+            # M6-B/C skip and the footer assertions stay the only thing measured.
+            "**Câu hỏi gốc:** mn ơi cho e hỏi khám bên DND ntn ạ\n\n")
 
 SELFTEST_FOOTER_B = [
     ("tier T1 + its own amount -> pass",
@@ -1423,6 +2074,7 @@ SELFTEST_FOOTER_B = [
 
 SELFTEST_DRAFT_BAD = """# Seeding Reply-Group - DND
 **Mode:** reply-group
+**Câu hỏi gốc:** mn ơi cận 5 độ loạn 2 mổ smile pro có ổn k ạ
 
 ### Kiểu 1: Trả lời từ kinh nghiệm bản thân (2 bình luận)
 1. bạn qua DND Trương Định q3 khám 12 bước free luôn á, bs sẽ tư vấn cho bé Ortho-K
@@ -1435,6 +2087,7 @@ SELFTEST_DRAFT_BAD = """# Seeding Reply-Group - DND
 
 SELFTEST_DRAFT_GOOD = """# Seeding Reply-Group - DND
 **Mode:** reply-group
+**Câu hỏi gốc:** mn ơi cận 5 độ loạn 2 mổ smile pro có ổn k ạ
 
 ### Kiểu 1: Trả lời từ kinh nghiệm bản thân (2 bình luận)
 1. case mình cx tương tự nè, cận 4.5 loạn 1.75, mổ smile pro bên DND SG, thị lực giờ ổn lắm
@@ -1451,6 +2104,7 @@ SELFTEST_DRAFT_GOOD = """# Seeding Reply-Group - DND
 # the coverage gate treats as full, so this doubles as the boundary case.
 SELFTEST_DRAFT_M5_GOOD = """# Seeding Reply-Group - DND
 **Mode:** reply-group
+**Câu hỏi gốc:** mn ơi cận 5 độ loạn 2 mổ smile pro có ổn k ạ
 
 ### Kiểu 1: Trả lời từ kinh nghiệm bản thân (1 bình luận)
 1. case mình cx tương tự nè, cận 4.5 loạn 1.75, mổ smile pro bên DND SG, giờ 10/10 r nha
@@ -1494,6 +2148,7 @@ SELFTEST_DRAFT_M5_GOOD = """# Seeding Reply-Group - DND
 # together they pin *which* angles are load-bearing.
 SELFTEST_DRAFT_M5_CONTEXT = """# Seeding Reply-Group - DND
 **Mode:** reply-group
+**Câu hỏi gốc:** mn ơi cận 5 độ loạn 2 mổ smile pro có ổn k ạ
 
 ### Kiểu 1: Trả lời từ kinh nghiệm bản thân (2 bình luận)
 1. case mình cx tương tự nè, cận 4.5 loạn 1.75, mổ smile pro bên DND SG r
@@ -1530,25 +2185,515 @@ SELFTEST_REFUTE = [
     ("k phải lo j đâu bạn, chỗ này mổ xong là khỏi cận luôn, yên tâm đi nha", True),
 ]
 
+# detect_topic ladder. (text, expected phase, expected service)
+#
+# The divergence cases matter more than the easy ones: these pin that topic
+# labels do NOT collapse the way fee buckets legitimately do.
+SELFTEST_TOPICS = [
+    # --- ladder order ---
+    # lao_thi BEFORE phaco: the fee side calls this lt_phaco -> hotline, but the
+    # CONTENT must be about Presbyond / multifocal IOL, not the cataract pitch.
+    # Two systems, two answers, neither wrong. This is the whole reason
+    # detect_topic exists as a separate function.
+    ("bố e lão thị, nghe nói mổ phaco đặt IOL đa tiêu đc hả ạ", "pre", "lao_thi"),
+    # bare `mổ` must not swallow a named service - SKILL.md section 6 trap #1
+    ("mổ ortho-k cho bé đc k ạ", "pre", "ksct"),
+    ("khám tổng quát xem có bị cườm khô k ạ", "pre", "phaco"),
+    ("e muốn khám tổng quát định kỳ thôi ạ", "pre", "tong_quat"),
+
+    # --- the six formerly-gộp labels are distinct ---
+    ("bé nhà e bị lác thì chữa được không ạ", "pre", "lac"),
+    ("e bị cườm nước, tăng nhãn áp thì sao ạ", "pre", "glaucoma"),
+    ("e tiểu đường muốn khám võng mạc ạ", "pre", "vong_mac"),
+    ("e bị mộng thịt, mổ ở đâu ạ", "pre", "mong"),
+    ("e muốn cắt mí với lấy mỡ bọng mắt ạ", "pre", "tham_my"),
+
+    # --- phase carries the service, it does not replace it (ISSUE-1) ---
+    ("mẹ e mới mổ phaco xong, tái khám mấy lần ạ", "fu", "phaco"),
+    ("e mổ smile pro tuần trước, tái khám khi nào ạ", "fu", "kx"),
+    # bare post-op: nothing to drift away from, so M6-B stands down
+    ("mới mổ tuần trước thì kiêng gì ạ", "fu", "none"),
+
+    ("cận 5 độ mổ smile pro có ổn k ạ", "pre", "kx"),
+    ("e muốn cắt kính mới, đo độ ở đâu ạ", "pre", "kinh"),
+    ("mn ơi cho e hỏi khám bên DND ntn ạ", "pre", "none"),
+
+    # impl ISSUE-3: natural post-op phrasing. phase picks which half of a
+    # services.md section is used, so missing these serves pre-op facts to
+    # someone who already had surgery.
+    ("mẹ e mổ phaco 3 tháng rồi giờ nhìn sao ạ", "fu", "phaco"),
+    ("e mổ smile được 1 năm rồi, cần khám lại k ạ", "fu", "kx"),
+    ("mổ 2 tuần rồi mà mắt còn cộm ạ", "fu", "none"),
+    ("mổ 5 ngày rồi thì kiêng gì ạ", "fu", "none"),
+]
+
+# M6 topic-fit fixtures. (label, draft, expected fail code or None)
+#
+# These encode the reported bug and each way the gate could be faked out.
+SELFTEST_M6 = [
+    # --- the reported bug: Phaco question answered with mo can ---
+    ("Phaco question drifts to SMILE", """**Mode:** reply-group
+**Câu hỏi gốc:** mẹ e bị đục thủy tinh thể, mổ phaco ở đâu ổn ạ
+
+### Kiểu 2: Gợi ý/Recommend tự nhiên (1 bình luận)
+1. bạn qua DND Trương Định q3 khám xem, mình mổ smile pro bên đó thấy ổn lắm
+""", "M6-B"),
+
+    ("Phaco question answered about Phaco", """**Mode:** reply-group
+**Câu hỏi gốc:** mẹ e bị đục thủy tinh thể, mổ phaco ở đâu ổn ạ
+
+### Kiểu 2: Gợi ý/Recommend tự nhiên (1 bình luận)
+1. mẹ mình mổ phaco bên DND Trương Định q3, bs Tuấn mổ, tầm 3-5 phút 1 mắt à
+""", None),
+
+    # --- ISSUE-2 round 2: drift that never names a service ---
+    # This is the realistic shape. Kieu 9 in SKILL.md only had a mo-can version,
+    # so the model reproduces refractive logistics for any question.
+    ("Phaco question drifts via kx register, no service token", """**Mode:** reply-group
+**Câu hỏi gốc:** mẹ e bị đục thủy tinh thể, mổ phaco ở đâu ổn ạ
+
+### Kiểu 9: Chi tiết quy trình/hậu cần (1 bình luận)
+1. hôm đi khám họ đo bản đồ giác mạc với độ dày giác mạc kỹ lắm, nhớ ngưng lens trước 1 tuần nha
+""", "M6-B"),
+
+    # --- ISSUE-1 round 3: shared clinical phrases must NOT over-fire ---
+    # Dilation and ride-home advice are valid for Phaco / retina / paediatric
+    # exams. Failing these would push writers to keyword-stuff the service name.
+    ("Phaco reply mentioning dilation logistics passes", """**Mode:** reply-group
+**Câu hỏi gốc:** mẹ e bị đục thủy tinh thể, mổ phaco ở đâu ổn ạ
+
+### Kiểu 9: Chi tiết quy trình/hậu cần (1 bình luận)
+1. hôm dẫn mẹ đi khám phaco họ nhỏ thuốc giãn nên mắt nhoè, phải nhờ người chở về nha
+""", None),
+
+    ("retina reply mentioning dilation passes", """**Mode:** reply-group
+**Câu hỏi gốc:** e bị tiểu đường muốn khám võng mạc thì sao ạ
+
+### Kiểu 9: Chi tiết quy trình/hậu cần (1 bình luận)
+1. khám đáy mắt là phải nhỏ thuốc giãn đó bạn, xong mắt nhoè vài tiếng nên đừng tự chạy xe về
+""", None),
+
+    ("paediatric reply mentioning dilation + khám chuyên sâu passes", """**Mode:** reply-group
+**Câu hỏi gốc:** con e 10 tuổi tăng độ nhanh, kiểm soát cận thị sao ạ
+
+### Kiểu 9: Chi tiết quy trình/hậu cần (1 bình luận)
+1. bé nhà mình đi khám kiểm soát cận thị, có nhỏ thuốc liệt điều tiết nên khám chuyên sâu lâu tầm 90 phút
+""", None),
+
+    # --- ISSUE-2 round 1: the six split labels are not interchangeable ---
+    # Under the old gộp `khac` cell both sides were the same label, so this passed.
+    ("lac question answered about glaucoma", """**Mode:** reply-group
+**Câu hỏi gốc:** bé nhà e bị lác thì chữa được không ạ
+
+### Kiểu 2: Gợi ý/Recommend tự nhiên (1 bình luận)
+1. bạn cho bé đi khám sớm nha, cườm nước để lâu là hỏng mắt đó
+""", "M6-B"),
+
+    # --- ISSUE-1 round 1: follow-up carries its service ---
+    ("post-op Phaco question drifts to post-op mo can", """**Mode:** reply-group
+**Câu hỏi gốc:** mẹ e mới mổ phaco xong, tái khám mấy lần ạ
+
+### Kiểu 9: Chi tiết quy trình/hậu cần (1 bình luận)
+1. mình mổ smile pro thì tái khám 1 ngày 1 tuần 1 tháng á, thẻ dùng đc 3 năm
+""", "M6-B"),
+
+    ("bare post-op question is not gated", """**Mode:** reply-group
+**Câu hỏi gốc:** mới mổ tuần trước thì kiêng gì ạ
+
+### Kiểu 9: Chi tiết quy trình/hậu cần (1 bình luận)
+1. mình thì kiêng dụi mắt với bơi lội, còn lại bs dặn sao làm vậy thôi
+""", None),
+
+    # --- escape hatch: an item naming BOTH is a legitimate comparison ---
+    ("item carrying both services passes", """**Mode:** reply-group
+**Câu hỏi gốc:** mẹ e bị đục thủy tinh thể, mổ phaco ở đâu ổn ạ
+
+### Kiểu 1: Trả lời từ kinh nghiệm bản thân (1 bình luận)
+1. mẹ e mổ phaco còn e mổ cận, cùng bên DND Trương Định, 2 ca khác nhau nhưng đều ổn
+""", None),
+
+    # impl rev2 ISSUE-1: the hatch must not be "contains the target token once".
+    # This item names phaco in passing and then gives refractive advice - the
+    # substance is drift, so a bare co-occurrence must NOT launder it.
+    ("target token sprinkled in, substance drifts", """**Mode:** reply-group
+**Câu hỏi gốc:** mẹ e bị đục thủy tinh thể, mổ phaco ở đâu ổn ạ
+
+### Kiểu 2: Gợi ý/Recommend tự nhiên (1 bình luận)
+1. phaco thì bs khám nha, bên đó đo bản đồ giác mạc với độ dày giác mạc kỹ lắm r mới mổ
+""", "M6-B"),
+
+    ("on-topic item with no drift needs no compare marker", """**Mode:** reply-group
+**Câu hỏi gốc:** mẹ e bị đục thủy tinh thể, mổ phaco ở đâu ổn ạ
+
+### Kiểu 1: Trả lời từ kinh nghiệm bản thân (1 bình luận)
+1. mẹ mình mổ phaco bên DND Trương Định q3, bs Tuấn mổ, tầm 3-5 phút 1 mắt à
+""", None),
+
+    # impl rev3 ISSUE-1: a bare connector must NOT open the hatch. `cũng`/`còn`/
+    # `chứ` are among the commonest words in Vietnamese, so an item-wide search
+    # for them reopens the sprinkling bypass one step removed. The marker has to
+    # sit BETWEEN the two service mentions.
+    ("incidental 'cũng' does not launder drift", """**Mode:** reply-group
+**Câu hỏi gốc:** mẹ e bị đục thủy tinh thể, mổ phaco ở đâu ổn ạ
+
+### Kiểu 2: Gợi ý/Recommend tự nhiên (1 bình luận)
+1. phaco cũng cần bs khám kỹ, e mổ cận SMILE xong thoát kính luôn
+""", "M6-B"),
+
+    ("incidental 'còn' far from both mentions does not launder", """**Mode:** reply-group
+**Câu hỏi gốc:** mẹ e bị đục thủy tinh thể, mổ phaco ở đâu ổn ạ
+
+### Kiểu 2: Gợi ý/Recommend tự nhiên (1 bình luận)
+1. phaco thì bs khám nha, bên đó đo bản đồ giác mạc kỹ lắm r mới mổ, còn lại thì yên tâm
+""", "M6-B"),
+
+    # strong phrase counts anywhere - it cannot be an incidental connector
+    ("explicit 'khác với' comparison passes", """**Mode:** reply-group
+**Câu hỏi gốc:** mẹ e bị đục thủy tinh thể, mổ phaco ở đâu ổn ạ
+
+### Kiểu 8: Đính chính nhầm lẫn kỹ thuật (1 bình luận)
+1. mổ phaco khác với mổ cận nha b, 1 cái thay thủy tinh thể 1 cái chỉnh giác mạc
+""", None),
+
+    # --- M6-A: no marker, nothing to check against ---
+    ("reply-group without the marker", """**Mode:** reply-group
+
+### Kiểu 2: Gợi ý/Recommend tự nhiên (1 bình luận)
+1. bạn qua DND Trương Định q3 khám thử xem
+""", "M6-A"),
+
+    # --- M6-D: BHYT may be named, its numbers may not ---
+    ("BHYT with a number", """**Mode:** reply-group
+**Câu hỏi gốc:** mổ phaco có bảo hiểm y tế không ạ
+
+### Kiểu 3: Bổ sung thông tin hữu ích (1 bình luận)
+1. mổ phaco có BHYT chi trả tầm 80% đó bạn
+""", "M6-D"),
+
+    # impl ISSUE-1: M6-D is a fee rule, not a topic rule. Behind the topic
+    # early-return it was unreachable for kx questions - the commonest thread.
+    ("BHYT with a number on a kx question", """**Mode:** reply-group
+**Câu hỏi gốc:** cận 5 độ mổ smile pro có ổn k ạ
+
+### Kiểu 3: Bổ sung thông tin hữu ích (1 bình luận)
+1. mổ cận thì BHYT chi trả tầm 80% đó bạn
+""", "M6-D"),
+
+    # impl ISSUE-2: services.md PRESCRIBES stopping lenses before đo kính and
+    # before a KSCT exam. Gating that phrase made the gate contradict the fact
+    # pack it is meant to enforce.
+    ("kinh reply advising lens stop passes", """**Mode:** reply-group
+**Câu hỏi gốc:** mn ơi e muốn đo độ cắt kính mới thì đi đâu ạ
+
+### Kiểu 3: Bổ sung thông tin hữu ích (1 bình luận)
+1. nhớ ngưng lens trước 1 tuần r hẵng đi nha, k là ra sai độ đó
+""", None),
+
+    ("ksct reply advising lens stop passes", """**Mode:** reply-group
+**Câu hỏi gốc:** con e đang đeo ortho-k, đi khám lại thì sao ạ
+
+### Kiểu 3: Bổ sung thông tin hữu ích (1 bình luận)
+1. bé phải ngưng kính áp tròng trước 1 tháng r mới đi khám đc nha b
+""", None),
+
+    ("BHYT without a number", """**Mode:** reply-group
+**Câu hỏi gốc:** mổ phaco có bảo hiểm y tế không ạ
+
+### Kiểu 3: Bổ sung thông tin hữu ích (1 bình luận)
+1. mổ phaco bên DND có hỗ trợ BHYT nha, số cụ thể b gọi 0775.147.147 hỏi cho chắc
+""", None),
+]
+
+# M6-B escape hatch, unit level. (text, is a real comparison?)
+#
+# The hatch decides whether an item naming BOTH services is contrasting them or
+# just laundering drift, so it gets its own fixtures rather than only being
+# exercised through full drafts.
+SELFTEST_COMPARE = [
+    # real comparisons
+    ("mẹ e mổ phaco còn e mổ cận, 2 ca khác nhau nhưng đều ổn", True),
+    # the subject introduced by `còn` may be long - a character-window rule
+    # rejected this, which is why the split is lexical instead of positional
+    ("mẹ em mổ phaco còn chị gái em năm ngoái mổ cận SMILE", True),
+    ("mổ phaco khác với mổ cận nha b", True),
+    ("mổ phaco là thay thủy tinh thể chứ k phải chỉnh giác mạc như mổ cận", True),
+    # not comparisons
+    # `cũng` is additive and binds BACKWARD onto phaco; the drift is a separate
+    # clause. This is the laundering shape.
+    ("phaco cũng cần bs khám kỹ, e mổ cận SMILE xong thoát kính luôn", False),
+    # bare "2 ca" counts cases/shifts, it is not inherently comparative
+    ("phaco bên đó có 2 ca mổ buổi sáng, e mổ cận SMILE xong thoát kính", False),
+    ("phaco thì bs khám nha, bên đó đo bản đồ giác mạc kỹ lắm, còn lại thì yên tâm", False),
+    # `còn` + VERB is the adverb "still", which binds backward like `cũng`.
+    # Only `còn` + SUBJECT is contrastive.
+    ("phaco còn cần bs khám kỹ, e mổ cận SMILE xong thoát kính", False),
+    ("phaco còn phải chờ lịch, e mổ cận SMILE thoát kính luôn", False),
+    # word boundaries: `chứ` is a substring of `chứng`, `còn` of `còng`
+    ("phaco có triệu chứng mờ dần, e mổ cận SMILE xong thoát kính", False),
+    ("phaco cần chứng minh giấy tờ, e mổ cận SMILE thoát kính", False),
+    # `còn` + subject is still not enough on its own: in a real contrast the
+    # subject runs STRAIGHT INTO the second service. If the clause wanders off
+    # and the drift arrives after a comma, it is not a comparison.
+    ("phaco còn e thấy cần bs khám kỹ, mổ cận SMILE xong thoát kính", False),
+    ("phaco còn chị nghĩ phải khám kỹ, e mổ cận SMILE thoát kính", False),
+    # classifiers / place fillers are not contrast subjects
+    ("phaco còn cái này phải hỏi bs kỹ, e mổ cận SMILE thoát kính", False),
+    ("phaco còn bên đó khám đông, e mổ cận SMILE thoát kính", False),
+    # No comma needed to launder - a predicate is enough. Length cannot separate
+    # these (legit tail "gái em năm ngoái " = 17 chars, bypass " thấy cần khám kỹ "
+    # = 18), so the rule bans clause verbs in the run, not long runs.
+    ("phaco còn e thấy cần khám kỹ mổ cận SMILE thoát kính", False),
+    ("phaco còn chị nghĩ nên hỏi bs mổ cận SMILE", False),
+    # bare `chứ` is a discourse particle; only `chứ (k) phải` is corrective
+    ("phaco chứ không phải cứ khám là mổ, e mổ cận SMILE thoát kính", False),
+    # Predicates the old blacklist did not name. These are why the rule is an
+    # ALLOWLIST now: a blacklist fails open on every verb nobody thought of.
+    ("phaco còn e khám kỹ mổ cận SMILE thoát kính", False),
+    ("phaco còn chị khám xong mổ cận SMILE", False),
+    ("phaco còn e đo mắt rồi mổ cận SMILE", False),
+    ("phaco còn e tư vấn thêm mổ cận SMILE", False),
+    # ...and the false negative the blacklist caused: "đi mổ" is normal Vietnamese
+    ("mẹ mổ phaco còn em đi mổ cận SMILE", True),
+    # `chứ (k) phải` without a comma - the bridge allowlist has to close this too
+    ("phaco chứ không phải cứ khám là mổ cận SMILE thoát kính", False),
+    ("phaco chứ không phải bs khám kỹ rồi mổ cận SMILE", False),
+    # strong markers are scoped to the gap, not the item: "2 ca mổ khác giờ" is
+    # scheduling, not a service contrast
+    ("phaco bên đó có 2 ca mổ khác giờ buổi sáng, e mổ cận SMILE thoát kính", False),
+    # strong markers are anchored too: these compare a time and a place, not the
+    # two services. Third and last of the free-text paths to be closed.
+    ("phaco khác với hôm trước, e mổ cận SMILE thoát kính", False),
+    ("phaco so với chỗ khác thì ổn, e mổ cận SMILE thoát kính", False),
+    # `2 ca` needs "khác NHAU". Bare "khác" takes a noun and becomes "a different
+    # <something>" - schedule, day, room.
+    ("phaco bên đó có 2 ca khác giờ buổi sáng, e mổ cận SMILE thoát kính", False),
+    ("phaco bên đó có 2 ca khác ngày, e mổ cận SMILE", False),
+    # the marker may also close after BOTH mentions
+    ("mổ phaco với mổ cận là 2 ca khác nhau", True),
+    ("mổ phaco với mổ cận khác nhau hoàn toàn", True),
+    # ...but only the CLOSING form belongs after the mentions. A between-mentions
+    # marker landing after the drift describes what follows, not the two services.
+    ("phaco thì bs khám, e mổ cận trong khi đang phân vân chưa quyết", False),
+    ("phaco cần bs khám kỹ, e mổ cận so với hồi trước thì đỡ hơn", False),
+    # the close-after bridge is its own narrow list: nominal fillers would let
+    # "bên khác nhau" (different sides) pass as a service contrast
+    ("mổ phaco với mổ cận bên khác nhau", False),
+    # `trong khi <subject>` is the same shape as `còn <subject>` and must pass
+    ("mẹ mổ phaco trong khi em mổ cận SMILE", True),
+    # ...but bare `trong khi` with no second subject is not a contrast
+    ("phaco trong khi mổ cận SMILE thoát kính", False),
+    # nor may `khác nhau` be re-qualified into a non-service difference
+    ("mổ phaco với mổ cận khác nhau về bên", False),
+    # a one-token lookahead only guarded the first slot, so the qualifier moved
+    # one word right. The whole tail after the closing phrase is validated now.
+    ("mổ phaco với mổ cận khác nhau hoàn toàn về bên", False),
+    ("mổ phaco với mổ cận khác nhau là bên khác", False),
+    # ...while ordinary sentence-final particles must still pass
+    ("mổ phaco với mổ cận khác nhau nha b", True),
+    ("mổ phaco với mổ cận là 2 ca khác nhau, b cân nhắc nhé", True),
+    # `về bản chất` keeps the difference about the services; `về bên` does not
+    ("mổ phaco với mổ cận khác nhau về bản chất", True),
+    ("mổ phaco với mổ cận khác nhau về bản chất nha b", True),
+    # stopping the tail check at the first comma let the qualifier move behind it
+    ("mổ phaco với mổ cận khác nhau, về bên khác lắm", False),
+    ("mổ phaco với mổ cận là 2 ca khác nhau, về giờ thì khác", False),
+    # ...and past a filler word after the punctuation. Lookaheads guard one
+    # offset; the qualifier just steps right. The whole clause is matched now.
+    ("mổ phaco với mổ cận khác nhau, hoàn toàn về bên khác", False),
+    ("mổ phaco với mổ cận là 2 ca khác nhau, thì về giờ khác", False),
+    # a real comparison may continue with a conjunction
+    ("mổ phaco với mổ cận là 2 ca khác nhau nhưng đều ổn", True),
+    # a comma may precede the closing phrase, and `về bản chất` may sit anywhere
+    # in the tail rather than only at its head
+    ("mổ phaco với mổ cận, là 2 ca khác nhau", True),
+    ("mổ phaco với mổ cận khác nhau hoàn toàn về bản chất", True),
+    # after a comma the writer has moved on; only an explicit qualifier is
+    # rejected there, so an ordinary trailing remark must not be punished
+    ("mổ phaco với mổ cận khác nhau hoàn toàn, b đừng nhầm nha", True),
+    # ...but fresh drift after that comma is the cross-sentence laundering shape
+    # with a comma instead of a full stop
+    ("mổ phaco với mổ cận khác nhau, e mổ cận SMILE xong thoát kính luôn", False),
+    # ...while a comma tail that spells out the difference IS the Kiểu 8 shape
+    ("mổ phaco với mổ cận khác nhau, phaco thay thủy tinh thể còn mổ cận chỉnh giác mạc nha", True),
+    # `còn` may introduce the service itself, not only a person
+    ("phaco thay thủy tinh thể còn mổ cận chỉnh giác mạc", True),
+    # ...but bare `còn` before the mention is the "still also does" reading, i.e.
+    # laundering. A definitional contrast has a predicate on BOTH sides.
+    ("phaco còn mổ cận SMILE xong thoát kính", False),
+    ("phaco còn bắn laser chữa cận thì khác", False),
+    # a bare predicate is not a definition either - `lịch`, `thuốc`, `số` are not
+    # what either surgery operates on
+    ("phaco đặt lịch còn mổ cận SMILE xong thoát kính", False),
+    ("phaco thay thuốc còn mổ cận SMILE thoát kính", False),
+    ("phaco lấy số còn mổ cận SMILE", False),
+    # real anatomy, but not Phaco's - the object table is keyed by service
+    ("phaco cắt mí còn mổ cận SMILE thoát kính", False),
+    ("phaco xử lý võng mạc còn mổ cận SMILE", False),
+    # ...and the common patient-facing disease wording must pass
+    ("phaco mổ đục thủy tinh thể còn mổ cận chỉnh giác mạc", True),
+    ("phaco chữa cườm còn mổ cận là chỉnh giác mạc", True),
+    # BOTH sides must be defined: one valid definition cannot excuse a bare
+    # claim on the other side
+    ("phaco thay thủy tinh thể còn mổ cận SMILE xong thoát kính", False),
+    # ...and the rule is order-independent
+    ("mổ cận chỉnh giác mạc còn phaco thay thủy tinh thể", True),
+    # fresh drift after mention #2 is caught on EVERY hatch path, not just the
+    # closing-marker one. `khác với` / `chứ k phải` / `còn` are the idiomatic
+    # openers, so those were the likelier laundering routes.
+    ("mổ phaco khác với mổ cận nha b, e mổ cận SMILE xong thoát kính, 12 bước xong về luôn", False),
+    ("phaco chứ k phải mổ cận đâu, e mổ cận SMILE xong không đeo kính nữa", False),
+    ("mẹ e mổ phaco còn e mổ cận, e mổ SMILE xong thoát kính, bản đồ giác mạc đo xong là mổ luôn", False),
+]
+
+# M6-B drift set is per-service, not "every other label". A neighbour named
+# ALONGSIDE the target is normal clinical content, not drift.
+# (label, draft, expected fail code or None)
+SELFTEST_M6_NEIGHBOUR = [
+    ("phaco reply naming presbyopia/glasses/general passes", """**Mode:** reply-group
+**Câu hỏi gốc:** mẹ e bị đục thủy tinh thể, mổ phaco bên DND thế nào ạ
+
+### Kiểu 1: Trả lời từ kinh nghiệm bản thân (3 bình luận)
+1. mẹ e mổ phaco xong vẫn phải đeo kính lão để đọc sách nha b
+2. mổ phaco xong 1 tháng bs mới cho đo độ cắt kính đọc lại
+3. mẹ e vừa mổ phaco, bs dặn đi khám tổng quát định kỳ 6 tháng
+""", None),
+
+    ("phaco reply drifting to mo can still fails", """**Mode:** reply-group
+**Câu hỏi gốc:** mẹ e bị đục thủy tinh thể, mổ phaco bên DND thế nào ạ
+
+### Kiểu 1: Trả lời từ kinh nghiệm bản thân (1 bình luận)
+1. mẹ e mổ phaco xong, mà e thì mổ cận SMILE xong thoát kính luôn
+""", "M6-B"),
+]
+
+# M6-B drift is judged PER SENTENCE, so a valid comparison in one sentence
+# cannot excuse a separate off-topic claim in the next. (label, draft, code)
+SELFTEST_M6_SENTENCE = [
+    ("comparison then separate drift sentence", """**Mode:** reply-group
+**Câu hỏi gốc:** mẹ e bị đục thủy tinh thể, mổ phaco ở đâu ổn ạ
+
+### Kiểu 8: Đính chính nhầm lẫn kỹ thuật (1 bình luận)
+1. mổ phaco với mổ cận khác nhau. e mổ cận SMILE xong thoát kính luôn
+""", "M6-B"),
+
+    ("comparison then same-sentence drift after comma", """**Mode:** reply-group
+**Câu hỏi gốc:** mẹ e bị đục thủy tinh thể, mổ phaco ở đâu ổn ạ
+
+### Kiểu 8: Đính chính nhầm lẫn kỹ thuật (1 bình luận)
+1. mổ phaco với mổ cận khác nhau, e mổ cận SMILE xong thoát kính luôn
+""", "M6-B"),
+
+    ("comparison alone still passes", """**Mode:** reply-group
+**Câu hỏi gốc:** mẹ e bị đục thủy tinh thể, mổ phaco ở đâu ổn ạ
+
+### Kiểu 8: Đính chính nhầm lẫn kỹ thuật (1 bình luận)
+1. mổ phaco với mổ cận khác nhau hoàn toàn, b đừng nhầm nha
+""", None),
+]
+
+# M6-C: coverage on a full run. Kept separate because these need 10+ items.
+# The first is ISSUE-1 round 2 - the way a 20% floor could be gamed: a handful
+# of on-topic replies padded with generic filler that names no service at all,
+# so M6-B skips every one of them.
+_M6C_HEAD = ("**Mode:** reply-group\n"
+             "**Câu hỏi gốc:** mẹ e bị đục thủy tinh thể, mổ phaco ở đâu ổn ạ\n\n"
+             "### Kiểu 1: Trả lời từ kinh nghiệm bản thân (10 bình luận)\n")
+
+SELFTEST_M6_COVERAGE = [
+    # Each carries the Kieu 6+7 floor so M5 stays quiet and M6-C is the only
+    # thing under test - a fixture that trips two gates proves neither.
+    ("4/10 on-topic, rest generic filler", _M6C_HEAD + """1. mẹ mình mổ phaco bên DND Trương Định, ổn lắm
+2. mẹ e cũng mổ phaco bên đó, bs Tuấn mổ
+3. nhà mình cho bà đi mổ phaco ở đây r
+4. phaco mổ nhanh lắm bạn, mẹ mình mổ xong về luôn
+5. bạn cứ đi khám sớm đi cho yên tâm
+6. mình thấy bên đó ổn á, bs tư vấn kỹ
+7. bà mình đi khám ở đây, nhân viên nhiệt tình
+8. chỗ này khang trang, máy móc xịn
+9. bạn ib hỏi thử xem sao nha
+10. mình thấy nhiều người khen chỗ này
+
+### Kiểu 6: Review có điểm chưa hài lòng (1 bình luận)
+11. mẹ mình mổ phaco bên đó, nói thật hôm khám đông nên chờ hơi lâu. còn lại thì ổn
+
+### Kiểu 7: Hỏi lại người đăng (1 bình luận)
+12. bác nhà mình bao nhiêu tuổi r ạ, đi khám chưa v?
+""", "M6-C"),
+
+    ("13/19 on-topic passes", _M6C_HEAD + """1. mẹ mình mổ phaco bên DND Trương Định, ổn lắm
+2. mẹ e cũng mổ phaco bên đó, bs Tuấn mổ chính
+3. nhà mình cho bà đi mổ phaco ở đây r
+4. phaco mổ nhanh lắm bạn, tầm 3-5 phút 1 mắt
+5. bà mình đục thủy tinh thể mổ bên này
+6. mổ cườm bên đó có hỗ trợ BHYT nha
+7. mẹ mình mổ phaco xong nhìn rõ lại r
+8. đục thủy tinh thể để lâu là cườm chín, khó hơn đó
+9. bà e mổ phaco tuần trước, khám mổ trong ngày
+10. mổ cườm khô thì bên này làm nhiều
+11. mẹ mình mổ phaco, nhớ nhịn ăn sáng để xét nghiệm
+12. đi khám phaco nhớ mang thẻ BHYT nha bạn
+13. bạn cứ đi khám sớm cho yên tâm
+14. mình thấy bên đó ổn á
+15. bà mình đi khám ở đây, nhân viên nhiệt tình
+16. chỗ này khang trang lắm
+17. bạn ib hỏi thử xem sao
+18. mình thấy nhiều người khen chỗ này
+
+### Kiểu 6: Review có điểm chưa hài lòng (1 bình luận)
+19. bà mình mổ phaco bên đó, hôm đi khám đông phải chờ hơi lâu. mổ thì nhanh
+
+### Kiểu 7: Hỏi lại người đăng (1 bình luận)
+20. bác nhà bạn mắt mờ lâu chưa v, có bệnh nền gì k?
+""", None),
+
+    # Kieu 7 exists to name nothing. If it counted toward the denominator this
+    # draft would fail, and the section 7 anti-all-praise floor would be
+    # unsatisfiable on any non-kx question.
+    ("Kiểu 7 excluded from the denominator", """**Mode:** reply-group
+**Câu hỏi gốc:** mẹ e bị đục thủy tinh thể, mổ phaco ở đâu ổn ạ
+
+### Kiểu 1: Trả lời từ kinh nghiệm bản thân (8 bình luận)
+1. mẹ mình mổ phaco bên DND Trương Định, ổn lắm
+2. mẹ e cũng mổ phaco bên đó, bs Tuấn mổ chính
+3. nhà mình cho bà đi mổ phaco ở đây r
+4. phaco mổ nhanh lắm bạn, tầm 3-5 phút 1 mắt
+5. bà mình đục thủy tinh thể mổ bên này
+6. mổ cườm bên đó có hỗ trợ BHYT nha
+7. mẹ mình mổ phaco xong nhìn rõ lại r
+8. bà e mổ phaco tuần trước, khám mổ trong ngày
+
+### Kiểu 6: Review có điểm chưa hài lòng (1 bình luận)
+9. mẹ mình mổ phaco bên đó, hôm khám đông nên chờ hơi lâu. bù lại mổ nhanh
+
+### Kiểu 7: Hỏi lại người đăng (2 bình luận)
+10. bác nhà mình bao nhiêu tuổi r ạ, đi khám chưa v?
+11. bác có bệnh nền gì k b, tiểu đường huyết áp j k?
+""", None),
+]
+
 # M5 negatives - each must fail for exactly one reason.
 SELFTEST_M5_BAD = [
     ("mixed angle with no downside", "M5", """**Mode:** reply-group
+**Câu hỏi gốc:** mn ơi cho e hỏi khám bên DND ntn ạ
 
 ### Kiểu 6: Review có điểm chưa hài lòng (1 bình luận)
 1. mình mổ bên DND SG, bs Tuấn mổ khéo, mọi thứ đều ổn hết, quá hài lòng lun
 """),
     ("Kiểu 7 names the brand", "M5", """**Mode:** reply-group
+**Câu hỏi gốc:** mn ơi cho e hỏi khám bên DND ntn ạ
 
 ### Kiểu 7: Hỏi lại người đăng (1 bình luận)
 1. bạn khám chưa v, giác mạc dày bn? qua DND Trương Định q3 khám thử đi
 """),
     ("10/10 in a new angle", "M5", """**Mode:** reply-group
+**Câu hỏi gốc:** mn ơi cho e hỏi khám bên DND ntn ạ
 
 ### Kiểu 9: Chi tiết quy trình/hậu cần (1 bình luận)
 1. buổi khám mất cả buổi sáng, nhờ ai chở về nha, mình mổ xong giờ 10/10 r
 """),
     # The floor is what this pins: all-praise Kiểu 1 with no 6 and no 7.
     ("full run missing required angles", "M5", """**Mode:** reply-group
+**Câu hỏi gốc:** mn ơi cho e hỏi khám bên DND ntn ạ
 
 ### Kiểu 1: Trả lời từ kinh nghiệm bản thân (10 bình luận)
 1. case mình cx tương tự nè, mổ smile pro bên DND SG, thị lực giờ ổn
@@ -1567,6 +2712,7 @@ SELFTEST_M5_BAD = [
     # anti-fingerprint pair. Without this the required/optional split could
     # regress to ">=1 new angle" and the selftest would not notice.
     ("full run with 8/9/10 but no 6 or 7", "M5", """**Mode:** reply-group
+**Câu hỏi gốc:** mn ơi cho e hỏi khám bên DND ntn ạ
 
 ### Kiểu 1: Trả lời từ kinh nghiệm bản thân (4 bình luận)
 1. case mình cx tương tự nè, mổ smile pro bên DND SG, thị lực giờ ổn
@@ -1792,6 +2938,59 @@ def run_selftest():
         print("  %-4s %-32s rc=%d codes=%s (want %s)"
               % ("ok" if ok else "FAIL", label, rc,
                  ",".join(sorted(codes)) or "none", want_code))
+
+    print("")
+    print("G. M6 topic-fit - each must land on the intended M6 sub-code")
+    print("-" * 68)
+    for label, body, want_code in (SELFTEST_M6 + SELFTEST_M6_COVERAGE
+                                   + SELFTEST_M6_SENTENCE + SELFTEST_M6_NEIGHBOUR):
+        box = []
+        rc = run_check(body, label="<m6: %s>" % label, require_policy=False, rep_out=box)
+        codes = set(c for c, _ in box[0].fails) if box else set()
+        if want_code is None:
+            ok = rc == 0
+        else:
+            ok = rc != 0 and want_code in codes
+        if not ok:
+            nfail += 1
+        print("  %-4s %-46s rc=%d codes=%s (want %s)"
+              % ("ok" if ok else "FAIL", label, rc,
+                 ",".join(sorted(codes)) or "none", want_code or "PASS"))
+
+    print("")
+    print("G1b. M6-B escape hatch - comparison vs laundering")
+    print("-" * 68)
+    for text, want in SELFTEST_COMPARE:
+        got = _is_comparison(norm(text), TOPIC_TOK["phaco"], TOPIC_TOK["kx"],
+                             "phaco", "kx")
+        ok = got == want
+        if not ok:
+            nfail += 1
+        print("  %-4s %-64s -> %s (want %s)"
+              % ("ok" if ok else "FAIL", text[:64], got, want))
+
+    print("")
+    print("G2. M6-B ladder - topic labels must not collapse the way fee buckets do")
+    print("-" * 68)
+    for text, want_phase, want_service in SELFTEST_TOPICS:
+        phase, service = detect_topic(text)
+        ok = (phase, service) == (want_phase, want_service)
+        if not ok:
+            nfail += 1
+        print("  %-4s %-52s -> (%s, %s)  want (%s, %s)"
+              % ("ok" if ok else "FAIL", text[:52], phase, service,
+                 want_phase, want_service))
+
+    print("")
+    print("G3. M6-E - services.md must carry no money token")
+    print("-" * 68)
+    problems = check_services_no_money()
+    if problems:
+        nfail += 1
+        for pb in problems:
+            print("  FAIL %s" % pb)
+    else:
+        print("  ok   services.md is money-free")
 
     print("")
     if nfail:
