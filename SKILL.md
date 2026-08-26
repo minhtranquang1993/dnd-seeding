@@ -47,6 +47,7 @@ Layout 5 file: `SKILL.md` · `fees-promos.md` · `services.md` · `qa/` · `scri
 - `/dnd-seeding maps` — Tạo ~20 review Google Maps tiếng Việt (xem MODE 5A)
 - `/dnd-seeding maps_foreigner` — Tạo ~20 review Google Maps tiếng Anh, persona người nước ngoài (MODE 5B)
 - `/dnd-seeding koc` — Tạo ~20 item giọng KOC/vlogger (MODE 5C)
+- `/dnd-seeding anti "review xấu"` — Tạo ~20 comment reply vào thread có **review xấu**, giọng khách đã trải nghiệm tốt (MODE 6)
 - `/dnd-seeding` (không tham số) — Mặc định chạy mode `group`
 
 **Luật nhận lệnh:** mode token chỉ được nhận ở **vị trí token đầu tiên**, và chỉ **trước** mọi chuỗi trong ngoặc kép. `k=v` (ví dụ `service=phaco`) luôn là param, không bao giờ là mode. Token đầu không khớp mode nào → chạy `group`, không đoán.
@@ -206,6 +207,7 @@ Mọi số hit dưới đây đo trên 217 file output cũ. Script `--check` gá
 | `maps` | không góc nào | **0** — đo 0 hit, không được miễn |
 | `maps_foreigner` | không góc nào | **0** — đo 0 hit, không được miễn |
 | `koc` | mọi item | **miễn hạn ngạch** — đo 5 hit, ngoại lệ có chủ đích |
+| `anti` | Kiểu 1 (khách đã mổ) | ≤20% item/run |
 
 Mẫu số = số item trong run đó, không phải cả file lịch sử.
 
@@ -694,6 +696,87 @@ Việc chặn lây nhiễm do **script** cưỡng chế, không do vị trí fil
 
 ---
 
+# MODE 6: `/dnd-seeding anti "<review xấu>"`
+
+**Mục đích:** Có người đăng **review xấu** về DND trên group/fanpage. Sinh ~20 comment vào thread đó, đóng vai **khách hàng đã trải nghiệm tốt** — kể chuyện của mình, không phản bác, không đấu khẩu.
+
+> ⛔ **Đây KHÔNG phải giọng bệnh viện trả lời khiếu nại.** Không "bệnh viện chúng tôi rất tiếc", không "xin lỗi quý khách", không "bộ phận CSKH sẽ liên hệ". Gate **M7-B** chặn.
+
+### Ba luật cứng của mode
+
+| Luật | Nội dung | Gate |
+|---|---|---|
+| **Không đấu khẩu** | Không quy kết động cơ (`đối thủ`, `dựng chuyện`, `nick ảo`, `được thuê`) và không phủ nhận lời kể của người đăng (`chắc b hên xui`, `1 sao mà kể như thật`, `acc mới tinh nhỉ`) | **M7-C** |
+| **Né hẳn điểm phàn nàn** | Không thừa nhận rồi cân bằng lại. Không `nói thật hôm e đi cx chờ hơi lâu mà...`, không `công nhận hơi đông nhưng...`, không `bù lại`. Kể trải nghiệm tốt của mình, **không nhắc lại điểm người ta phàn nàn** | **M7-E** |
+| **Không xếp hạng** | Không `khám kỹ nhất`, `uy tín nhất q3`, `hơn hẳn chỗ cũ`, `viện khác k bằng`. Nêu **lý do cụ thể** ("bs chịu ngồi giải thích", "gần nhà") thay vì so bên nào hơn | **M7-F** + §7C |
+
+**Được đính chính DỮ KIỆN, không được phủ nhận TRẢI NGHIỆM.** "chắc b nhầm lịch nghỉ trưa r, bên đó nghỉ 12h-13h" — hợp lệ, hữu ích. "chắc b hên xui gặp hôm đó thôi" — bị chặn.
+
+### Marker bắt buộc ở đầu output
+
+Cả 3 dòng, và review phải là **blockquote** (mỗi dòng bắt đầu `> `):
+
+```
+**Mode:** anti
+**Review xấu:**
+> <paste nguyên văn review của user>
+> <dòng 2 nếu review dài>
+**Topic:** <service> / <phase>
+```
+
+Vì sao phải blockquote, không phải văn trần:
+
+- Review dán vào thường **nhiều dòng**. Regex một dòng chỉ đọc được dòng đầu → mất chủ đề → M6 tắt im lặng.
+- Review hay có gạch đầu dòng số ("1. chờ 2 tiếng"). Không có `>` thì script đếm chúng thành **item của bạn**.
+- Vùng review được **miễn** luật §7C (bạn đang trích dẫn, không phải đang nói). Ranh giới vùng đó phải rõ ràng, nếu không nó thành chỗ giấu vi phạm.
+
+Thiếu dòng `**Mode:** anti` → **fail M7-A**, dù có marker review. Không có dòng đó thì cả họ gate M7 không chạy.
+
+`**Topic:**` phân loại bằng đúng bảng service ở MODE 2 Bước 0. Review chung chung ("thái độ kém") → `none`, gate chủ đề tự bỏ qua. Review chạm ≥2 service → gate cũng bỏ qua và in note.
+
+### 6 kiểu comment (~20 item)
+
+In header đúng dạng `### Kiểu N: <tên>` — script attribute item theo header này.
+
+| Kiểu | Số | Nội dung |
+|---|---|---|
+| **1** | 5 | Khách **đã mổ** kể trải nghiệm của mình — bs nào, phương pháp, thị lực hiện tại |
+| **2** | 3 | Khách **đi khám** (chưa mổ) kể buổi khám — bs giải thích ra sao, các bước |
+| **3** | 3 | **Người nhà** dẫn ba mẹ / con đi (Phaco, Ortho-K, kiểm soát cận) |
+| **4** | 3 | Khách **tái khám / lâu năm** — đi nhiều lần, hồ sơ mắt được lưu, được theo dõi |
+| **5** | 3 | Khách **ở tỉnh**, hoặc khách **đã đi nhiều viện rồi chốt DND** |
+| **7** | **≥2** | **Hỏi lại người đăng** — trung tính, KHÔNG khen, KHÔNG nhắc DND, KHÔNG kể trải nghiệm bản thân |
+
+**Không có Kiểu 6.** Ở MODE 2, Kiểu 6 nghĩa là "review có điểm chưa hài lòng thật" — mode này **cấm** đúng thứ đó. Số 6 để trống có chủ đích; đừng dùng lại nó cho nghĩa khác.
+
+**Kiểu 5 là kiểu rủi ro nhất.** "Đã đi nhiều viện rồi chốt DND" mời gọi đúng thứ §7C cấm. Viết theo hình "đã xem nhiều nơi, chốt chỗ này **vì lý do cụ thể**", không xếp hạng:
+- ❌ "e khám 3 chỗ r mới chốt bên này, tại thấy bs giải thích **rõ nhất**"
+- ✅ "e khám 3 chỗ r mới chốt bên này, tại bs chịu ngồi giải thích kỹ cho e"
+
+**Kiểu 7 là sàn cứng, ≥2 item.** Chốt "né hẳn" đã bỏ Kiểu 6, nên Kiểu 7 là **phòng tuyến cấu trúc duy nhất** còn lại chống thread 20/20 toàn khen. Ba điều kiện, gate M7-D kiểm cả ba:
+
+1. Phải là **câu hỏi thật** — `?`, `nhỉ`, `v ạ`, `bao lâu`, `bs nào`, `bn độ`
+2. **Không nhắc** DND / Trương Định
+3. **Không mang trải nghiệm hay đánh giá của bản thân** — "bên đó ổn lắm, b khám lại chưa v?" vẫn **fail**: khen rồi dán câu hỏi ở đuôi thì vẫn là khen
+
+### Luật kế thừa (không có ngoại lệ nào cho mode này)
+
+- **§6 luật phí** — nêu thông tin phí phải đọc `fees-promos.md` + in footer. Kiểu 3 nói Phaco/Ortho-K là **T2 có phí**, không được nói free.
+- **§7C cấm chung** — claim hết đau, superlative, so sánh viện, `cam kết`/`đảm bảo`, `khỏi cận`.
+- **Claim an toàn tuyệt đối bị cấm** (họ `safety_absolute`): "an toàn 100%", "chưa nghe ai bị biến chứng", "k có ca nào bị sao", "chưa lỗi ca nào". Thread phòng thủ dễ trượt vào đây nhất, và đây là loại claim rủi ro pháp lý cao nhất skill sinh ra được. Nói được: "bs giải thích rõ rủi ro cho e".
+- **`10/10` chỉ ở Kiểu 1**, tối đa 20% item/run.
+- **Anti-repeat §7D** — mỗi cụm ≤15% item/run.
+- **Độ dài** — 1-2 câu/comment, như MODE 2.
+- **Mật độ nhắc DND** — tối đa 1 lần/comment; có comment chỉ nói "chỗ Trương Định q3" hoặc "bên đó"; Kiểu 7 không nhắc.
+
+### Giới hạn đã biết — nói thẳng
+
+Chốt "né hẳn" nghĩa là **18/20 comment đều tích cực**. Đó chính là fingerprint mà §7 dựng ra để chặn. Các lớp giảm nhẹ: sàn Kiểu 7 · anti-repeat · §7C + M7-F · `safety_absolute` · quota `10/10`. **Không xoá được hết** — nếu thread cần trông thật hơn nữa thì phải nới chốt "né hẳn", và đó là quyết định của bạn, không phải của skill.
+
+M7-E cũng **không kín**: nó bắt các hình nhượng bộ phổ biến ("nói thật...", "công nhận...", "bù lại"), nhưng "hôm e đi thì phải ngồi đợi tới trưa, mà bs khám kỹ" thì lọt. Tập cách nói một điểm dở là mở; siết thêm sẽ bắt oan câu hợp lệ.
+
+---
+
 ## Process Flow
 
 ### Khi nhận lệnh `/dnd-seeding [mode] [tham số]`:
@@ -708,6 +791,7 @@ Chỉ đọc **token đầu tiên**, và chỉ phần **trước** dấu ngoặc
 - `ads` → chạy Mode 3
 - `live (nội dung content live)` → chạy Mode 4, parse toàn bộ nội dung live, detect bác sĩ/chủ đề/ưu đãi từ đó
 - `maps` / `maps_foreigner` / `koc` → chạy Mode 5A / 5B / 5C, áp ngoại lệ §7B đúng theo mode
+- `anti "review xấu"` → chạy **Mode 6**, parse review xấu từ ngoặc kép, in marker blockquote, sinh 6 kiểu comment
 - token đầu không khớp mode nào → chạy `group`. **Không suy diễn mode từ chữ trong câu hỏi của user.**
 
 **Bước 2: Chọn Persona & Sinh nội dung**
@@ -773,5 +857,12 @@ Lưu vào: `C:\Users\Admin\.gemini\antigravity-ide\scratch\seeding_<mode>_<times
 | **Hứa miễn phí tái khám cho người mổ ở viện khác** | Chỉ người đã mổ tại DND. Ca viện khác: có phí, không báo số, chuyển hotline |
 | **Đẩy người lão thị sang cắt kính** | Lão thị điều trị được (Presbyond / Phaco + IOL đa tiêu). Khám lão thị đường khúc xạ = free |
 | **Nêu phí mà không in footer** | Có nêu thông tin phí → in `[fees: <updated> · <fee-tier-id>]` ở cuối file, ngày lấy từ `fees-promos.md` |
+| **Mode `anti`: dùng giọng bệnh viện trả lời khiếu nại** | Mode này đóng vai **KHÁCH đã trải nghiệm**. Không "bệnh viện chúng tôi", "quý khách", "bộ phận CSKH" — gate M7-B chặn |
+| **Mode `anti`: đấu khẩu / quy kết người viết review** | Không "chắc đối thủ", "nick ảo", "chắc b hên xui gặp hôm đó". Được đính chính **dữ kiện** ("chắc b nhầm lịch nghỉ trưa"), không được phủ nhận **trải nghiệm** — gate M7-C |
+| **Mode `anti`: thừa nhận điểm phàn nàn rồi cân bằng lại** | Chốt là **né hẳn**: không "nói thật hôm e đi cx chờ hơi lâu mà...", không "công nhận hơi đông nhưng...", không "bù lại". Kể trải nghiệm tốt của mình — gate M7-E |
+| **Mode `anti`: xếp hạng ("khám kỹ nhất", "hơn hẳn chỗ cũ")** | §7C cấm superlative + so sánh viện, nhưng regex cũ chỉ phủ `tốt nhất/giỏi nhất/số 1` và so sánh **giá**. Gate M7-F phủ khoảng giữa. Nêu **lý do cụ thể** thay vì xếp hạng |
+| **Mode `anti`: review xấu viết văn trần, không blockquote** | Phải là `> ` mỗi dòng. Văn trần làm regex chỉ đọc dòng đầu (M6 mất chủ đề) và biến vùng review thành chỗ giấu vi phạm — gate M7-A |
+| **Mode `anti`: Kiểu 7 là câu khen dán câu hỏi ở đuôi** | "bên đó ổn lắm, b khám lại chưa v?" vẫn fail. Kiểu 7 phải trung tính hoàn toàn: không brand, không trải nghiệm bản thân — gate M7-D |
+| **Claim an toàn tuyệt đối ("an toàn 100%", "chưa nghe ai bị biến chứng")** | Bị cấm ở **mọi mode** (họ `safety_absolute`). Thread phòng thủ dễ trượt nhất. Nói được: "bs giải thích rõ rủi ro cho e" |
 | **Nêu số phí/số ưu đãi mà chưa đọc `fees-promos.md` trong run đó** | Đây là con bug gốc, chỉ đổi hình. Chưa đọc file → không nêu bất kỳ thông tin phí nào (kể cả chữ "free"), chuyển hotline |
 | **Copy số tiền từ `fees-promos.md` ngược lên SKILL.md** | Để số ở 2 nơi là tái tạo class bug. SKILL.md chỉ giữ `fee-tier-id` / `promo-key` |

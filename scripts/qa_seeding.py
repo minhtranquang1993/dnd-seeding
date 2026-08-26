@@ -659,6 +659,31 @@ SERVICE_DRIFT_TARGETS = {
 ORIGINAL_Q_RX = re.compile(r"^\*\*Câu hỏi gốc:\*\*\s*(.+)$",
                            re.IGNORECASE | re.MULTILINE)
 
+# M7-A: mode `anti` answers a pasted NEGATIVE REVIEW, and the review must arrive
+# as a BLOCKQUOTE. Three measured reasons it is not shaped like ORIGINAL_Q_RX:
+#
+#   1. `.` excludes newline, so a one-line regex captures only line 1. A câu hỏi
+#      gốc is one line; a pasted review is not. Measured: a 2-line review with
+#      `phaco` on line 2 gave detect_topic(line 1) == ('pre','none'), which makes
+#      check_topic_fit early-return - M6-B/C never ran at all.
+#   2. A review pasted with its own numbered gripes ("1. chờ 2 tiếng") matches
+#      ITEM_RX, so parse_items invented phantom items with section=None. Those
+#      count as substantive in M6-C and dilute the 5A/ANTIREPEAT denominators.
+#      A "> 1. chờ 2 tiếng" line does NOT match ITEM_RX, so the blockquote form
+#      fixes this with no extra mechanism.
+#   3. Defining the block as "up to the next blank line" turned the excise below
+#      into a BAN BYPASS. Measured: two real seeding comments pasted directly
+#      under the marker with no blank line were swallowed by the block and
+#      excised, taking dau_claim / cure_myopia / superlative_vn /
+#      compare_other_hospital from 1 hit each to 0. A `>` prefix makes the
+#      boundary a character rather than whitespace, so smuggled items stay
+#      outside the block and every family fires.
+REVIEW_Q_RX = re.compile(r"^\*\*Review xấu:\*\*[ \t]*\r?\n((?:^>.*(?:\r?\n|$))+)",
+                         re.IGNORECASE | re.MULTILINE)
+# A marker line with prose on it instead of a following blockquote: recognised so
+# M7-A can say "wrong format" rather than "missing", which are different fixes.
+REVIEW_MARKER_RX = re.compile(r"^\*\*Review xấu:\*\*", re.IGNORECASE | re.MULTILINE)
+
 # M6-C: share of *substantive* items that must touch the asked service.
 # Kieu 7 is excluded from the denominator - it exists to name nothing (section
 # 7's anti-all-praise floor), so forcing a token into it would break that floor.
@@ -666,6 +691,14 @@ ORIGINAL_Q_RX = re.compile(r"^\*\*Câu hỏi gốc:\*\*\s*(.+)$",
 # experience without repeating the service name every line.
 TOPIC_COVERAGE_MIN = 0.60
 TOPIC_NEUTRAL_SECTIONS = {7}
+
+# Modes whose replies must stay on the service that was actually asked about.
+# `reply_group` is in here because the underscore spelling is accepted by
+# COMMAND_MODES and carries a QUOTA_10_10 row, but M5/M6 used to compare the
+# string exactly - so `**Mode:** reply_group` skipped both gates entirely.
+# Measured: a textbook drift item on a Phaco question printed PASS under that
+# spelling.
+TOPIC_FIT_MODES = frozenset(("reply-group", "reply_group", "anti"))
 
 # M6-D: BHYT may be mentioned, its numbers may not - they are not in
 # fees-promos.md, so they route to the hotline like every other unpriced number.
@@ -869,6 +902,11 @@ QUOTA_10_10 = {
     "story":       {"allowed": {6, 7}, "max_ratio": 0.20},
     "reply-group": {"allowed": {1},    "max_ratio": 0.20},
     "reply_group": {"allowed": {1},    "max_ratio": 0.20},
+    # `anti` follows reply-group: only Kiểu 1 (a former patient recounting their
+    # own result) may carry 10/10. Without this row the mode falls into the "no
+    # quota row" branch below - a warn when the draft is clean and a fail when it
+    # actually carries 10/10, i.e. an unactionable error message.
+    "anti":        {"allowed": {1},    "max_ratio": 0.20},
     "ads":         {"allowed": {5},    "max_ratio": 0.20},
     "live":        {"allowed": set(),  "max_ratio": 0.0},
     # 5B is a PER-COLUMN exemption, not a blanket one. maps/maps_foreigner are
@@ -911,6 +949,30 @@ BAN_KEYS = ("dau_claim", "superlative_vn", "superlative_en", "commitment",
 BAN_EXTRA = {
     "cure_forever": r"khỏi cận vĩnh viễn|hết cận vĩnh viễn",
     "everyone_eligible": r"ai (cũng|cx) mổ đượ?c|ai (cũng|cx) mổ đc",
+    # Absolute medical-safety claims. Lives here rather than in the M7 family on
+    # purpose: it is mode-agnostic (no mode should publish it) and it inherits
+    # count_unrefuted, so a Kiểu 8 correction can still quote the belief it is
+    # correcting.
+    #
+    # Measured gap: a defensive thread invites exactly this shape, and NOTHING
+    # fired on "mổ bên đó an toàn 100%", "chưa nghe ai bị biến chứng cả", "k có
+    # ca nào bị sao hết", "bs mổ mấy nghìn ca rồi chưa lỗi ca nào". Section 7C
+    # covers superlatives, hospital comparison, pain claims and cam kết/đảm bảo -
+    # none of which these hit. Under fake first-person voices on a thread that
+    # already carries a complaint, this is the highest-liability output the skill
+    # can produce.
+    #
+    # The negated-experience arm requires an explicit complication//harm object
+    # ("bị sao", "biến chứng"), so ordinary speech survives: "e chưa nghe bs nói
+    # gì thêm" and "bs dặn nếu thấy gì bất thường thì gọi lại" do not match.
+    "safety_absolute": (r"an toàn 100|100 *% *(an toàn|thành công)|"
+                        r"tuyệt đối an toàn|"
+                        r"(chưa|k|ko|không) (nghe |thấy )?(ai|ca nào|case nào|"
+                        r"trường hợp nào) (nào )?(bị|có|gặp) "
+                        r"(sao|biến chứng|vấn đề|gì)|"
+                        r"(k|ko|không) (có|hề) (ca nào|ai|trường hợp nào) "
+                        r"(bị|gặp)|chưa (lỗi|fail|hỏng) ca nào|"
+                        r"k(hông)? bao giờ (bị|lỗi)"),
 }
 
 # 7 - anti-repeat. Baseline: `nhe nhang` ~1.3 hits/file (281 over 217).
@@ -970,6 +1032,145 @@ M5_FULL_RUN_MIN_ITEMS = 10
 REFUTABLE_BANS = ("cure_myopia", "cure_forever")
 REFUTE_RX = r"(kh?ông|ko|k|chẳng|chưa) *phải[^.\n]{0,12}$|chứ +(kh?ông|ko|k)[^.\n]{0,12}$"
 
+# ---------------------------------------------------------------------------
+# M7 - mode `anti`: seeding comments answering a pasted NEGATIVE REVIEW, in the
+# voice of FORMER CUSTOMERS. Every regex below was swept against the four real
+# output files in scratch/ before being accepted; the false positives that sweep
+# found are recorded inline, because each one was a sentence the skill legitimately
+# produces.
+# ---------------------------------------------------------------------------
+
+# M7-B - brand/admin voice. Anchored to INSTITUTIONAL FRAMES, not to pronouns.
+# Measured over-fire when it was pronoun-based: `chúng tôi rất` matched "vợ chồng
+# chúng tôi rất yên tâm khi mổ bên đây" and bare `chăm sóc khách hàng` matched
+# "bên đó chăm sóc khách hàng tốt lắm" - both ordinary customer speech. Dropping
+# bare `chúng tôi` was not enough; the pronoun has to be tied to a verb only the
+# hospital would use.
+BRAND_VOICE_RX = (r"bệnh viện chúng tôi|"
+                  r"chúng tôi (xin|rất|thành thật) "
+                  r"(lỗi|tiếc|mong|ghi nhận|cảm ơn|xin lỗi)|"
+                  r"xin lỗi quý|quý khách|quý anh|quý chị|kính gửi|"
+                  r"bộ phận (cskh|chăm sóc khách hàng)|ban giám đốc|"
+                  r"phản hồi từ (bệnh viện|bv)|rất tiếc về trải nghiệm|"
+                  r"xin lỗi vì sự bất tiện|ghi nhận phản hồi|"
+                  r"tổng đài của chúng tôi")
+
+# M7-C tier 1 - attributing a MOTIVE to the reviewer. Kept narrow because three
+# bare forms over-fired on the sweep:
+#   `nói xấu` alone matched "e k biết nói xấu ai"  -> needs a hospital object
+#   `bịa`     alone matched any word containing it -> needs bịa chuyện/đặt/ra
+#   `dìm`     alone matched "mắt e bị dìm xuống"   -> needs dìm hàng
+ATTACK_MOTIVE_RX = (r"đối thủ|nói xấu (bên|bv|bệnh viện|chỗ|họ|người ta|viện)|"
+                    r"dựng chuyện|bịa (chuyện|đặt|ra)|vu khống|nick ảo|"
+                    r"\bseeding\b|(được|đc) thuê|bốc phốt|phá hoại|dìm hàng|"
+                    r"làm màu|chơi xấu")
+
+# M7-C tier 2 - STRUCTURAL: a 2nd-person pronoun plus doubt or negation aimed at
+# the poster's account. A flat blacklist fails open, which qa/checks.md already
+# records as doctrine (the M6 hatch was rewritten to an allowlist for exactly
+# this reason). Measured: six delegitimising sentences carried no tier-1 token at
+# all - "chắc b hên xui gặp hôm đó thôi", "1 sao mà kể như thật", "acc mới tinh
+# nhỉ", "post này lạ nha", "b nói vậy chứ e thấy k đúng", "chắc b gặp hôm đông
+# thôi".
+#
+# Two exclusions, both measured:
+#   `chắc b chưa (đi|khám|mổ)` - fired on "chắc b chưa đi khám lại đúng k ạ?",
+#       which is the exact Kiểu 7 clarifier M7-D REQUIRES. Two gates pulling
+#       opposite ways.
+#   `nhầm` / `lộn` - fired on "chắc b nhầm lịch nghỉ trưa r, bên đó nghỉ 12h-13h"
+#       and "chắc b lộn chi nhánh r, DND Hà Nội khác DND SG". Those correct a
+#       CHECKABLE FACT, which is the most useful comment on a thread whose review
+#       has its facts wrong. The distinction: hên xui / nói quá deny the person's
+#       EXPERIENCE; nhầm / lộn fix a detail.
+_YOU = r"(b|bn|bạn|ng|người)"
+ATTACK_DELEGIT_RX = (
+    r"chắc " + _YOU + r"\b.{0,20}(hên xui|gặp hôm|k đúng|không đúng|nói quá|dựng)|"
+    r"\b" + _YOU + r" (nói|kể|viết|post|đăng) (vậy|thế|z|v) (chứ|mà|nhưng)|"
+    r"(kể|nói) như thật|(1|một) sao mà|acc (mới|ảo|lạ)|"
+    r"(post|bài|cmt) này (lạ|sao|z|v|k)|"
+    r"(k|ko|không) (tin|đúng|thật) (đâu|nha|nhé|á)|đừng tin|k(hông)? có thật")
+
+# M7-D - Kiểu 7 must be a real clarifying question.
+QUESTION_RX = (r"\?|\bv\s*$|k ạ\s*$|(chưa|chớ) ạ\s*$|nhỉ|ntn|thế nào|bao lâu|"
+               r"\bbn\b|hôm nào|bs nào|ai biết|(có|đã) .{0,20}chưa|sao ạ|j ạ|"
+               r"gì ạ|mấy giờ|khi nào")
+# ...and must NOT smuggle praise in. BRAND_RX is only `\bDND\b|Trương Định`, so
+# "bên đó ổn lắm, b khám lại chưa v?" satisfied both the question and no-brand
+# conditions while being brand-adjacent praise with a question glued on - and
+# `bên đó` is the phrasing SKILL.md's Tone section actively encourages. The Kiểu 7
+# floor is the only structural defence left after "né hẳn" removed Kiểu 6, so it
+# cannot be satisfiable by praise.
+SELF_EXP_RX = (r"(e|em|mình|tui|t|tớ|nhà e|nhà mình|mẹ e|ba e|con e) "
+               r".{0,25}(mổ|khám|tái khám)|"
+               r"(ổn|tốt|hài lòng|khen|yên tâm|an tâm|khéo|kỹ|nhiệt tình|xịn|"
+               r"đáng) (lắm|quá|thật|ghê|á|nha|nhé|r)|"
+               r"(rất|khá|siêu) (ổn|tốt|hài lòng|yên tâm|khéo|kỹ|nhiệt tình)")
+ANTI_NEUTRAL_SECTION = 7
+ANTI_NEUTRAL_MIN = 2
+
+# M7-E - the user's locked decision is to AVOID a legitimate complaint entirely,
+# not to concede it. Gated by CONCESSION SHAPE, never by symptom vocabulary.
+#
+# DISSATISFACTION_RX above is NOT reused, and not merely tightened. It runs
+# fail-OPEN (M5 requires Kiểu 6 to contain one, so a loose match only lets a
+# draft through); M7-E runs fail-CLOSED, where a loose match blocks a correct
+# draft. Inverting the direction reprices every false positive, so the accuracy
+# measured in one direction cannot be borrowed for the other. The sweep showed
+# what that costs: `khô mắt` matched "vết mổ nhỏ nên mau lành vs đỡ khô mắt hơn
+# mấy gói khác" and "e làm văn phòng sợ khô mắt quá"; `đông lắm` matched "cuối
+# tuần có đông lắm k ạ"; `đi xa` matched "e ở Long An lên nên đi xa chút mà vẫn
+# đáng". The first two are SELLING the hospital.
+#
+# What the user rejected is the "yes but" shape, not the word khô mắt.
+#
+# Known limitation, accepted: this is fail-open. Measured bypasses that carry no
+# listed frame - "hôm e đi thì phải ngồi đợi tới trưa, mà bs khám kỹ", "e đi 3
+# lần mới xong hết các bước, nhưng đáng", "chỗ đó hơi chật, bs thì ổn". The set
+# of ways to phrase a downside is open, and tightening walks back into
+# DISSATISFACTION_RX's false positives. The consequences are asymmetric: M7-C
+# leaking means the thread argues with a complainant (real damage), M7-E leaking
+# means one balanced comment among twenty positive ones (which reads MORE human).
+CONCESSION_RX = (
+    # explicit admission markers
+    r"nói thật|thật ra thì|thú thật|công nhận|đúng là|phải công nhận|"
+    r"điểm trừ|chưa hài lòng|k hài lòng|không hài lòng|có điểm|mặt hạn chế|"
+    r"nhược điểm|"
+    # the balancing clause of a concession
+    r"bù lại|còn lại thì|nhưng bù|được cái|"
+    # first-person "I had that experience too" - the agreeing shape
+    r"(e|em|mình|tui|t|tớ|nhà e|nhà mình) (cũng|cx) (chờ|đợi|bị|thấy|gặp)|"
+    r"(cũng|cx) (chờ|đợi) (hơi |khá |rất |quá )?lâu|"
+    r"(cũng|cx) (hơi |khá |rất |quá )?(đông|chậm|lộn xộn)|"
+    r"(hôm|bữa) (e|em|mình|tui|đó|nọ) .{0,20}(chờ|đợi) (hơi |khá |rất |quá )?lâu")
+
+# M7-F - the measured gap between what section 7C SAYS and what its regexes DO.
+# superlative_vn is only `tốt nhất|giỏi nhất|số 1`; compare_other_hospital only
+# covers PRICE ("rẻ hơn", "bằng nửa"). So a 20-item anti draft PASSED --check
+# while containing "bs giải thích rõ nhất với e". Mode `anti` lands in that gap
+# hardest: Kiểu 5 (customers who shopped around) invites quality comparison, and
+# a defensive thread's instinct is to rank.
+#
+# `đông` is deliberately NOT in the superlative list: "chỗ này đông nhất" is not
+# brand praise, and it would overlap CONCESSION_RX. One phrase, one gate.
+SUPERLATIVE_GEN_RX = (r"(kỹ|rõ|xịn|chuẩn|ổn|uy tín|hiện đại|nhiệt tình|khéo|"
+                      r"nhanh|rẻ|đẹp|hay|chuyên nghiệp|hài lòng|yên tâm|an tâm|"
+                      r"tận tình|thoải mái|sạch|mới) nhất|"
+                      r"nhất (sài gòn|sg|q3|quận 3|việt nam|vn|thành phố|tphcm)|"
+                      r"đứng đầu|top 1|number ?1|dẫn đầu|vô địch|"
+                      r"k(hông)? đâu bằng|chẳng đâu bằng|hơn hẳn|vượt trội|ăn đứt")
+COMPARE_GEN_RX = (r"(ổn|kỹ|tốt|xịn) hơn (viện|bv|bệnh viện|chỗ|bên|mấy chỗ|nơi)|"
+                  r"(viện|bv|bệnh viện|chỗ|bên|nơi) (khác|kia|đó|nọ) "
+                  r".{0,20}(k bằng|không bằng|kém hơn|tệ hơn|dở hơn|"
+                  r"k(hông)? (được|đc) như)|"
+                  r"bên (này|đó) (ổn|tốt|kỹ|xịn) hơn")
+# ASKING is not CLAIMING. Precedent: fixture B3 already separates *nêu* phí from
+# *hỏi* phí - only the assertion needs a footer. Two real corpus sentences would
+# otherwise be failed: "gói rẻ nhất bên mình giờ là bao nhiêu thế ad" and "k biết
+# bên dnd bác sĩ nào khám kỹ nhất mng nhỉ". Both are questions, both legitimate.
+ASKING_RX = (r"\?|\bnhỉ\b|\bv\s*$|k ạ|\bạ\s*$|thế ad|thế mn|thế mng|mng nhỉ|"
+             r"mn nhỉ|\bnào\b.{0,25}(nhất|hơn)|(nhất|hơn).{0,20}(k|ko|không) "
+             r"(ạ|v|nhỉ)|là (bao nhiêu|bn)|cho (e|em|mình) hỏi|ai biết|có ai")
+
 SECTION_RX = re.compile(r"^#{2,4}\s*(?:Góc|Kiểu|Nhóm|Group|Type)\s*([0-9]+|[A-Z])\s*[:.—-]",
                         re.IGNORECASE | re.MULTILINE)
 ITEM_RX = re.compile(r"^\s*([0-9]{1,3})[\.\)]\s+(.*)$")
@@ -1004,6 +1205,11 @@ def detect_mode(text, explicit=None):
                  "maps", "koc", "story", "group", "ads", "live"):
         if cand in head:
             return "maps" if cand == "google_maps" else cand
+    # `anti` is checked LAST and with word boundaries. It is common Vietnamese
+    # internet slang ("bị anti", "hội anti", "anti fan"), so a bare substring test
+    # would let a quoted question steal the routing from reply-group.
+    if re.search(r"(?<![a-z])anti(?![a-z])", head):
+        return "anti"
     return "unknown"
 
 
@@ -1017,7 +1223,7 @@ COMMAND_PREFIX_RX = re.compile(r"^\s*/?(?:dnd-seeding|seeding-dnd)\b", re.IGNORE
 
 # Longest-first so `reply-group` wins over `group`, `maps_foreigner` over `maps`.
 COMMAND_MODES = ("maps_foreigner", "reply-group", "reply_group", "google_maps",
-                 "maps", "koc", "group", "story", "ads", "live")
+                 "maps", "koc", "group", "story", "ads", "live", "anti")
 
 DEFAULT_MODE = "group"
 
@@ -1580,8 +1786,13 @@ def check_new_angles(mode, items, rep):
     legitimately carries a couple of angles, and failing those would make the
     gate untrustworthy for the case it was built for. Per-item rules below apply
     whenever the angle is present, at any run length.
+
+    Stays reply-group-only, including the underscore alias. Mode `anti` does NOT
+    reuse M5: its Kiểu 6 is the mixed-review angle, which `anti` forbids outright
+    (the user's locked decision is to avoid a legitimate complaint, not concede
+    it). check_anti_mode enforces the Kiểu 7 floor for `anti` instead.
     """
-    if mode != "reply-group":
+    if mode not in ("reply-group", "reply_group"):
         return
     by_section = {}
     for it in items:
@@ -1632,8 +1843,145 @@ def check_new_angles(mode, items, rep):
                          % (it.number, it.line, sec))
 
 
+def review_block_body(text):
+    """The pasted negative review, `>` markers stripped, or None."""
+    m = REVIEW_Q_RX.search(text)
+    if not m:
+        return None
+    body = "\n".join(re.sub(r"^>[ \t]?", "", ln) for ln in m.group(1).splitlines())
+    return body.strip()
+
+
+def excise_review(text):
+    """Blank the review blockquote, preserving line numbering.
+
+    The 5C/M3 ban families scan the whole draft, so without this a draft fails
+    for QUOTING the review it answers. Measured on a verbatim complaint ("cam kết
+    mổ xong hết cận... chỗ khác rẻ hơn... tệ nhất Sài Gòn... k đau gì"): five
+    failures - 5C dau_claim, 5C commitment, 5C cure_myopia,
+    5C compare_other_hospital, M3 - none from any of the twenty comments. Same
+    principle as DENY_FREE_RX for M2 and REFUTE_RX for Kiểu 8.
+
+    Lines become empty rather than disappearing so reported line numbers still
+    point at the right line of the user's file.
+
+    parse_items needs no equivalent: ITEM_RX does not match a `>`-prefixed line,
+    so a review pasted with its own numbered gripes cannot inject phantom items.
+    """
+    m = REVIEW_Q_RX.search(text)
+    if not m:
+        return text
+    raw = m.group(0)
+    return text.replace(raw, "\n" * raw.count("\n"), 1)
+
+
+def check_anti_mode(mode, text, items, rep):
+    """M7 - mode `anti` answers a negative review in FORMER-CUSTOMER voice.
+
+      M7-A  the review must be present AND be a blockquote
+      M7-B  no brand/admin voice - these are customers, not the hospital
+      M7-C  no attacking the reviewer, by motive OR by doubting their account
+      M7-D  the Kiểu 7 floor: real neutral questions, not praise in disguise
+      M7-E  no conceding the complaint (the user chose to avoid it entirely)
+      M7-F  no ranking claims and no non-price hospital comparison
+
+    Item-scoped, unlike 5C. Measured reason: `seeding` appears in the TITLE line
+    of all three older scratch files ("# Seeding Reply-Group - ..."), so a
+    whole-text scan would fail every draft over the heading the skill prints
+    itself. parse_items excludes that line.
+    """
+    if mode != "anti":
+        return
+
+    if not REVIEW_Q_RX.search(text):
+        if REVIEW_MARKER_RX.search(text):
+            rep.fail("M7-A", "mode anti có dòng '**Review xấu:**' nhưng review không "
+                             "phải blockquote. Mỗi dòng review phải bắt đầu bằng '> '. "
+                             "Dạng văn trần làm regex chỉ đọc được dòng đầu (M6 mất chủ "
+                             "đề) và biến vùng review thành đường lách ban.")
+        else:
+            rep.fail("M7-A", "mode anti thiếu block '**Review xấu:**' (blockquote '>'), "
+                             "nên không có gì để đối chiếu 20 comment.")
+        return
+
+    by_section = {}
+    for it in items:
+        by_section.setdefault(it.section, []).append(it)
+
+    for it in items:
+        body = norm(it.text)
+
+        m = rx(BRAND_VOICE_RX).search(body)
+        if m:
+            rep.fail("M7-B", "item %s (line %d): giọng bệnh viện/CSKH (%r). Mode anti "
+                             "đóng vai KHÁCH đã trải nghiệm, không phải bên bệnh viện "
+                             "trả lời" % (it.number, it.line, m.group(0)))
+
+        m = rx(ATTACK_MOTIVE_RX).search(body)
+        if m:
+            rep.fail("M7-C", "item %s (line %d): quy kết động cơ người viết review "
+                             "(%r). 20 nick cùng quy kết một người là dấu hiệu seeding "
+                             "rõ nhất, và làm thread nổ to hơn chính review xấu"
+                     % (it.number, it.line, m.group(0)))
+        else:
+            m = rx(ATTACK_DELEGIT_RX).search(body)
+            if m:
+                rep.fail("M7-C", "item %s (line %d): phủ nhận lời kể của người đăng "
+                                 "(%r). Được đính chính DỮ KIỆN ('chắc b nhầm lịch nghỉ "
+                                 "trưa'), không được phủ nhận TRẢI NGHIỆM"
+                         % (it.number, it.line, m.group(0)))
+
+        if it.section != ANTI_NEUTRAL_SECTION:
+            m = rx(CONCESSION_RX).search(body)
+            if m:
+                rep.fail("M7-E", "item %s (line %d): nhượng bộ điểm phàn nàn (%r). Chốt "
+                                 "của mode là NÉ HẲN - kể trải nghiệm tốt của mình, "
+                                 "không thừa nhận rồi cân bằng lại"
+                         % (it.number, it.line, m.group(0)))
+
+        # ASKING is not CLAIMING - same split as fixture B3 for fees.
+        if not rx(ASKING_RX).search(body):
+            m = rx(SUPERLATIVE_GEN_RX).search(body) or rx(COMPARE_GEN_RX).search(body)
+            if m:
+                rep.fail("M7-F", "item %s (line %d): xếp hạng / so sánh viện (%r). §7C "
+                                 "cấm cả hai, nhưng superlative_vn chỉ phủ 'tốt nhất/"
+                                 "giỏi nhất/số 1' và compare_other_hospital chỉ phủ so "
+                                 "sánh GIÁ, nên khoảng giữa cần luật riêng"
+                         % (it.number, it.line, m.group(0)))
+
+    neutral = by_section.get(ANTI_NEUTRAL_SECTION, [])
+    for it in neutral:
+        if not rx(QUESTION_RX).search(norm(it.text)):
+            rep.fail("M7-D", "item %s (line %d) ở Kiểu %d nhưng không phải câu hỏi. "
+                             "Kiểu %d là sàn chống-toàn-khen: phải hỏi lại người đăng"
+                     % (it.number, it.line, ANTI_NEUTRAL_SECTION, ANTI_NEUTRAL_SECTION))
+        m = rx(BRAND_RX).search(it.text)
+        if m:
+            rep.fail("M7-D", "item %s (line %d) ở Kiểu %d nhắc brand (%r). Kiểu này tồn "
+                             "tại để thread trông như thread thật"
+                     % (it.number, it.line, ANTI_NEUTRAL_SECTION, m.group(0)))
+        m = rx(SELF_EXP_RX).search(norm(it.text))
+        if m:
+            rep.fail("M7-D", "item %s (line %d) ở Kiểu %d mang trải nghiệm/đánh giá "
+                             "ngôi thứ nhất (%r). Khen + dán câu hỏi ở đuôi vẫn là khen, "
+                             "và BRAND_RX không bắt được 'bên đó ổn lắm'"
+                     % (it.number, it.line, ANTI_NEUTRAL_SECTION, m.group(0)))
+
+    # Count floor only on a full run, matching check_new_angles. Per-item rules
+    # above apply at any length.
+    if len(items) >= M5_FULL_RUN_MIN_ITEMS and len(neutral) < ANTI_NEUTRAL_MIN:
+        rep.fail("M7-D", "chỉ %d item ở Kiểu %d, cần >=%d. Chốt 'né hẳn' đã bỏ Kiểu 6 "
+                         "(mixed), nên Kiểu %d là phòng tuyến cấu trúc DUY NHẤT còn lại "
+                         "chống thread 20/20 toàn khen"
+                 % (len(neutral), ANTI_NEUTRAL_SECTION, ANTI_NEUTRAL_MIN,
+                    ANTI_NEUTRAL_SECTION))
+    elif neutral:
+        rep.note("M7-D: %d item Kiểu %d (sàn %d)"
+                 % (len(neutral), ANTI_NEUTRAL_SECTION, ANTI_NEUTRAL_MIN))
+
+
 def check_topic_fit(mode, text, items, rep):
-    """M6 - reply-group must answer the service that was actually asked about.
+    """M6 - a reply must answer the service that was actually asked about.
 
     Built because SKILL.md had no service-classification step in MODE 2, every
     one of the 10 angles was written in mo-can language, and the whole example
@@ -1641,24 +1989,40 @@ def check_topic_fit(mode, text, items, rep):
     model to imitate examples and that the instruction measurably lands
     (10/10: 167 hits). Prose alone cannot hold this - without a gate the drift
     returns silently, which is how :55 lasted 13 months.
+
+    Reused verbatim for mode `anti`: a negative review about Phaco answered by
+    twenty comments recounting SMILE surgery is the same defect in a different
+    setting. Only the SOURCE of the topic changes - `**Câu hỏi gốc:**` for
+    reply-group, the `**Review xấu:**` blockquote for anti.
     """
-    if mode != "reply-group":
+    if mode not in TOPIC_FIT_MODES:
         return
 
-    m = ORIGINAL_Q_RX.search(text)
-    if not m:
-        # Applies at ANY length, unlike M5's full-run coverage rule. A short
-        # draft can still drift, and exempting fixtures by name would create a
-        # class of draft the gate never looks at - exactly what
-        # SELFTEST_MODE_EXEMPT exists to prevent.
-        rep.fail("M6-A", "reply-group draft has no '**Câu hỏi gốc:**' line, so there "
-                         "is nothing to check the replies against. Print the original "
-                         "question at the top of the output.")
-        return
+    if mode == "anti":
+        # M7-A owns the anti marker's presence and format; here we only need the
+        # text. Bail quietly when it is absent so the draft gets ONE clear error
+        # (M7-A) instead of two describing the same missing block.
+        m = REVIEW_Q_RX.search(text)
+        if not m:
+            return
+        source = review_block_body(text)
+        label = "review xấu"
+    else:
+        m = ORIGINAL_Q_RX.search(text)
+        if not m:
+            # Applies at ANY length, unlike M5's full-run coverage rule. A short
+            # draft can still drift, and exempting fixtures by name would create a
+            # class of draft the gate never looks at - exactly what
+            # SELFTEST_MODE_EXEMPT exists to prevent.
+            rep.fail("M6-A", "reply-group draft has no '**Câu hỏi gốc:**' line, so there "
+                             "is nothing to check the replies against. Print the original "
+                             "question at the top of the output.")
+            return
+        source = m.group(1).strip()
+        label = "câu hỏi gốc"
 
-    question = m.group(1).strip()
-    phase, service = detect_topic(question)
-    rep.note("M6: câu hỏi gốc -> service=%s phase=%s" % (service, phase))
+    phase, service = detect_topic(source)
+    rep.note("M6: %s -> service=%s phase=%s" % (label, service, phase))
 
     # M6-D runs BEFORE the topic early-return. It is a fee rule wearing an M6
     # number, not a topic rule: "BHYT chi tra 80%" is an unpriced number
@@ -1670,6 +2034,26 @@ def check_topic_fit(mode, text, items, rep):
         if rx(BHYT_RX).search(body) and rx(BHYT_NUMBER_RX).search(body):
             rep.fail("M6-D", "item %s (line %d): nhắc BHYT kèm số. Được nói 'có BHYT "
                              "hỗ trợ', số thì chuyển hotline" % (it.number, it.line))
+
+    # TOPIC_LADDER is first-match, and it was written for questions, which carry
+    # ONE intent. A pasted complaint enumerates grievances across services, so the
+    # ladder returns whichever happens to sit highest and M6-B then treats every
+    # other service as drift. Measured: "đi đo độ cắt kính ở đây sai độ, mà tư vấn
+    # mổ cận smile pro cứ đẩy giá" -> `kinh`, and SERVICE_DRIFT_TARGETS["kinh"] is
+    # ("kx",), so EVERY comment telling a SMILE story would fail - the majority of
+    # this hospital's customers. qa/checks.md records that over-fire is the worse
+    # direction because it teaches writers to keyword-stuff.
+    #
+    # The matched labels are printed, not just the count: in theory a draft could
+    # pad the quoted review with a second grievance to switch M6 off, and naming
+    # the labels puts that evidence in --check's own output. The block is the
+    # user's text, quoted verbatim, and the user holds the original.
+    matched = [s for s in TOPIC_LADDER if rx(TOPIC_TOK[s]).search(norm(source))]
+    if len(matched) >= 2:
+        rep.note("M6-B/C skipped: %s chạm %d service (%s) nên ladder first-match "
+                 "không xác định được chủ đề đơn nhất"
+                 % (label, len(matched), ", ".join(matched)))
+        return
 
     if service in ("kx", "none"):
         # `kx` is the default register, so there is nothing to drift away from;
@@ -1880,7 +2264,20 @@ def run_check(text, mode=None, fees_path=None, label="<stdin>", require_policy=T
     check_quota_10_10(mode, items or [Item(0, None, text, 1)], rep)
     check_new_angles(mode, items, rep)
     check_topic_fit(mode, text, items, rep)
-    check_bans(mode, text, items, rep)
+    check_anti_mode(mode, text, items, rep)
+    # The marker IMPLIES the mode. Measured: a draft carrying the review
+    # blockquote but no `**Mode:**` line detected as `unknown`, which made
+    # check_new_angles, check_topic_fit and the whole M7 family return
+    # immediately - and --check printed PASS. The single likeliest output defect
+    # (a dropped header) disabled every new gate and reported green, the exact
+    # shape the QUOTA_10_10 and check_quota_10_10 comments warn about.
+    if mode != "anti" and REVIEW_MARKER_RX.search(text):
+        rep.fail("M7-A", "draft có '**Review xấu:**' nhưng mode detect ra %r. Marker đó "
+                         "chỉ thuộc mode anti; thiếu dòng '**Mode:** anti' thì cả họ gate "
+                         "M7 không chạy và draft báo PASS oan." % mode)
+    # 5C/M3 scan the whole draft, so the quoted review is excised first - see
+    # excise_review for the five measured false failures this prevents.
+    check_bans(mode, excise_review(text), items, rep)
     check_antirepeat(items, rep)
 
     rc = rep.emit()
@@ -2734,6 +3131,247 @@ SELFTEST_M5_BAD = [
 """),
 ]
 
+# ---------------------------------------------------------------------------
+# H - mode `anti`. Every negative fixture pins WHICH code fires, and every
+# positive one is a sentence taken from the real scratch corpus or from the
+# mode's own prescribed content. The PASS half matters as much as the FAIL half:
+# the first draft of these rules failed correct sentences in eight places, and
+# only a sweep against real output revealed it.
+# ---------------------------------------------------------------------------
+_ANTI_HEAD = ("# Seeding Anti - DND Sai Gon\n**Mode:** anti\n"
+              "**Review xấu:**\n> bs khám ẩu, chờ gần 2 tiếng mới tới lượt\n")
+# The Kiểu 7 floor, appended so per-item fixtures do not also trip the count
+# floor. Numbered high so they never collide with the item under test.
+_ANTI_K7 = ("\n### Kiểu 7: Hỏi lại người đăng (2 bình luận)\n"
+            "90. b đi khám hôm nào v?\n"
+            "91. b mổ chưa hay mới khám thôi nhỉ?\n")
+
+
+def _anti_draft(item, section=1, head=_ANTI_HEAD, floor=True):
+    return (head + "\n### Kiểu %d: x (1 bình luận)\n1. %s\n" % (section, item)
+            + (_ANTI_K7 if floor else ""))
+
+
+# (label, item text, section, expected FAIL code or None)
+SELFTEST_ANTI_ITEMS = [
+    # --- M7-B: brand voice. The PASS rows are the measured over-fires from the
+    # pronoun-based first draft.
+    ("M7-B brand apology", "bệnh viện chúng tôi rất tiếc về trải nghiệm của quý khách", 1, "M7-B"),
+    ("M7-B admin ack", "chúng tôi xin ghi nhận phản hồi của anh", 1, "M7-B"),
+    ("M7-B cskh dept", "bộ phận cskh sẽ liên hệ lại với anh", 1, "M7-B"),
+    ("M7-B formal address", "kính gửi quý anh chị đã tin tưởng", 1, "M7-B"),
+    ("M7-B customer says chúng tôi", "vợ chồng chúng tôi rất yên tâm khi mổ bên đây", 1, None),
+    ("M7-B customer praises care", "bên đó chăm sóc khách hàng tốt lắm", 1, None),
+    ("M7-B nurse care", "điều dưỡng chăm sóc tận tình lắm", 1, None),
+
+    # --- M7-C tier 1: motive attribution
+    ("M7-C rival", "chắc đối thủ dựng chuyện thôi", 1, "M7-C"),
+    ("M7-C fake acct", "nick ảo bốc phốt á", 1, "M7-C"),
+    ("M7-C paid", "b này chắc được thuê", 1, "M7-C"),
+    ("M7-C smear", "dìm hàng bên đó thôi", 1, "M7-C"),
+    # --- M7-C tier 2: the six sentences that carried NO tier-1 token. These are
+    # the fixtures that stop the blacklist from being reverted to one tier.
+    ("M7-C bad luck", "chắc b hên xui gặp hôm đó thôi", 1, "M7-C"),
+    ("M7-C one star", "1 sao mà kể như thật", 1, "M7-C"),
+    ("M7-C new acct", "acc mới tinh nhỉ", 1, "M7-C"),
+    ("M7-C odd post", "post này lạ nha", 1, "M7-C"),
+    ("M7-C you say but", "b nói vậy chứ e thấy k đúng", 1, "M7-C"),
+    ("M7-C busy day", "chắc b gặp hôm đông thôi", 1, "M7-C"),
+    # --- M7-C must NOT fire: correcting a CHECKABLE FACT is the most useful
+    # comment on a thread whose review has its facts wrong.
+    ("M7-C corrects hours", "chắc b nhầm lịch nghỉ trưa r, bên đó nghỉ 12h-13h", 1, None),
+    ("M7-C corrects branch", "chắc b lộn chi nhánh r, DND Hà Nội khác DND SG", 1, None),
+    ("M7-C bare nói xấu", "e k biết nói xấu ai", 1, None),
+    ("M7-C bare dìm", "mắt e bị dìm xuống nên nhìn mờ", 1, None),
+
+    # --- M7-E: concession SHAPE, not symptom vocabulary
+    ("M7-E admits then balances", "nói thật hôm e đi cx chờ hơi lâu mà bs bên DND khám kỹ", 1, "M7-E"),
+    ("M7-E concedes crowding", "công nhận bên đó hơi đông, nhưng bs Tuấn mổ khéo", 1, "M7-E"),
+    ("M7-E bù lại clause", "e cx chờ khá lâu, bù lại mổ nhanh", 1, "M7-E"),
+    # ...and the four real corpus sentences DISSATISFACTION_RX would have failed.
+    # Two of them are actively selling the hospital.
+    ("M7-E corpus dry-eye advantage",
+     "vết mổ nhỏ nên mau lành vs đỡ khô mắt hơn mấy gói khác", 1, None),
+    ("M7-E corpus fears dry eye", "e làm văn phòng sợ khô mắt quá nên hỏi bs kỹ", 1, None),
+    ("M7-E corpus province travel", "e ở Long An lên nên đi xa chút mà vẫn đáng", 1, None),
+    ("M7-E corpus asks if crowded", "cuối tuần bên đó có đông lắm k ạ", 1, None),
+
+    # --- M7-F: the gap between what 7C says and what its regexes do
+    ("M7-F explains best", "bs giải thích rõ nhất với e", 1, "M7-F"),
+    ("M7-F most thorough", "bên này khám kỹ nhất", 1, "M7-F"),
+    ("M7-F most trusted", "chỗ này uy tín nhất q3", 1, "M7-F"),
+    ("M7-F better than old", "e thấy bên này hơn hẳn chỗ cũ", 1, "M7-F"),
+    ("M7-F others inferior", "viện khác k bằng bên này", 1, "M7-F"),
+    # ASKING is not CLAIMING - both rows are verbatim corpus sentences.
+    ("M7-F corpus asks cheapest",
+     "gói rẻ nhất bên mình giờ là bao nhiêu thế ad", 1, None),
+    ("M7-F corpus asks which doctor",
+     "k biết bên dnd bác sĩ nào khám kỹ nhất mng nhỉ", 1, None),
+    ("M7-F nhất là idiom", "nhất là mấy hôm trời nắng mắt e mỏi", 1, None),
+
+    # --- safety_absolute (BAN_EXTRA, so it lands on 5C and is mode-agnostic)
+    ("safety 100pct", "mổ bên đó an toàn 100% nha", 1, "5C"),
+    ("safety no complication heard", "chưa nghe ai bị biến chứng cả", 1, "5C"),
+    ("safety no case", "k có ca nào bị sao hết", 1, "5C"),
+    ("safety never failed", "bs mổ mấy nghìn ca rồi chưa lỗi ca nào", 1, "5C"),
+    ("safety explains risk ok", "bs giải thích rõ rủi ro cho e", 1, None),
+    ("safety heard nothing more", "e chưa nghe bs nói gì thêm", 1, None),
+    ("safety told to call", "bs dặn nếu thấy gì bất thường thì gọi lại", 1, None),
+
+    # --- M7-D per-item rules, which apply at ANY run length
+    ("M7-D K7 not a question", "mình mổ bên đó thấy ổn", 7, "M7-D"),
+    ("M7-D K7 names brand", "b khám bên DND hôm nào v?", 7, "M7-D"),
+    # The measured hole: praise with a question glued on satisfied both the
+    # question rule and the no-brand rule, because BRAND_RX is only
+    # `\bDND\b|Trương Định` and `bên đó` is phrasing the Tone section encourages.
+    ("M7-D K7 praise plus tail question", "bên đó ổn lắm, b khám lại chưa v?", 7, "M7-D"),
+    ("M7-D K7 clean clarifier", "b cận bn độ r ạ?", 7, None),
+]
+
+# (label, draft, expected FAIL code or None) - whole-draft shapes
+SELFTEST_ANTI_DRAFTS = [
+    ("anti without the review block", """# Seeding Anti - DND
+**Mode:** anti
+
+### Kiểu 1: x (1 bình luận)
+1. e mổ smile pro bên DND SG, bs Tuấn mổ
+""", "M7-A"),
+    # Prose instead of a blockquote is a DIFFERENT error from missing, because it
+    # is a different fix. Measured consequences of allowing prose: a one-line
+    # regex reads only line 1 (M6 loses the topic) and the block boundary becomes
+    # whitespace, which is what made the excise a ban bypass.
+    ("anti review as prose, not blockquote", """# Seeding Anti - DND
+**Mode:** anti
+**Review xấu:** bs khám ẩu chờ 2 tiếng
+
+### Kiểu 1: x (1 bình luận)
+1. e mổ smile pro bên DND SG, bs Tuấn mổ
+""", "M7-A"),
+    # The marker implies the mode. Without this rule a dropped `**Mode:**` line
+    # detected as `unknown`, every M7 check returned immediately, and --check
+    # printed PASS - the likeliest defect disabling the whole new gate family.
+    ("review marker present but no Mode line", """# Seeding - DND
+**Review xấu:**
+> bs khám ẩu chờ 2 tiếng
+
+### Kiểu 1: x (1 bình luận)
+1. e mổ smile pro bên DND SG, bs Tuấn mổ
+""", "M7-A"),
+    # Excise, direction 1: quoting the complaint verbatim must not fail. Before
+    # excise this draft produced FIVE failures, none from its own comments.
+    ("verbatim review quoting banned phrases passes", """# Seeding Anti - DND
+**Mode:** anti
+**Review xấu:**
+> cam kết mổ xong hết cận mà giờ e vẫn cận, chỗ khác rẻ hơn nhiều
+> dịch vụ tệ nhất Sài Gòn, k đau gì mà mắt cứ mờ
+
+### Kiểu 1: x (2 bình luận)
+1. e mổ smile pro bên DND SG, bs Tuấn mổ cho, thị lực giờ ổn
+2. mình mổ bên Trương Định q3, bs giải thích từng bước
+
+### Kiểu 7: Hỏi lại người đăng (2 bình luận)
+3. b đi khám hôm nào v?
+4. b mổ chưa hay mới khám thôi nhỉ?
+""", None),
+    # Excise, direction 2: the same phrases inside an ITEM must still fail. This
+    # is the fixture that stops excise from being widened into an exemption.
+    ("banned phrases inside an item still fail", """# Seeding Anti - DND
+**Mode:** anti
+**Review xấu:**
+> bs khám ẩu
+
+### Kiểu 1: x (1 bình luận)
+1. e mổ bên DND xong hết cận luôn, k đau gì hết
+
+### Kiểu 7: Hỏi lại người đăng (2 bình luận)
+2. b đi khám hôm nào v?
+3. b mổ chưa nhỉ?
+""", "5C"),
+    # Anti-smuggle: items pasted under the marker WITHOUT `>` stay outside the
+    # block. With the old blank-line boundary they were swallowed and excised,
+    # taking four ban families from 1 hit each to 0.
+    ("items smuggled under the marker are not excised", """# Seeding Anti - DND
+**Mode:** anti
+**Review xấu:**
+> bs khám ẩu
+1. e mổ bên DND xong hết cận luôn, k đau gì, bs giỏi nhất Sài Gòn
+
+### Kiểu 7: Hỏi lại người đăng (2 bình luận)
+2. b đi khám hôm nào v?
+3. b mổ chưa nhỉ?
+""", "5C"),
+    # M6 reuse: a review about Phaco answered with SMILE surgery is the same
+    # defect M6 was built for, in a new setting. `phaco` sits on line 2 of the
+    # quote, which a one-line marker regex would have missed entirely.
+    ("anti drifts from the review's service", """# Seeding Anti - DND
+**Mode:** anti
+**Review xấu:**
+> thái độ nhân viên kém
+> mẹ tôi mổ phaco ở đây mà bị viêm, phải quay lại nhiều lần
+
+### Kiểu 1: x (1 bình luận)
+1. e mổ smile pro bên DND SG xong thoát kính, 12 bước khám kỹ lắm
+
+### Kiểu 7: Hỏi lại người đăng (2 bình luận)
+2. b đi khám hôm nào v?
+3. bác nhà b bao nhiêu tuổi ạ?
+""", "M6-B"),
+    # A review naming two services cannot be classified by a first-match ladder
+    # built for single-intent questions. Skipping is the safe direction:
+    # over-firing here would fail every comment telling a SMILE story.
+    ("multi-service review skips M6-B/C", """# Seeding Anti - DND
+**Mode:** anti
+**Review xấu:**
+> đi đo độ cắt kính ở đây sai độ, mà tư vấn mổ cận smile pro cứ đẩy giá
+
+### Kiểu 1: x (1 bình luận)
+1. e mổ smile pro bên DND SG, bs Tuấn mổ cho, thị lực giờ ổn
+
+### Kiểu 7: Hỏi lại người đăng (2 bình luận)
+2. b đi khám hôm nào v?
+3. b đo độ lần gần nhất bao lâu r ạ?
+""", None),
+    # A numbered review inside the quote must not become items. ITEM_RX does not
+    # match a `>`-prefixed line, so this needs no excise - the fixture pins that.
+    ("numbered gripes inside the quote are not items", """# Seeding Anti - DND
+**Mode:** anti
+**Review xấu:**
+> e thất vọng:
+> 1. chờ 2 tiếng
+> 2. bs khám 3 phút
+
+### Kiểu 1: x (1 bình luận)
+1. e mổ smile pro bên DND SG, bs Tuấn mổ
+
+### Kiểu 7: Hỏi lại người đăng (2 bình luận)
+2. b đi khám hôm nào v?
+3. b mổ chưa nhỉ?
+""", None),
+    # The count floor: without Kiểu 7 a full run is twenty positive comments,
+    # which is the fingerprint section 7 exists to prevent. "Né hẳn" removed
+    # Kiểu 6, so this floor is the only structural defence left.
+    ("full anti run with no Kiểu 7", """# Seeding Anti - DND
+**Mode:** anti
+**Review xấu:**
+> bs khám ẩu chờ 2 tiếng
+
+### Kiểu 1: Khách đã mổ (5 bình luận)
+1. e mổ smile pro bên DND SG, bs Tuấn mổ cho, thị lực giờ ổn
+2. mình mổ bên Trương Định q3, bs giải thích từng bước
+3. e cận 6 độ mổ smartsight bên đó, sáng hôm sau nhìn rõ lại
+4. tui mổ hồi năm ngoái, tới giờ vẫn ổn
+5. e mổ femto bên viện mắt q3, bs tư vấn kỹ
+
+### Kiểu 2: Khách đi khám (5 bình luận)
+6. e mới đi khám tuần trước, bs đo đủ các bước
+7. hôm e khám bs chỉ luôn trên hình ảnh mắt e
+8. e đi khám ở đây, bs nói thẳng mắt e chưa nên mổ
+9. e khám xong bs ghi hồ sơ rõ ràng
+10. bs bên đó chịu ngồi giải thích cho e
+""", "M7-D"),
+]
+
+
 
 def run_selftest():
     print("selftest: policy=%s" % POLICY_VERSION)
@@ -2991,6 +3629,77 @@ def run_selftest():
             print("  FAIL %s" % pb)
     else:
         print("  ok   services.md is money-free")
+
+    print("")
+    print("H. M7 mode anti - per-item rules (PASS rows are real corpus sentences)")
+    print("-" * 68)
+    for label, item, section, want_code in SELFTEST_ANTI_ITEMS:
+        box = []
+        rc = run_check(_anti_draft(item, section), label="<anti: %s>" % label,
+                       require_policy=False, rep_out=box)
+        codes = set(c for c, _ in box[0].fails) if box else set()
+        if want_code is None:
+            ok = rc == 0
+        else:
+            ok = rc != 0 and want_code in codes
+        if not ok:
+            nfail += 1
+        print("  %-4s %-38s rc=%d codes=%-14s (want %s)"
+              % ("ok" if ok else "FAIL", label, rc,
+                 ",".join(sorted(codes)) or "none", want_code or "PASS"))
+
+    print("")
+    print("H2. M7 mode anti - whole-draft shapes (marker, excise, M6 reuse, floor)")
+    print("-" * 68)
+    for label, body, want_code in SELFTEST_ANTI_DRAFTS:
+        box = []
+        rc = run_check(body, label="<anti: %s>" % label, require_policy=False,
+                       rep_out=box)
+        codes = set(c for c, _ in box[0].fails) if box else set()
+        if want_code is None:
+            ok = rc == 0
+        else:
+            ok = rc != 0 and want_code in codes
+        if not ok:
+            nfail += 1
+        print("  %-4s %-46s rc=%d codes=%-12s (want %s)"
+              % ("ok" if ok else "FAIL", label, rc,
+                 ",".join(sorted(codes)) or "none", want_code or "PASS"))
+
+    print("")
+    print("H3. routing - `anti` must not steal an existing mode")
+    print("-" * 68)
+    routing = [
+        ('/dnd-seeding anti "bs khám ẩu chờ 2 tiếng"', "anti", "bs khám ẩu"),
+        # `anti` inside the user's quoted text is their words, not the command.
+        ('/dnd-seeding reply-group "có ai anti bên đó k"', "reply-group", "anti bên đó"),
+        ("/dnd-seeding group", "group", None),
+    ]
+    for cmd, want_mode, want_payload in routing:
+        got_mode, _params, payload = parse_command(cmd)
+        ok = got_mode == want_mode and (want_payload is None
+                                        or want_payload in payload)
+        if not ok:
+            nfail += 1
+        print("  %-4s %-46s -> %-12s payload=%r"
+              % ("ok" if ok else "FAIL", cmd[:46], got_mode, payload[:26]))
+
+    # detect_mode reads a finished draft, which is a different job: `anti` is
+    # common Vietnamese slang ("bị anti", "hội anti"), so it needs a word
+    # boundary and must be checked last.
+    detect = [
+        ("# Seeding Anti - DND\n1. x", "anti"),
+        ("# Seeding Reply-Group\n**Câu hỏi gốc:** ai anti bên đó k\n1. x", "reply-group"),
+        ("# Seeding Group - DND\n1. x", "group"),
+        ("# Antibiotic note\n1. x", "unknown"),
+    ]
+    for text, want in detect:
+        got = detect_mode(text)
+        ok = got == want
+        if not ok:
+            nfail += 1
+        print("  %-4s detect_mode(%-42r) -> %-12s (want %s)"
+              % ("ok" if ok else "FAIL", text.splitlines()[0][:42], got, want))
 
     print("")
     if nfail:

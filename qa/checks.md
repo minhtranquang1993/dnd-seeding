@@ -32,9 +32,15 @@ Draft phải qua `--check` **trước** khi ghi file. Ghi trước rồi check t
 | `M6-C` | fail | Tỉ lệ item **thực chất** chạm service câu hỏi quá thấp (trả lời chung chung / lạc đề) | **≥60%**, mẫu số **loại Kiểu 7**; chỉ áp run ≥10 item |
 | `M6-D` | fail | Nhắc BHYT kèm số hoặc % | 0 item — "có BHYT" thì được, số thì hotline. **Chạy cho mọi service**, kể cả `kx`/`none`: đây là luật phí mang số hiệu M6, không phải luật chủ đề |
 | `M6-E` | fail (`--selftest`) | `services.md` chứa token tiền | 0 hit |
+| `M7-A` | fail | Mode `anti` thiếu block `**Review xấu:**`, hoặc review không phải blockquote `>`, hoặc có marker mà mode ≠ `anti` | **mọi độ dài** |
+| `M7-B` | fail | Item mang giọng bệnh viện/CSKH (`bệnh viện chúng tôi`, `quý khách`, `bộ phận cskh`) | 0 item |
+| `M7-C` | fail | Item quy kết động cơ (`đối thủ`, `nick ảo`, `được thuê`) **hoặc** phủ nhận lời kể người đăng (`chắc b hên xui`, `1 sao mà kể như thật`) | 0 item |
+| `M7-D` | fail | Sàn Kiểu 7: item không phải câu hỏi · nhắc brand · mang trải nghiệm/đánh giá ngôi 1 | 3 luật per-item **mọi độ dài**; sàn ≥2 item chỉ ở run ≥10 |
+| `M7-E` | fail | Item ngoài Kiểu 7 mang **khung nhượng bộ** (`nói thật`, `công nhận`, `bù lại`, `e cx chờ lâu`) | 0 item |
+| `M7-F` | fail | Item xếp hạng chung (`khám kỹ nhất`, `uy tín nhất q3`, `hơn hẳn`) hoặc so sánh viện **phi-giá** (`viện khác k bằng`) | 0 item; item là **câu hỏi** được miễn |
 | `5A` | fail | `10/10` ngoài góc được phép, hoặc vượt hạn ngạch | ≤20% item/run, `live` = 0 |
 | `5A` | fail / warn | Mode không khai được (`unknown`): có `10/10` → **fail** (không có luật nào xử được); không có `10/10` → warn | khai `**Mode:** <tên>` hoặc `--mode` |
-| `5C` | fail | Cấm chung: hết đau · superlative VN/EN · so sánh viện · cam kết · khỏi cận | 0 hit |
+| `5C` | fail | Cấm chung: hết đau · superlative VN/EN · so sánh viện · cam kết · khỏi cận · **an toàn tuyệt đối** (`safety_absolute`) | 0 hit |
 | `FOOTER-A` | fail | Có nêu thông tin phí mà **không có footer** | bắt buộc có footer |
 | `FOOTER-B` | fail | Footer khai tier không khớp con số/claim trong draft | xem dưới |
 | `ANTIREP` | warn / fail | 1 cụm lặp quá nhiều item trong run | warn >15%, **block >30%** |
@@ -194,7 +200,142 @@ bypass "rắc token + thêm từ nối" quay lại nguyên vẹn.
 > fail closed là hướng an toàn.
 >
 > Mẫu chung của cả 3 lần sai: **chỗ nào chấp nhận "văn bản tự do" thì chỗ đó thành bypass.**
-> `SELFTEST_COMPARE` giữ 28 ca để nếu ai nới luật thì sập ngay.
+> `SELFTEST_COMPARE` giữ **69** ca để nếu ai nới luật thì sập ngay.
+
+## M7 — mode `anti` (reply review xấu, giọng khách cũ)
+
+Mode `anti` sinh ~20 comment vào thread có review xấu, đóng vai **khách đã trải nghiệm tốt**.
+Ba luật cứng: không giọng brand · không đấu khẩu · né hẳn điểm phàn nàn. Mọi regex dưới đây được
+**sweep qua 4 file output cũ** trước khi chốt; bản đầu bắt oan câu hợp lệ ở 8 chỗ, và chỉ sweep
+mới lộ ra.
+
+### Review xấu là BLOCKQUOTE, không phải một dòng
+
+Ba lý do đo được, đừng đổi về dạng `ORIGINAL_Q_RX`:
+
+1. **`.` không khớp newline.** Câu hỏi gốc là một dòng; review dán vào thì không. Review 2 dòng có
+   `phaco` ở dòng 2 → `detect_topic(dòng 1)` = `('pre','none')` → `check_topic_fit` early-return →
+   **M6-B/C không bao giờ chạy**.
+2. **Review có gạch đầu dòng số** ("1. chờ 2 tiếng") khớp `ITEM_RX` → `parse_items` sinh item
+   `section=None`, tính là substantive trong M6-C, làm loãng mẫu số 5A/ANTIREP. Dòng `> 1. ...`
+   **không** khớp `ITEM_RX`, nên blockquote sửa việc này không cần cơ chế nào thêm.
+3. **Block "tới dòng trống" là đường lách ban.** Dán 2 comment seeding ngay dưới marker, không dòng
+   trống → cả hai lọt vào block rồi bị excise → `dau_claim` · `cure_myopia` · `superlative_vn` ·
+   `compare_other_hospital` **về 0**. Ranh giới phải là ký tự `>`, không phải khoảng trắng.
+
+### Excise: gate không phạt draft vì nó TRÍCH DẪN
+
+Review verbatim ("cam kết mổ xong hết cận… chỗ khác rẻ hơn… tệ nhất Sài Gòn… k đau gì") làm draft
+**fail 5 gate**, không cái nào đến từ 20 comment. Nên block review bị blank khỏi body của 5C/M3
+(giữ số dòng để line number còn đúng). Cùng nguyên tắc `DENY_FREE_RX` cho M2 và `REFUTE_RX` cho
+Kiểu 8. Fixture khoá **2 chiều**: cụm cấm trong quote → PASS; trong item → FAIL 5C.
+
+### M7-B: neo vào ĐỘNG TỪ THỂ CHẾ, không vào đại từ
+
+`chúng tôi` trơn không vào list. Bản dựa vào đại từ bắt oan "vợ chồng **chúng tôi rất** yên tâm
+khi mổ bên đây"; `chăm sóc khách hàng` trơn bắt oan "bên đó **chăm sóc khách hàng** tốt lắm". Chỉ
+`bộ phận (cskh|chăm sóc khách hàng)` mới tính.
+
+### M7-C: hai tầng, vì blacklist fail open
+
+Doctrine đã ghi ở §M6 của file này (hatch M6 phải viết lại thành allowlist vì đúng lý do đó). Sáu
+câu delegitimising **không chứa token tầng 1 nào**: `chắc b hên xui gặp hôm đó thôi` · `1 sao mà kể
+như thật` · `acc mới tinh nhỉ` · `post này lạ nha` · `b nói vậy chứ e thấy k đúng` · `chắc b gặp
+hôm đông thôi`. Nên tầng 2 là luật **cấu trúc**: đại từ ngôi 2 + nghi ngờ/phủ định lời kể.
+
+Ba cụm bị **loại có chủ đích**:
+
+| Cụm | Bắt oan câu |
+|---|---|
+| `nói xấu` trơn | "e k biết nói xấu ai" → phải có tân ngữ bệnh viện |
+| `bịa` trơn | khớp mọi từ chứa nó → phải là `bịa chuyện/đặt/ra` |
+| `dìm` trơn | "mắt e bị dìm xuống" (triệu chứng thật) → phải là `dìm hàng` |
+| `chắc b chưa (đi\|khám\|mổ)` | "chắc b chưa đi khám lại đúng k ạ?" — **chính hình dạng Kiểu 7 mà M7-D đòi**. Hai gate kéo ngược nhau |
+| `nhầm` / `lộn` | "chắc b **nhầm** lịch nghỉ trưa r, bên đó nghỉ 12h-13h" · "chắc b **lộn** chi nhánh r" — **đính chính dữ kiện**, loại comment hữu ích nhất trên thread có review sai thông tin |
+
+Phân biệt: `hên xui`/`gặp hôm`/`nói quá` phủ nhận **lời kể**; `nhầm`/`lộn` sửa **một dữ kiện kiểm được**.
+
+### M7-D: sàn Kiểu 7 có BA điều kiện
+
+`NO_BRAND_SECTIONS={7}` **không** tự áp cho `anti` — nó nằm trong `check_new_angles`, mà hàm đó
+return ngay nếu mode không phải `reply-group`. M7-D phải tự kiểm.
+
+Điều kiện thứ ba (`SELF_EXP_RX`) tồn tại vì lỗ đo được: "**bên đó ổn lắm**, b khám lại chưa v?"
+thoả cả câu-hỏi và không-brand — `BRAND_RX` chỉ là `\bDND\b|Trương Định`, mà `bên đó` là cách nói
+§Tone **khuyến khích**. Chốt "né hẳn" đã bỏ Kiểu 6, nên Kiểu 7 là phòng tuyến cấu trúc **duy nhất**
+còn lại; nó không được thoả bằng khen + câu hỏi đuôi.
+
+Sàn đếm ≥2 chỉ fail ở run ≥10 item; 3 luật per-item áp **mọi độ dài** — theo đúng cách
+`check_new_angles` đã tách.
+
+### M7-E: gác KHUNG NHƯỢNG BỘ, không gác từ vựng triệu chứng
+
+**Không reuse `DISSATISFACTION_RX`, và không phải bản siết nhẹ của nó.** `DISSATISFACTION_RX` chạy
+fail-**open** (M5 đòi Kiểu 6 *phải* có cụm; khớp nhầm chỉ cho qua một draft); M7-E chạy
+fail-**closed** (khớp nhầm chặn draft đúng). Đảo hướng thì false-positive đổi giá, nên không mượn
+lại được độ chính xác đo ở hướng kia. Sweep corpus chứng minh:
+
+| Cụm | Câu thật bị bắt oan |
+|---|---|
+| `khô mắt` | "vết mổ nhỏ nên mau lành vs **đỡ khô mắt** hơn mấy gói khác" — đang **bán** bệnh viện |
+| `khô mắt` | "e làm văn phòng **sợ khô mắt** quá" |
+| `đông lắm` | "cuối tuần có **đông lắm** k ạ" |
+| `đi xa` | "e ở Long An lên nên **đi xa** chút mà vẫn đáng" |
+
+**M7-E fail-open có chủ đích.** Bypass đo được, không mang cụm nào trong list: "hôm e đi thì phải
+**ngồi đợi tới trưa**, mà bs khám kỹ" · "e đi **3 lần mới xong** hết các bước, nhưng đáng" ·
+"**chỗ đó hơi chật**, bs thì ổn". Tập cách nói một điểm dở là mở; siết thêm là quay lại đúng lỗi
+trên. Lý do chấp nhận: **hậu quả bất đối xứng** — M7-C lọt → thread đấu khẩu với người khiếu nại
+(hỏng thật); M7-E lọt → một comment cân bằng lẫn vào 20 comment tích cực (**trông thật hơn**).
+
+### M7-F: khoảng trống đo được giữa §7C nói và §7C làm
+
+| Regex | Thực tế chỉ phủ | Không phủ |
+|---|---|---|
+| `superlative_vn` | `tốt nhất` · `giỏi nhất` · `số 1` | `khám kỹ nhất` · `rõ nhất` · `uy tín nhất q3` · `hơn hẳn` · `vượt trội` |
+| `compare_other_hospital` | so sánh **giá** | so sánh **chất lượng**: "bên này ổn hơn chỗ cũ" · "viện khác k bằng" |
+
+Draft `anti` 20 item **PASS** `--check` trong khi chứa "bs giải thích **rõ nhất** với e". Mode
+`anti` trượt vào khoảng này nặng nhất: Kiểu 5 (khách đã đi nhiều viện) mời gọi so sánh chất lượng.
+
+**`ASKING_RX` — hỏi không phải claim.** Tiền lệ: fixture `B3` đã tách *nêu* phí khỏi *hỏi* phí.
+Hai câu corpus thật sẽ bị bắt oan nếu không có: "gói **rẻ nhất** bên mình giờ là bao nhiêu thế ad"
+và "k biết bên dnd bác sĩ nào **khám kỹ nhất** mng nhỉ".
+
+`đông nhất` bị loại khỏi `SUPERLATIVE_GEN_RX`: không phải lời khen thương hiệu, và chồng lấn
+`CONCESSION_RX`. Một cụm chỉ thuộc một gate.
+
+### M7-B/C/E/F soi ITEM, không soi toàn văn
+
+Khác 5C (scan cả draft). Lý do đo được: `seeding` xuất hiện ở **dòng tiêu đề file** của cả 3 file
+scratch cũ (`# Seeding Reply-Group - ...`). Soi toàn văn thì mọi draft fail M7-C vì chính cái tiêu
+đề skill tự in. `parse_items` bỏ dòng đó.
+
+### Marker IMPLIES mode
+
+Draft có blockquote review nhưng **thiếu dòng `**Mode:**`** → `detect_mode` = `unknown` → cả
+`check_new_angles`, `check_topic_fit` và họ M7 return ngay → `--check` in **PASS**. Lỗi output dễ
+xảy ra nhất (rơi header) vô hiệu hoá toàn bộ gate mới mà báo xanh. Nên: có marker mà mode ≠ `anti`
+→ FAIL.
+
+### M6 dùng lại cho `anti`
+
+`TOPIC_FIT_MODES = {reply-group, reply_group, anti}`. Alias `reply_group` có trong đó vì lỗ **có
+trước**: `COMMAND_MODES` nhận cách viết gạch dưới và `QUOTA_10_10` có row cho nó, nhưng M5/M6 so
+chuỗi đúng `"reply-group"` — đo được: `**Mode:** reply_group` + drift textbook trên câu hỏi Phaco
+→ **PASS**.
+
+**Review chạm ≥2 nhãn service → skip M6-B/C kèm note in cả danh sách nhãn.** `TOPIC_LADDER` là
+first-match, viết cho câu hỏi **một ý định**; review xấu kể tràn nhiều dịch vụ. Đo: "đi **đo độ cắt
+kính** ở đây sai độ, mà tư vấn **mổ cận smile pro** cứ đẩy giá" → `kinh`, và
+`SERVICE_DRIFT_TARGETS["kinh"] = ("kx",)` → **mọi** comment kể chuyện mổ SMILE fail. §M6 của file
+này đã ghi: over-fire là hướng tệ hơn. In nhãn ra là để nếu ai pad thêm khiếu nại thứ hai nhằm tắt
+M6 thì dấu vết hiện ngay trong output `--check`.
+
+### M5 KHÔNG mở cho `anti`
+
+Kiểu 6 của M5 là góc mixed-có-điểm-dở, mà `anti` **cấm** đúng thứ đó. Mode `anti` không dùng số 6;
+sàn chống-toàn-khen của nó là M7-D.
 
 ## Footer 2 lớp
 
@@ -237,8 +378,11 @@ Luật phí **không** có ngoại lệ mode nào. `maps`/`koc` vẫn chịu M2 
 | E2 | run đủ 10 item có sàn 6+7 mà **không** có 8/9/10 → phải PASS (kiểu chọn theo ngữ cảnh) |
 | C–F | draft biết-sai phải fail **đúng gate**, draft đúng phải pass |
 | G | M6 topic-fit: drift có token · drift bằng `KX_CONTEXT` · **3 ca chống over-fire** (Phaco/võng mạc/khám bé nhắc nhỏ giãn → PASS) · hậu phẫu mang service · escape hatch · M6-A · M6-D · M6-C 2 chiều |
-| G2 | `detect_topic()` ladder — 15 ca, gồm `lão thị + phaco` → `lao_thi` (khác bucket `lt_phaco`), `mổ ortho-k` → `ksct` (không phải `kx`), `khám tổng quát xem có cườm` → `phaco` |
+| G2 | `detect_topic()` ladder — **19** ca, gồm `lão thị + phaco` → `lao_thi` (khác bucket `lt_phaco`), `mổ ortho-k` → `ksct` (không phải `kx`), `khám tổng quát xem có cườm` → `phaco` |
 | G3 | `services.md` không có token tiền (M6-E) |
+| H | M7 per-item — 47 ca. **Các row PASS lấy từ corpus thật**, gồm 4 câu `DISSATISFACTION_RX` từng bắt oan và 2 câu hỏi có chữ "nhất" |
+| H2 | M7 cấp draft — 10 ca: marker thiếu/sai format/thiếu Mode · excise 2 chiều · **anti-smuggle** (item dán không có `>`) · M6 reuse · multi-service skip · sàn Kiểu 7 |
+| H3 | routing — `parse_command` + `detect_mode`, gồm `anti` trong ngoặc kép không đánh cắp `reply-group`, và `Antibiotic` không thành mode `anti` |
 
 Cặp fixture khoá **sàn M5 là 6+7 cụ thể**, không phải "bất kỳ góc mới nào": `E2` chứng minh thiếu 8/9/10 vẫn pass, còn negative `full run with 8/9/10 but no 6 or 7` chứng minh 3 góc kia không thay thế được cặp chống-toàn-khen.
 
