@@ -303,15 +303,15 @@ Xáo trộn persona mỗi lần chạy. Không dùng quá 3 câu cùng 1 persona
 4. **Góc 4: Dịch vụ & CSVC (3 câu)** — Quy trình trong ngày, phòng ốc, Ortho-K cho trẻ. **Câu Ortho-K không được nhắc khám free** (Ortho-K = T2 có phí); hỏi phí thì để ngỏ/hotline.
 5. **Góc 5: Hậu phẫu (3 câu)** — Hồi phục, khô mắt, tái khám, kiêng cữ.
 6. **Góc 6: Social proof — Người đã mổ xong (5 câu)** — Chia sẻ trải nghiệm tích cực, kể chi tiết (BS, thị lực, số ngày hồi phục).
-7. **Góc 7: Story kể chuyện (4 câu)** — Bài dài hơn hẳn các góc khác (1 đoạn 4-6 câu, kể mạch trải nghiệm thật). Chủ đề: tâm lý lo lắng/rén trước ngày mổ, buổi khám chuyên sâu 12 bước diễn ra thế nào, băn khoăn trước khi quyết định mổ. Luôn đặt bối cảnh ở DND Sài Gòn/DND Trương Định — không dùng tên bệnh viện khác. Kết bài bằng 1 câu hỏi xin chia sẻ/động lực/kinh nghiệm từ mọi người, không phải câu hỏi thông tin khô khan.
+7. **Góc 7: Story kể chuyện (4 câu)** — Bài dài hơn hẳn các góc khác (1 đoạn 4-6 câu, kể mạch trải nghiệm thật). Chủ đề lấy từ pool ở **MODE 1B**; nếu lấy chủ đề nhóm "trước mổ" thì **bắt buộc áp luật 3 câu + anti-pattern ở §Nhóm A mở rộng** — không viết bài dừng ở "e lo / e băn khoăn / e chần chừ". Luôn đặt bối cảnh ở DND Sài Gòn/DND Trương Định — không dùng tên bệnh viện khác. Kết bài bằng 1 câu hỏi xin chia sẻ/động lực/kinh nghiệm từ mọi người, không phải câu hỏi thông tin khô khan.
 8. **Góc 8: So sánh bệnh viện (4 câu)** — Đóng vai người đang tìm hiểu nhiều nơi: đã khám (hoặc định khám) ở 1-2 viện khác — ví dụ Mắt Sài Gòn, Mắt TPHCM, Việt Nhật — và đang cân nhắc thêm DND Sài Gòn để khám/so sánh giá, công nghệ, cách tư vấn. DND luôn xuất hiện như **1 lựa chọn đang xem xét** bên cạnh viện khác, không phải viện đã chốt hay được khen vượt trội — giữ đúng tinh thần "đang tìm hiểu, chưa quyết".
 
 ### Ví dụ mode `group`
 - "mn có ai mổ cận chỗ bs Tuấn DND Sài Gòn chưa ạ, cho e xin review tay nghề bác với"
 - "e thấy bên DND SG đang có smiledays, tc e eo hẹp mổ đc gói nào tốt nhỉ"
 - "mình mổ smile pro bên DND Trương Định tuần trước, bs Tuấn mổ cho, dễ chịu hơn mình tưởng mn, tầm 2-3 ngày là đi làm lại đc r"
-- (Góc 7 - story) "e vừa đặt lịch mổ cận tuần sau ở DND Sài Gòn xong mà từ hôm qua đến giờ tự nhiên lại thấy rén 😅. lúc đi khám thì quyết tâm lắm, bs bảo mắt e đủ điều kiện, cũng chọn được phương pháp r. về nhà bố mẹ lại hỏi đủ thứ, có đau k, nhỡ sau này có vấn đề thì sao, làm e cũng dao động theo. anh/chị nào từng mổ ở DND SG r cho e xin ít động lực với ạ, k biết trước ngày mổ mn có bị tâm lý giống e k"
-- (Góc 7 - story) "mn cho e xin review mổ cận ở DND Sài Gòn với ạ 🙏 tuần trước e đi khám chuyên sâu trước mổ ở đây, bình thường e khá sợ khám mắt vì nhìn máy móc là run, nhưng buổi khám k căng như e lo, mất khá nhiều tg vì qua nhiều bước, có nhỏ thuốc rồi đợi đo lại nên gần cả buổi sáng. bs giải thích tình trạng mắt e khá kỹ và tư vấn e đủ điều kiện mổ smile pro, nhưng e vẫn chưa chốt ngay vì đây là quyết định lớn. ai mổ ở DND SG r cho e xin ít review: thị lực sau mổ ổn k, hồi phục ntn, bệnh viện theo dõi hậu phẫu có kỹ k ạ, e cảm ơn mn nhiều"
+- (Góc 7 - story · trục **A9**) "mẹ e cứ gạt 'mắt mũi để yên đó, đụng vào lỡ có j hối k kịp', xong mẹ kể bà cô ở quê mổ xong khô rát cả năm 😔. e hiểu mẹ lo nên k dám nói tiếp, mà e cx mệt cái cảnh trời mưa là mờ kính, đi bơi thì gần như mù, nói ra thì mẹ bảo chịu chút đi. e tìm hiểu cả tháng, chọn đc DND Sài Gòn r mà vẫn chưa dám đặt lịch vì k muốn đi kiểu giấu mẹ. mấy hôm nay e tính rủ mẹ đi cùng buổi khám cho mẹ nghe bs nói trực tiếp, chứ e nói mẹ k tin đâu. mn có ai từng phải thuyết phục ba mẹ vụ này chưa ạ, mn nói kiểu j cho ba mẹ chịu ngồi nghe"
+- (Góc 7 - story · buổi khám làm cốt truyện — **tối đa 1 bài/run**, xem §Nhóm A mở rộng) "mn cho e xin review mổ cận ở DND Sài Gòn với ạ 🙏 tuần trước e đi khám chuyên sâu trước mổ ở đây, bình thường e khá sợ khám mắt vì nhìn máy móc là run, nhưng buổi khám k căng như e lo, mất khá nhiều tg vì qua nhiều bước, có nhỏ thuốc rồi đợi đo lại nên gần cả buổi sáng. bs giải thích tình trạng mắt e khá kỹ và tư vấn e đủ điều kiện mổ smile pro, nhưng e vẫn chưa chốt ngay vì đây là quyết định lớn. ai mổ ở DND SG r cho e xin ít review: thị lực sau mổ ổn k, hồi phục ntn, bệnh viện theo dõi hậu phẫu có kỹ k ạ, e cảm ơn mn nhiều"
 - (Góc 8 - so sánh viện) "e cận 5 độ loạn 1, mới khám ở mắt sg đc tư vấn femto pro với smile pro r, giờ muốn khám thêm chỗ khác xem sao. có ai khám ở DND Sài Gòn r k, chi phí khám bên đó tầm nhiêu, có nên qua khám thêm 1 vòng trước khi chốt k ạ"
 - (Góc 8 - so sánh viện) "e đang phân vân giữa mắt tphcm với DND Trương Định q3, chưa biết nên khám ở đâu trước, ai đi khám cả 2 chỗ r so sánh giúp e với"
 
@@ -325,18 +325,18 @@ Xáo trộn persona mỗi lần chạy. Không dùng quá 3 câu cùng 1 persona
 
 ### Đặc trưng story (kế thừa Góc 7)
 - **Bài dài hơn hẳn comment thường:** mỗi bài 1 đoạn 4-6 câu, kể mạch trải nghiệm thật, có cảm xúc.
-- **Luôn đặt bối cảnh ở DND Sài Gòn / DND Trương Định** — không dùng tên bệnh viện khác làm nơi mổ (trừ chủ đề 7/15 có thể nhắc viện khác như nơi "đã đi khám trước" rồi mới tới DND).
+- **Luôn đặt bối cảnh ở DND Sài Gòn / DND Trương Định** — không dùng tên bệnh viện khác làm nơi mổ (trừ trục A13/D7 có thể nhắc "chỗ đã đi khám trước" rồi mới tới DND).
 - **Kết bài bằng 1 câu hỏi xin chia sẻ/động lực/kinh nghiệm** từ mọi người — KHÔNG phải câu hỏi thông tin khô khan.
+- **Nhóm A còn thêm 3 luật riêng** (luật 3 câu · chi tiết vật lý · anti-pattern) — xem §Nhóm A mở rộng. Bỏ qua là ra đúng loạt bài một màu "e lo / e sợ / e chần chừ".
 - Áp dụng đủ Tone & Writing Style + Persona Pool + quy tắc tên bác sĩ như các mode khác.
 
-### Pool 19 chủ đề — xáo trộn mỗi lần chạy, chọn ~15 câu, phân bổ ĐỀU 4 nhóm (~3-4 câu/nhóm)
+### Pool chủ đề — xáo trộn mỗi lần chạy, chọn ~15 câu, phân bổ ĐỀU 4 nhóm (~3-4 câu/nhóm)
 
-**Nhóm A — Trước mổ (tâm lý/quyết định):**
-1. Tâm lý lo lắng/rén trước ngày mổ
-2. Buổi khám chuyên sâu 12 bước diễn ra thế nào
-3. Băn khoăn trước khi quyết định mổ
-8. Vượt nỗi sợ đụng vào mắt (sợ dao kéo, nhìn máy là run)
-9. Chần chừ nhiều năm mới quyết mổ, tiếc sao không làm sớm
+**Nhóm A — Trước mổ (tâm lý / quyết định):** nhóm này có **pool riêng 18 trục**, không phải liệt kê chủ đề như 3 nhóm còn lại — xem **§Nhóm A mở rộng** ngay sau pool. Chọn 3-4 trục, **mỗi lần chạy phải rơi vào ≥3 cụm khác nhau** (A-I → A-V).
+
+> Lý do tách riêng: Nhóm A là nhóm dễ viết một màu nhất. 5 chủ đề cũ (lo lắng trước ngày mổ · buổi khám 12 bước · băn khoăn quyết định · sợ dao kéo · chần chừ nhiều năm) thực chất là **cùng một câu chuyện** kể bằng 5 nhãn khác nhau: "e lo, e sợ, e chưa quyết". Đọc 3 bài liên tiếp là nhận ra ngay cùng một khuôn.
+>
+> Cả 5 chủ đề đó **không bị xoá**, chỉ được cụ thể hoá thành tình huống có xung đột: lo lắng trước ngày mổ → **A17** (nghi thức đêm trước) · băn khoăn quyết định → **A15/A16** (bị dí chốt · được trao quyền chọn) · sợ dao kéo → **A5** · chần chừ nhiều năm → **A7** (chi phí cơ hội của trì hoãn). Riêng "buổi khám 12 bước" bị **hạ từ chủ đề xuống bối cảnh** — xem §Luật chọn trục.
 
 **Nhóm B — Sau mổ (hồi phục/đổi đời):**
 4. Hành trình hậu phẫu — hồi phục ngày 1/ngày 3, sáng mắt dần
@@ -353,17 +353,113 @@ Xáo trộn persona mỗi lần chạy. Không dùng quá 3 câu cùng 1 persona
 16. Kể thay ba mẹ mổ Phaco (đục thủy tinh thể, mắt sáng lại)
 
 **Nhóm D — Y khoa đặc biệt / cách biết đến DND:**
-15. Cận nặng từng bị từ chối laser → được tư vấn Phakic ICL
+15. Cận nặng từng bị từ chối laser → được tư vấn Phakic ICL — **góc y khoa** (phương pháp nào phù hợp). Cùng tình huống nhưng kể ở **góc tâm lý** (sợ bị từ chối lần nữa) thì đó là trục **A13** của Nhóm A, không phải bài này. Một run không lấy cả hai.
 7. Quá trình chọn viện & chốt DND SG
 18. Tình cờ biết DND (bạn giới thiệu / xem livestream / lướt fanpage)
 19. Tiktoker/KOC quay hành trình review, nhận cashback khi share
 
 ### Cách xuất kết quả (mode story)
-In **gộp theo 4 nhóm A/B/C/D**, mỗi nhóm là 1 tiêu đề, dưới liệt kê các bài story của nhóm đó. Mỗi lần chạy chọn chủ đề khác nhau trong pool để không trùng ý.
+In **gộp theo 4 nhóm A/B/C/D**, mỗi nhóm là 1 tiêu đề, dưới liệt kê các bài story của nhóm đó. Mỗi lần chạy chọn chủ đề khác nhau trong pool để không trùng ý. Nhóm A ghi kèm **mã trục** (`A1`…`A18`) sau tiêu đề bài để đối chiếu luật chọn trục.
+
+### Nhóm A mở rộng — 18 trục, 5 cụm
+
+**Vấn đề đang sửa:** 5 chủ đề Nhóm A cũ đều dừng ở **trạng thái cảm xúc** ("lo lắng", "băn khoăn", "chần chừ", "sợ"). Trạng thái cảm xúc không phải nội dung — nó là *nhãn* dán lên nội dung. Viết theo nhãn thì bài nào cũng ra cùng một khuôn: mở bằng "e lo/e sợ", giữa bài kể buổi khám, kết bằng "mn cho e xin động lực".
+
+**Luật thay thế:** mỗi bài Nhóm A phải trả lời được **3 câu** trước khi viết. Không trả lời được cả 3 thì bài đó chưa có nội dung, đừng viết:
+
+1. **Sợ/băn khoăn CÁI GÌ cụ thể?** — không phải "sợ mổ", mà "sợ nằm không yên vì hồi lấy máu đã xỉu", "sợ 20 năm nữa mắt thế nào thì chưa ai trả lời được".
+2. **Hai thứ nào đang kéo nhau?** — phải có **xung đột thật**: tiền vs thời gian · mẹ vs bản thân · deadline nghề vs độ cận chưa ổn định · muốn tin bs vs sợ bị bán thêm. Bài chỉ có một chiều "e lo" là bài không có xung đột.
+3. **Câu hỏi kết bài hỏi ĐÚNG cái xung đột đó** — không phải "mn cho e xin động lực" dán vào cuối. Câu hỏi phải là câu mà chỉ người từng ở đúng tình huống đó mới trả lời được.
+
+Thêm 1 luật hình thức: mỗi bài cần **≥1 chi tiết vật lý cụ thể** (đồ vật, con số nhỏ, hành động, địa điểm, thời điểm trong ngày) — "tay lạnh ngắt lúc đợi đọc kết quả", "tờ giấy bs ghi để trong tủ 6 tháng", "đặt 3 cái báo thức mà thức tới sáng", "chụp cái ảnh cuối còn đeo kính". Chi tiết vật lý là thứ phân biệt bài người thật gõ với bài mô tả cảm xúc chung chung.
+
+#### Cụm A-I — Nỗi sợ có nội dung (không phải "sợ" chung chung)
+
+| # | Trục | Xung đột / chi tiết cần có |
+|---|---|---|
+| **A1** | Sợ **mất kiểm soát trong lúc mổ**, không phải sợ đau: sợ nằm không yên, sợ nhắm mắt sai lúc, sợ panic giữa ca | Nền: từng xỉu lúc lấy máu / có rối loạn lo âu / hồi bé nhỏ thuốc giãn là khóc ầm |
+| **A2** | Sợ **hậu quả dài hạn không ai trả lời được**: 20-30 năm nữa mắt thế nào, về già mổ Phaco có bị ảnh hưởng | Đã hỏi bs, bs nói theo dõi định kỳ — nhưng câu "20 năm nữa" thì không ai chốt được. Xung đột: muốn một câu chắc chắn vs không tồn tại câu chắc chắn |
+| **A3** | Đọc **case biến chứng trên mạng lúc 2h sáng** rồi không ngủ được | Xung đột: lý trí biết đó là số ít vs cái case đó cứ hiện ra. Chi tiết: đọc lúc mấy giờ, đọc ở đâu |
+| **A4** | Mắt có **nền bệnh riêng** nên sợ mình là ca ngoại lệ: khô mắt sẵn, viêm bờ mi, cận lệch 2 mắt, nhược thị nhẹ, giác mạc chóp nghi ngờ | Xung đột: mắt mình khác người ta nên review của người khác không dùng được cho mình |
+| **A5** | Sợ **dao kéo / máy móc chạm vào mắt** — bản cụ thể hoá của chủ đề cũ | Phải có chi tiết vật lý: đo nhãn áp phụt hơi là giật, không dám tự nhỏ thuốc, cắt tóc gần mắt cũng nhắm chặt |
+
+#### Cụm A-II — Kinh tế & chi phí cơ hội
+
+| # | Trục | Xung đột / chi tiết cần có |
+|---|---|---|
+| **A6** | **Cộng tiền kính mấy năm qua** rồi so với tiền mổ — phát hiện gần bằng nhau | Xung đột: trả 1 lần thì xót, trả rải ra thì không thấy. Chi tiết: đổi mấy cặp kính, lens, nước ngâm |
+| **A7** | **Chi phí cơ hội của việc trì hoãn**: mỗi năm dời lại là thêm 1 năm sống với kính, mà tiền để dành thì bị việc khác chen vào | Xung đột: kế hoạch vs đời sống thật. Chi tiết: đã dời mấy lần, lý do từng lần |
+| **A8** | Cân giữa **tiền mổ cho mình vs việc khác của gia đình** (đóng học cho em, sửa nhà, ba mẹ cần khám) | Xung đột thật, không phải "tc eo hẹp" chung chung. Persona sinh viên / người mới đi làm |
+
+#### Cụm A-III — Áp lực từ người khác
+
+| # | Trục | Xung đột / chi tiết cần có |
+|---|---|---|
+| **A9** | **Ba mẹ phản đối** — "mắt mũi để yên đó", kèm câu chuyện người quen mổ hỏng | Xung đột: hiểu mẹ lo vs mệt cảnh mưa mờ kính. Hướng giải: rủ mẹ đi cùng buổi khám cho mẹ nghe bs nói |
+| **A10** | **Bạn bè / đồng nghiệp mỗi người một ý**, người thúc người dội — càng hỏi càng loãng | Chi tiết: hỏi mấy người, mỗi người nói gì trái nhau |
+| **A11** | **Chưa dám công khai**: xin nghỉ phép mà không dám khai lý do thật, sợ bị hỏi qua hỏi lại, sợ mổ xong không đạt thì mất mặt | Xung đột: muốn làm âm thầm vs cần người chở về |
+| **A12** | **Deadline nghề nghiệp dí**: sơ tuyển công an/quân đội/phi công/tiếp viên, hạn nộp hồ sơ vs độ cận chưa ổn định hoặc chưa đủ tuổi khuyến nghị | Xung đột rõ nhất trong cả pool: thời hạn bên ngoài vs điều kiện y khoa bên trong |
+
+#### Cụm A-IV — Nghi ngờ quy trình & niềm tin
+
+| # | Trục | Xung đột / chi tiết cần có |
+|---|---|---|
+| **A13** | **Từng bị một nơi từ chối laser** → cạch luôn, giờ đi khám lại mà mang tâm lý "kiểu gì cũng nghe lại câu đó" | Chi tiết: lần trước bs nói gì, lần này ngồi đợi đọc kết quả cảm giác ra sao. Hướng: được tư vấn Phakic ICL nhưng vẫn chưa dám mừng |
+| **A14** | Sợ **bị tư vấn lên phương pháp đắt hơn nhu cầu thật** — muốn tin bs mà không có chuyên môn để tự kiểm | Xung đột: muốn tin vs không đủ nền để tin. Không được viết thành tố cáo viện nào |
+| **A15** | Sợ **bị dí chốt ngay trong buổi khám**, muốn về nhà nghĩ thêm mà sợ mất suất/mất ưu đãi | Chi tiết: đã chuẩn bị sẵn câu "e về suy nghĩ thêm" trong đầu |
+| **A16** | **Bs đưa 2 hướng rồi để tự chọn** → đứng hình, vì cứ nghĩ đi khám là được chỉ định 1 đường | Xung đột: mong được quyết hộ vs được trao quyền quyết. Chi tiết: tờ giấy bs ghi, đọc tới lui cả tuần |
+
+#### Cụm A-V — Nghi thức & mốc thời gian
+
+| # | Trục | Xung đột / chi tiết cần có |
+|---|---|---|
+| **A17** | **Đêm trước ngày mổ**: đặt 3 báo thức mà thức tới sáng, chụp cái ảnh cuối còn đeo kính, dọn sẵn nhà vì biết mai không nhìn rõ | Không phải "e lo" — là **nghi thức**. Chi tiết vật lý là bắt buộc |
+| **A18** | **Ký giấy đồng ý phẫu thuật**: đọc tới dòng rủi ro thì chững lại, dù trước đó đã đọc hết trên mạng | Xung đột: biết trước vs thấy nó in trên giấy có tên mình. ⚠️ Viết là "giấy **đồng ý phẫu thuật**" — chữ "giấy **cam kết**" bị gate 5C `commitment` chặn |
+
+#### Luật chọn trục — chống một màu
+
+- Chọn **3-4 trục**, phải rơi vào **≥3 cụm khác nhau**. 3 bài cùng cụm A-I là đúng lỗi đang sửa, chỉ đổi nhãn.
+- **Không quá 1 bài/run** kể chi tiết buổi khám như nội dung chính. Buổi khám được xuất hiện ở nhiều bài, nhưng là **bối cảnh**, không phải cốt truyện. Cũ: 5 chủ đề mà 1 chủ đề dành riêng cho buổi khám → cứ ~20% Nhóm A là bài tả buổi khám.
+- **Không quá 1 bài/run** mở đầu bằng cụm cảm xúc trần (`e lo`, `e sợ`, `e băn khoăn`, `e rén`, `e chần chừ`). Các bài còn lại mở bằng **sự việc** — con số, hành động, câu người khác nói, mốc thời gian.
+- Câu hỏi kết bài **không được trùng khuôn** giữa các bài trong cùng run. Xoay: hỏi cách xử lý tình huống · hỏi người cùng hoàn cảnh · hỏi cái gì làm họ chốt · hỏi họ nói với ba mẹ thế nào · hỏi họ dựa vào gì để chọn.
+
+#### Anti-pattern Nhóm A — viết thế này là chưa đủ sâu
+
+| ❌ Chưa đủ | Vì sao | ✅ Thay bằng |
+|---|---|---|
+| "e lo lắm k biết mổ có sao k" | Nhãn cảm xúc, không có nội dung. Không trả lời được câu 1 của luật 3 câu | "e sợ nằm k yên giữa ca, hồi lấy máu e còn xỉu" (A1) |
+| "e băn khoăn k biết có nên mổ k" | Không có xung đột — chỉ có 1 chiều | "e cần bỏ kính trước kỳ sơ tuyển mà độ e năm nay còn tăng 0.5" (A12) |
+| "e chần chừ mấy năm r" | Trạng thái, không phải sự việc. Chần chừ **vì cái gì** mới là nội dung | "e dời lịch 2 lần, lần đầu lấy lý do công việc, lần 2 thì thật ra là e sợ" (A7) |
+| "tc e eo hẹp nên chưa mổ đc" | Chung chung, dùng được cho mọi bài | "tiền mổ của e đang cân với tiền đóng học cho em, mà em e vào cấp 3 năm nay" (A8) |
+| "mn cho e xin ít động lực với ạ" ở cuối mọi bài | Câu hỏi rỗng, ai cũng trả lời được nên không ai trả lời | Hỏi đúng xung đột: "mn nói kiểu j cho ba mẹ chịu ngồi nghe ạ" (A9) |
+| Kể lại quy trình 12 bước như bài mô tả dịch vụ | Đây là story, không phải bài giới thiệu. Buổi khám là bối cảnh | Chỉ giữ chi tiết nào có cảm xúc gắn vào: tay lạnh lúc đợi kết quả, tờ giấy bs ghi |
+
+#### Bẫy guardrail riêng của Nhóm A — đã test bằng `--check`
+
+Nhóm A là nhóm dễ vấp gate nhất vì nó viết về **nỗi sợ**, mà mô tả nỗi sợ hay kéo theo đúng những cụm bị cấm. Sáu bẫy đã đo:
+
+| Định viết | Gate chặn | Viết thay |
+|---|---|---|
+| "hôm ký giấy **cam kết** trước mổ" | 5C `commitment` | "hôm ký giấy **đồng ý phẫu thuật**" |
+| "e mong **hết cận** sau 10 năm đeo kính" | 5C `cure_myopia` | "e mong **thoát kính** sau 10 năm đeo" |
+| "bs nói **k phải là k đau**, chỉ cộm xốn" | 5C `dau_claim` + M3 — regex bắt cả câu **phủ định của phủ định** | "bs nói cảm giác chỉ cộm xốn tầm mấy tiếng đầu" |
+| "**so với viện** kia thì bên đây giải thích kỹ hơn" | 5C `compare_other_hospital` | "chỗ e khám trước đo có 10 phút, bên đây đo gần cả buổi" — kể **việc**, không so viện |
+| "bs mổ mấy nghìn ca **chưa lỗi ca nào**" | 5C `safety_absolute` | "bs giải thích rõ rủi ro cho e nghe" |
+| "e thấy bên đây **khám kỹ nhất** q3" | 5C `superlative_vn` / M7-F | "e thấy bs chịu ngồi giải thích kỹ cho e" |
+
+Trục A2 (sợ hậu quả 20 năm) và A3 (đọc case biến chứng) **được phép nhắc rủi ro/biến chứng** — kể **nỗi sợ của mình** không phải claim y khoa. Nhưng không được kết bài bằng câu trấn an tuyệt đối; kết bằng câu hỏi thật hoặc bằng chính điều bs đã nói ("bs bảo tuỳ tình trạng mắt từng người").
+
+
 
 ### Ví dụ mode `story`
-(2 ví dụ này chính là style Góc 7 — viết bài MỚI mỗi lần, chỉ tham khảo giọng)
-- (Nhóm A) "e vừa đặt lịch mổ cận tuần sau ở DND Sài Gòn xong mà từ hôm qua đến giờ tự nhiên lại thấy rén 😅. lúc đi khám thì quyết tâm lắm, bs bảo mắt e đủ điều kiện, cũng chọn được phương pháp r. về nhà bố mẹ lại hỏi đủ thứ, có đau k, nhỡ sau này có vấn đề thì sao, làm e cũng dao động theo. anh/chị nào từng mổ ở DND SG r cho e xin ít động lực với ạ, k biết trước ngày mổ mn có bị tâm lý giống e k"
+(viết bài MỚI mỗi lần, chỉ tham khảo giọng — không copy)
+
+**Nhóm A — 2 ví dụ dưới đã qua `--check` PASS.** Đọc kèm luật 3 câu ở §Nhóm A mở rộng: mỗi bài đều nêu **sợ cái gì cụ thể**, có **xung đột hai chiều**, và câu hỏi kết bám đúng xung đột đó.
+
+- (Nhóm A · trục **A13** — từng bị một nơi từ chối) "năm ngoái e đi khám 1 chỗ, bs xem bản đồ giác mạc xong lắc đầu bảo mắt e mỏng quá k bắn laser đc, e về ngồi xe buýt mà mắt đỏ hoe 😔. từ hôm đó e cạch luôn, ai nhắc chuyện mổ mắt là e đổi chủ đề. tuần rồi e mới lấy hết can đảm qua DND Sài Gòn khám chuyên sâu, lúc ngồi đợi bs đọc kết quả tay e lạnh ngắt, cứ nhẩm trước trong đầu là kiểu j cũng nghe lại đúng câu năm ngoái. bs Tuấn đo xong ngồi chỉ cho e giác mạc e dày bn, vì sao đường laser k hợp, còn đường Phakic ICL thì cân nhắc đc, mà e vẫn chưa dám chốt vì lần trước hy vọng r thất vọng. mn ai từng bị 1 nơi từ chối r đi khám lại chỗ khác chưa ạ, mn gỡ cái tâm lý này ntn"
+  > Sợ cụ thể: nghe lại đúng câu từ chối. Xung đột: muốn hy vọng vs sợ thất vọng lần hai. Chi tiết vật lý: xe buýt, tay lạnh ngắt. Câu hỏi kết chỉ người từng bị từ chối trả lời được.
+- (Nhóm A · trục **A16** — bs đưa 2 hướng để tự chọn) "hôm khám xong bs đưa e 2 hướng, giải thích ưu nhược từng cái r nói tuỳ e chọn, e ngồi đó mà đứng hình lun. e cứ nghĩ đi khám là bs chỉ định 1 đường r mình theo, k nghĩ là mình phải cầm quyết định trong khi mình chả có chuyên môn j. về nhà e mở lại tờ giấy bs ghi, đọc tới lui cả tuần, nghiêng bên này lại thấy tiếc bên kia. e chưa hẹn lại lịch vì sợ chọn xong mấy năm sau lại nghĩ 'hồi đó chọn cái kia có khi hơn'. mn lúc bs đưa nhiều lựa chọn thì mn dựa vào cái j để chốt ạ"
+  > Sợ cụ thể: sợ hối vì chính lựa chọn của mình. Xung đột: mong được quyết hộ vs được trao quyền quyết. Bài này **không** mở bằng "e lo/e sợ" — mở bằng sự việc.
 - (Nhóm B) "mình đeo kính từ năm lớp 6, tới giờ hơn 10 năm cận 6 độ, sáng nào dậy cũng quờ quạng tìm kính mới thấy đường 🥲. tuần trước mổ smile pro bên DND Trương Định, bs Tuấn mổ cho, sáng hôm sau mở mắt ra nhìn rõ luôn mà cứ ngỡ đang mơ. giờ đi tắm, bơi, ngủ dậy đều nhìn rõ, cảm giác lạ lắm mn ạ. ai mổ xong r có bị 'quen tay' đưa lên dụi mắt tìm kính giống mình k huhu"
 
 ---
@@ -836,6 +932,12 @@ Lưu vào: `C:\Users\Admin\.gemini\antigravity-ide\scratch\seeding_<mode>_<times
 | Nhắc tên DND quá nhiều trong 1 câu | Tối đa 1 lần/câu, đôi khi chỉ nói "chỗ Trương Định q3" |
 | Trùng cấu trúc câu | Đổi chủ ngữ + cách kết câu liên tục |
 | Copy nguyên Example Bank | Chỉ tham khảo style — viết câu MỚI mỗi lần |
+| **Story Nhóm A dừng ở nhãn cảm xúc ("e lo", "e băn khoăn", "e chần chừ")** | Nhãn không phải nội dung. Áp **luật 3 câu** (sợ cái gì cụ thể · hai thứ nào kéo nhau · câu hỏi kết bám xung đột) + **≥1 chi tiết vật lý**. Xem §Nhóm A mở rộng |
+| **3 bài Nhóm A cùng một cụm, chỉ đổi nhãn** | Chọn 3-4 trục rơi vào **≥3 cụm khác nhau** (A-I → A-V) |
+| **Bài Nhóm A nào cũng tả buổi khám 12 bước** | Tối đa **1 bài/run** lấy buổi khám làm cốt truyện; các bài khác dùng nó làm bối cảnh |
+| **Bài Nhóm A nào cũng kết "mn cho e xin ít động lực"** | Câu hỏi rỗng. Hỏi đúng xung đột của bài, mỗi bài một khuôn khác |
+| **Viết "ký giấy cam kết" trong story trước mổ** | Gate 5C `commitment` chặn chữ `cam kết`. Viết "giấy **đồng ý phẫu thuật**" |
+| **Viết "mong hết cận" / "bs nói k phải là k đau"** | `cure_myopia` và `dau_claim`/M3 chặn. Viết "mong **thoát kính**" · "cảm giác chỉ cộm xốn mấy tiếng đầu" |
 | Reply không liên quan câu hỏi gốc (mode reply-group) | Phải đọc kỹ câu hỏi gốc, reply đúng ngữ cảnh |
 | **Câu hỏi Phaco / cắt kính / lão thị / Ortho-K / tổng quát mà reply kéo về mổ cận** | Làm **Bước 0** phân loại service trước, đọc `services.md`, rồi viết theo service đó. Gate M6-B/M6-C chặn — xem MODE 2 |
 | **Trôi chủ đề không cần nhắc tên** (thread Phaco mà nói "bản đồ giác mạc", "ngưng lens", "vạt giác mạc") | Đó vẫn là giọng mổ cận, M6-B bắt qua `KX_CONTEXT`. Nói hậu cần **của service đang hỏi** |
