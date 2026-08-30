@@ -26,8 +26,8 @@ Draft phải qua `--check` **trước** khi ghi file. Ghi trước rồi check t
 |---|---|---|---|
 | `M2` | fail | Câu nói khám free mà service không thuộc T0/T-FU | 0 vi phạm |
 | `M3` | fail | Claim hết đau (regex mở rộng) | 0 hit |
-| `M5` | fail | Góc reply mới: Kiểu 6 phải có điểm dở thật, Kiểu 7 không nhắc brand, 10/10 chỉ ở Kiểu 1 | **Kiểu 6 + 7** bắt buộc khi run ≥10 item; Kiểu 8/9/10 optional → note |
-| `M6-A` | fail | Draft `reply-group` thiếu dòng `**Câu hỏi gốc:**` | **mọi độ dài**, không riêng full run |
+| `M5` | fail | Góc reply mới: Kiểu 6 phải có điểm dở thật, Kiểu 7 không nhắc brand, 10/10 chỉ ở Kiểu 1 | **Kiểu 6 + 7** bắt buộc khi run ≥10 item; Kiểu 8/9/10/11 optional → note |
+| `M6-A` | fail | Draft `reply-group` thiếu dòng `**Câu hỏi gốc:**`, **hoặc** có marker mà không có nội dung sau nó | **mọi độ dài**, không riêng full run |
 | `M6-B` | fail | Item trôi khỏi service câu hỏi: mang token service khác, **hoặc** giọng khúc xạ (`KX_CONTEXT`), mà không nhắc service đang hỏi | 0 item; xét **theo từng câu**; service `kx`/`none` không kích hoạt |
 | `M6-C` | fail | Tỉ lệ item **thực chất** chạm service câu hỏi quá thấp (trả lời chung chung / lạc đề) | **≥60%**, mẫu số **loại Kiểu 7**; chỉ áp run ≥10 item |
 | `M6-D` | fail | Nhắc BHYT kèm số hoặc % | 0 item — "có BHYT" thì được, số thì hotline. **Chạy cho mọi service**, kể cả `kx`/`none`: đây là luật phí mang số hiệu M6, không phải luật chủ đề |
@@ -38,6 +38,8 @@ Draft phải qua `--check` **trước** khi ghi file. Ghi trước rồi check t
 | `M7-D` | fail | Sàn Kiểu 7: item không phải câu hỏi · nhắc brand · mang trải nghiệm/đánh giá ngôi 1 | 3 luật per-item **mọi độ dài**; sàn ≥2 item chỉ ở run ≥10 |
 | `M7-E` | fail | Item ngoài Kiểu 7 mang **khung nhượng bộ** (`nói thật`, `công nhận`, `bù lại`, `e cx chờ lâu`) | 0 item |
 | `M7-F` | fail | Item xếp hạng chung (`khám kỹ nhất`, `uy tín nhất q3`, `hơn hẳn`) hoặc so sánh viện **phi-giá** (`viện khác k bằng`) | 0 item; item là **câu hỏi** được miễn |
+| `M8-A` | fail | Item ở Kiểu 11 (story reply) dài dưới 3 câu hoặc trên 7 câu | 3-7 câu/item; chỉ mode `reply-group` |
+| `M8-B` | fail | Item ở Kiểu 11 không gương chiếu chi tiết nào của bài gốc | ≥1 chi tiết trùng; **bỏ qua kèm note** nếu bài gốc không nêu chi tiết nào |
 | `5A` | fail | `10/10` ngoài góc được phép, hoặc vượt hạn ngạch | ≤20% item/run, `live` = 0 |
 | `5A` | fail / warn | Mode không khai được (`unknown`): có `10/10` → **fail** (không có luật nào xử được); không có `10/10` → warn | khai `**Mode:** <tên>` hoặc `--mode` |
 | `5C` | fail | Cấm chung: hết đau · superlative VN/EN · so sánh viện · cam kết · khỏi cận · **an toàn tuyệt đối** (`safety_absolute`) | 0 hit |
@@ -337,6 +339,46 @@ M6 thì dấu vết hiện ngay trong output `--check`.
 Kiểu 6 của M5 là góc mixed-có-điểm-dở, mà `anti` **cấm** đúng thứ đó. Mode `anti` không dùng số 6;
 sàn chống-toàn-khen của nó là M7-D.
 
+## M8 — Kiểu 11, story reply (`reply-group`)
+
+Kiểu 11 là **ngoại lệ độ dài duy nhất** của mode `reply-group` (3-7 câu, trong khi mọi kiểu khác 1-2 câu). Ngoại lệ đó là lý do phải có gate: "viết story cho hay hơn" là loại chỉ thị suy biến âm thầm thành "viết dài hơn", và trong skill này chỉ thị bắt-chước-example đã được đo là **có hiệu lực** (`10/10` 167 hit, `nhẹ nhàng` 281 hit).
+
+### `**Câu hỏi gốc:**` có 2 dạng, blockquote là dạng cho story
+
+Story gương chiếu chi tiết ở **dòng 2..n** của bài người ta dán (độ cận, nghề, ai đang cản). Nên marker nhận thêm dạng blockquote — **đúng ba lý do đã đo ở `REVIEW_Q_RX`**, không phải một biến thể tuỳ ý:
+
+1. **`.` không khớp newline.** Bài gốc có `phaco` ở dòng 2 → `detect_topic(dòng 1)` = `('pre','none')` → `check_topic_fit` early-return → **M6-B/C không chạy**. Fixture `multi-line post: M6 reads past line 1` khoá đúng ca này.
+2. **Bài gốc hay có gạch đầu dòng số** → khớp `ITEM_RX` → item ảo, làm loãng mẫu số M6-C/5A/ANTIREP. Dòng `> 1. …` không khớp `ITEM_RX`.
+3. **Ranh giới phải là ký tự `>`, không phải dòng trống.** Fixture `item smuggled under the marker still fails 5C` khoá điều này: item dán ngay dưới marker mà không có `>` vẫn phải bị 5C bắt.
+
+`ORIGINAL_Q_RX` (dạng inline) đòi **có ký tự không-trắng ngay trên dòng marker**, nên marker trơn + blockquote không khớp inline — hai dạng không tranh nhau. Marker mà **payload rỗng** → M6-A báo "wrong format", khác thông báo "missing": hai lỗi này sửa khác nhau.
+
+`excise_original_q` chỉ blank **dạng blockquote**. Dạng inline giữ nguyên hành vi cũ có chủ đích — đổi ở đây là thay đổi im lặng hành vi của mọi draft reply-group đang chạy, không phải tính năng của dạng mới.
+
+### M8-A: 3..7 câu, hai đầu đều là lỗi thật
+
+- **Dưới 3 câu:** là Kiểu 1/Kiểu 6 dán nhãn story. Góc này không mua được gì, mà lại xin được ngoại lệ độ dài.
+- **Trên 7 câu:** đọc như **bài đăng group**, đúng cái mà luật "1 câu/reply" ở MODE 2 được viết ra để chặn. Muốn dài hơn thì đã có `/dnd-seeding story`.
+
+`count_sentences` collapse `.{2,}` **trước** khi split: `...` giữa câu là nhịp nghỉ, không phải dấu kết. Emoji không phải separator. Câu cuối thiếu dấu chấm vẫn được đếm — §Tone chủ động yêu cầu thỉnh thoảng thiếu dấu chấm, nên split-rồi-đếm-đoạn-không-rỗng là cách duy nhất không phạt đúng thứ skill dặn viết.
+
+### M8-B: gương chiếu đọc từ BÀI GỐC, không từ list "story nên nói gì"
+
+Anchor lấy từ chính bài user dán, hai loại: **số + đơn vị** (`5 độ`, `68t`, `lớp 5`, `10 năm`) và **từ hoàn cảnh** (ai / vướng gì / ở đâu).
+
+**Lexicon cố ý nói về HOÀN CẢNH, không về mắt.** Token dịch vụ (`phaco`, `smile`, `ortho`) **không** tính là anchor — chúng đã bị M6-B/C gác riêng, và tính chúng ở đây chỉ dạy người viết lặp tên dịch vụ rồi gọi đó là story. Đây là cùng một doctrine với `KX_CONTEXT`: một cụm chỉ thuộc một gate.
+
+**M8-B fail-open khi bài gốc không có anchor** — skip kèm note. Lý do là **hậu quả bất đối xứng**, cùng khuôn với M7-E:
+
+| Hướng lọt | Hậu quả |
+|---|---|
+| Bài gốc trơn → không gác → story chung chung | một comment dài mà nhạt |
+| Bài gốc trơn → gác → người viết **bịa** chi tiết cho poster | "b cũng cận 5 độ giống e" khi poster chưa nói độ → **mâu thuẫn với người thật ngay trong thread** |
+
+Hướng thứ hai tệ hơn hẳn, nên gate chọn im lặng. Fixture `bare question -> M8-B skipped` khoá hành vi này.
+
+**M8 không tạo ngoại lệ nào cho 5C / 5A / M5 / M6.** Ba fixture khoá riêng: story mang claim hết đau → 5C; story mang `10/10` → M5 + 5A (Kiểu 11 nằm trong `NO_SCORE_SECTIONS`); story kể mổ cận trong thread Phaco → M6-B.
+
 ## Footer 2 lớp
 
 Đây là cơ chế chặn partial-load: model đọc SKILL.md mà **không** đọc `fees-promos.md` rồi tự bịa phí.
@@ -376,6 +418,7 @@ Luật phí **không** có ngoại lệ mode nào. `maps`/`koc` vẫn chịu M2 
 | B4 | sàn hạn ngạch `10/10` — instance đầu trong run ngắn phải hợp lệ |
 | B5 | ranh giới đính chính — Kiểu 8 được phép nhắc niềm tin sai để sửa nó |
 | E2 | run đủ 10 item có sàn 6+7 mà **không** có 8/9/10 → phải PASS (kiểu chọn theo ngữ cảnh) |
+| G1a | M8 Kiểu 11 — 10 ca: story bám bài gốc PASS · dưới 3 câu / trên 7 câu FAIL M8-A · story không bám gì FAIL M8-B · bài gốc trơn → skip · story mang claim hết đau FAIL 5C · story mang `10/10` FAIL M5 · cụm cấm **trong** blockquote bài gốc → PASS (excise) · item dán lậu dưới marker vẫn FAIL 5C · marker payload rỗng FAIL M6-A · bài gốc nhiều dòng có `phaco` ở dòng 2 → story mổ cận FAIL M6-B |
 | C–F | draft biết-sai phải fail **đúng gate**, draft đúng phải pass |
 | G | M6 topic-fit: drift có token · drift bằng `KX_CONTEXT` · **3 ca chống over-fire** (Phaco/võng mạc/khám bé nhắc nhỏ giãn → PASS) · hậu phẫu mang service · escape hatch · M6-A · M6-D · M6-C 2 chiều |
 | G2 | `detect_topic()` ladder — **19** ca, gồm `lão thị + phaco` → `lao_thi` (khác bucket `lt_phaco`), `mổ ortho-k` → `ksct` (không phải `kx`), `khám tổng quát xem có cườm` → `phaco` |

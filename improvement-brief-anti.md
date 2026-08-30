@@ -457,8 +457,12 @@ output cũ:
 Cả hai là **lỗ hổng có trước**, áp cho cả 8 mode, không phải do mode `anti` sinh ra — nên để
 ngoài phạm vi lần này theo đúng luật "không cleanup lan man ngoài Gate 2". Nhưng ghi ra vì với
 mode `anti` thì rủi ro cao hơn hẳn: một thread phòng thủ nhắc tên bác sĩ đã nghỉ là chính xác
-thứ người khiếu nại sẽ chụp lại. **Đề xuất làm ở lần improve sau** (gate M8: casing tên riêng +
+thứ người khiếu nại sẽ chụp lại. **Đề xuất làm ở lần improve sau** (gate M9: casing tên riêng +
 allowlist bác sĩ), không gộp vào đây.
+
+> Cập nhật 2026-08-30: brief này ban đầu đặt tên đề xuất đó là "M8". Số M8 sau đó đã được dùng
+> cho gate story reply (Kiểu 11) — có code + fixture, nên nó giữ tên. Việc casing/allowlist vẫn
+> chưa làm, đổi tên thành **M9**.
 
 ## Rủi ro regression
 
@@ -573,7 +577,7 @@ Viết dạng **lệnh chạy được**, không dùng con số chép tay — 3 
 - M7-E fail-open: 4 câu nhượng bộ đo được vẫn lách ("ngồi đợi tới trưa" · "3 lần mới xong" ·
   "chỗ đó hơi chật" · "chờ mất buổi sáng"). Chấp nhận có chủ đích, lý do ở §B M7-E
 - Multi-service skip có thể bị pad để tắt M6 — low-severity, dấu vết hiện ở output + bản gốc user giữ
-- Casing tên riêng + allowlist bác sĩ: không có gate, hoãn sang M8
+- Casing tên riêng + allowlist bác sĩ: không có gate, hoãn sang M9 (M8 đã dùng cho story reply)
 
 **Draft mẫu:**
 

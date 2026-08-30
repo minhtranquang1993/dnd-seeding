@@ -10,6 +10,47 @@ description: >
 
 Tạo content seeding tự nhiên cho Bệnh viện Mắt Quốc tế DND Sài Gòn (147 Trương Định, Quận 3, TP.HCM) với 4 chế độ khác nhau tùy mục đích sử dụng.
 
+## `--huongdan` — Cheat sheet (in ra rồi DỪNG)
+
+**Trigger:** lệnh chứa `--huongdan`, `--help`, `-h`, `huongdan`, `hướng dẫn` (vd `/dnd-seeding --huongdan`).
+**Hành vi:** in nguyên khối 📌 dưới đây ra chat rồi **DỪNG** — không đọc file phụ, không chạy script QA, không sinh content, không hỏi lại. Cờ này loại trừ mọi tham số khác trong lệnh.
+
+### 📌 /dnd-seeding — Content seeding cho BV Mắt Quốc tế DND Sài Gòn
+
+**Làm gì:** sinh ~20-28 item seeding (post group, comment reply, review Maps, KOC, chữa review xấu) giọng người thật.
+
+**Cú pháp:** `/dnd-seeding [mode] ["câu hỏi gốc"] [service=<tên>]`
+Mode chỉ được nhận ở **token đầu tiên** và phải đứng **trước** mọi chuỗi trong ngoặc kép. `k=v` luôn là param, không bao giờ là mode.
+
+| Mode | Ra gì |
+|---|---|
+| `group` (mặc định) | ~28 bài post seeding group mổ cận |
+| `group story` / `story` | ~15 bài story kể chuyện |
+| `reply-group "câu hỏi"` | ~20 comment reply vào bài người khác (có **Kiểu 11 story reply**) |
+| `ads` | ~20 comment dưới bài quảng cáo của mình |
+| `live (nội dung live)` | ~20 comment nick ảo cho livestream |
+| `maps` / `maps_foreigner` | ~20 review Google Maps (tiếng Việt / persona nước ngoài) |
+| `koc` | ~20 item giọng KOC/vlogger |
+| `anti "review xấu"` | ~20 comment cứu thread có review xấu |
+
+**Ví dụ**
+1. `/dnd-seeding` → chạy mode `group`
+2. `/dnd-seeding reply-group "mổ cận ở đâu tốt vậy mọi người"`
+3. `/dnd-seeding reply-group "mắt mờ dần nhìn không rõ" service=phaco`
+4. `/dnd-seeding maps_foreigner`
+5. `/dnd-seeding anti "khám ở đây chờ lâu, thái độ kém"`
+6. `reply-group` với **bài post dài**: dán nguyên bài nhiều dòng, skill in nó dạng blockquote rồi viết Kiểu 11 story bám chi tiết trong bài
+
+**Output:** danh sách item plain text, đã qua `scripts/qa_seeding.py --check`.
+
+**Lưu ý**
+- Mọi số tiền / ưu đãi chỉ lấy từ `fees-promos.md`. Chưa đọc file đó → không được nêu, phải chuyển hotline.
+- `reply-group` mà câu hỏi không phải mổ cận/khúc xạ → bắt buộc đọc `services.md` trước.
+- `reply-group "… maps …"` vẫn là mode `reply-group` — chữ `maps` nằm trong câu hỏi của user, không phải lệnh.
+- Bài gốc dài nhiều dòng → in dạng blockquote (`> ` mỗi dòng). Dán văn trần thì gate chỉ đọc được dòng đầu.
+
+---
+
 ## Mandatory reads
 
 Trước khi sinh nội dung, đọc theo nhu cầu:
@@ -201,7 +242,7 @@ Mọi số hit dưới đây đo trên 217 file output cũ. Script `--check` gá
 | Mode | Góc/Kiểu được mang `10/10` | Hạn ngạch |
 |---|---|---|
 | `group` | Góc 6 (social proof) + Góc 7 (story) | ≤20% item/run |
-| `reply-group` | Kiểu 1 (kinh nghiệm bản thân) | ≤20% item/run |
+| `reply-group` | Kiểu 1 (kinh nghiệm bản thân) | ≤20% item/run — **Kiểu 11 story không được mang**, story có 4 câu để kể kết quả thay vì cho điểm |
 | `ads` | kiểu 5 (chia sẻ đã mổ ở đây) | ≤20% item/run |
 | `live` | không góc nào | 0 |
 | `maps` | không góc nào | **0** — đo 0 hit, không được miễn |
@@ -478,12 +519,31 @@ Trục A2 (sợ hậu quả 20 năm) và A3 (đọc case biến chứng) **đư�
 > ⛔ Bỏ bước này là quay lại đúng con bug đang sửa: hỏi Phaco/cắt kính/lão thị/tổng quát mà
 > reply vẫn kéo về mổ cận. QA script gác bằng gate **M6**, không phải chỉ khuyên.
 
-**1. In 2 dòng này ở đầu output** (script parse để gác — sai format là fail M6-A):
+**1. In marker ở đầu output** (script parse để gác — sai format là fail M6-A). **Hai dạng, tuỳ thứ anh dán vào:**
+
+**Dạng A — câu hỏi ngắn 1 dòng:**
 
 ```
 **Câu hỏi gốc:** <paste nguyên câu hỏi>
 **Topic:** <service> / <phase>
 ```
+
+**Dạng B — bài post / review dài nhiều dòng** (dùng khi có Kiểu 11 story reply):
+
+```
+**Câu hỏi gốc:**
+> <dòng 1 của bài gốc>
+> <dòng 2>
+> <dòng 3...>
+**Topic:** <service> / <phase>
+```
+
+> ⛔ Dạng B **bắt buộc blockquote** (`> ` mỗi dòng), cùng 3 lý do đã đo ở mode `anti`:
+> - Regex một dòng chỉ đọc **dòng đầu**. Bài gốc có `phaco` ở dòng 2 → `detect_topic` ra `none` → **M6-B/C tắt im lặng**.
+> - Bài gốc hay có gạch đầu dòng số ("1. e cận 5 độ"). Không có `>` thì script đếm chúng thành **item của anh**.
+> - Vùng blockquote được **miễn** luật §7C (đang trích dẫn, không phải đang nói). Ranh giới phải là ký tự `>`, không phải dòng trống — nếu không nó thành chỗ giấu vi phạm.
+>
+> Marker có mà không có nội dung sau nó → **fail M6-A** kèm thông báo "wrong format".
 
 **2. Bảng service** — đọc câu hỏi, chọn theo ladder, **dừng ở match đầu tiên**:
 
@@ -519,11 +579,11 @@ Trục A2 (sợ hậu quả 20 năm) và A3 (đọc case biến chứng) **đư�
 `### pre` hoặc `### fu`. Không đọc thì không có dữ kiện, và không có dữ kiện thì chỉ nói được
 về mổ cận — đúng con bug.
 
-### 10 kiểu reply — chọn theo ngữ cảnh câu hỏi gốc, tổng ~20 item
+### 11 kiểu reply — chọn theo ngữ cảnh câu hỏi gốc, tổng ~20 item
 
 In section header đúng dạng `### Kiểu N: <tên>` — QA script attribute item theo header này để chấm hạn ngạch.
 
-**Không phải run nào cũng dùng đủ 10 kiểu.** Đọc câu hỏi gốc rồi chọn kiểu nào trả lời đúng thứ người ta đang hỏi; kiểu không hợp thì bỏ, dồn số item sang kiểu hợp.
+**Không phải run nào cũng dùng đủ 11 kiểu.** Đọc câu hỏi gốc rồi chọn kiểu nào trả lời đúng thứ người ta đang hỏi; kiểu không hợp thì bỏ, dồn số item sang kiểu hợp.
 
 | Kiểu | Bắt buộc? | Khi nào dùng |
 |---|---|---|
@@ -533,6 +593,7 @@ In section header đúng dạng `### Kiểu N: <tên>` — QA script attribute i
 | 8 (đính chính) | tuỳ ngữ cảnh | **Chỉ khi** bài gốc có nhận định sai cần sửa. Bài hỏi giá thuần → bỏ |
 | 9 (quy trình) | tuỳ ngữ cảnh | Chỉ khi người ta hỏi/lo về quy trình, thời gian, hậu cần |
 | 10 (đang cân nhắc) | tuỳ ngữ cảnh | Chỉ khi bài gốc đang so sánh nhiều chỗ hoặc chưa quyết |
+| **11** (story reply) | tuỳ ngữ cảnh | **Chỉ khi bài gốc kể hoàn cảnh cụ thể** (độ cận, tuổi, nghề, ai đang cản, đang vướng gì). Bài hỏi một câu trơn ("mổ ở đâu tốt ạ") → bỏ, không có gì để gương chiếu |
 
 Kiểu 6 và 7 là sàn cứng vì chúng không phải "nội dung" — chúng tồn tại để thread không toàn khen. Bỏ 2 kiểu này là quay lại đúng fingerprint mà guardrail §7 dựng ra để chặn. QA script fail nếu run ≥10 item mà thiếu 1 trong 2.
 
@@ -552,24 +613,94 @@ Kiểu 6 và 7 là sàn cứng vì chúng không phải "nội dung" — chúng 
 9. **Chi tiết quy trình/hậu cần** — thực dụng: mất bao lâu, có cần người đưa về, nghỉ mấy ngày, mang theo gì, nhỏ thuốc bao lâu. Số liệu quy trình thì được; **mốc hồi phục phải nói theo khoảng**, không số cứng.
 10. **Người đang cân nhắc, chưa mổ** — chưa trải nghiệm, đang xem 2-3 chỗ. Kiểu này **không được** claim kết quả sau mổ (chưa mổ thì không có kết quả) và không mang `10/10`.
 
-### Kiểu 8 / 9 / 10 nói gì theo service
+**Kiểu MỚI thứ 6 — story reply. Lý do: 10 kiểu trên đều là comment 1 câu, không kiểu nào kể được một mạch trải nghiệm:**
 
-Ba kiểu này ở trên **chỉ mô tả phiên bản mổ cận** — đó chính là lý do reply hay trôi. Câu hỏi
+11. **Story reply (gương chiếu hoàn cảnh người đăng)** — xem §Kiểu 11 ngay dưới.
+
+### Kiểu 11 — Story reply
+
+**Mục đích:** khi bài gốc kể một hoàn cảnh cụ thể (không chỉ hỏi một câu), một comment 1 câu không đủ. Kiểu 11 là **comment 3-5 câu kể lại trải nghiệm của mình theo đúng hoàn cảnh người ta vừa kể** — người đọc thấy "người này từng ở đúng chỗ mình đang đứng".
+
+**Đây là ngoại lệ duy nhất về độ dài trong mode `reply-group`** (Kiểu 6 và 9 được 2 câu, còn lại đúng 1 câu). Ngoại lệ này có giá: nó là chỗ dễ nhất để một comment biến thành bài PR dài. Nên có gate riêng.
+
+#### 3 luật cứng
+
+| Luật | Nội dung | Gate |
+|---|---|---|
+| **Độ dài 3-7 câu** | Dưới 3 câu là reply 1 câu dán nhãn story — kiểu này không mua được gì. Trên 7 câu là **bài đăng group**, không phải comment trong thread (đúng cái luật độ dài reply-group được viết ra để chặn) | **M8-A** |
+| **Phải gương chiếu ≥1 chi tiết của bài gốc** | Bài gốc nói `cận 5 độ` / `làm văn phòng` / `ba mẹ cản` / `ở Long An` / `con lớp 5` → story phải chạm ít nhất một trong số đó. Story không chạm gì là **mạch chung chung dán nhãn story** — đúng thứ kiểu này được thêm vào để tránh | **M8-B** |
+| **Bám đúng service ở Bước 0** | Bài gốc hỏi Phaco → story kể chuyện dẫn ba mẹ đi mổ Phaco, **không** kể chuyện mình mổ cận. Chịu M6-B/M6-C y như 10 kiểu kia | **M6-B/C** |
+
+**Không mang `10/10`** (chỉ Kiểu 1 được — §7A). Story có 4 câu để **kể** kết quả thay vì cho điểm.
+
+**Bài gốc không nêu chi tiết nào** → M8-B tự bỏ qua kèm note. Lúc đó **đừng bịa chi tiết cho người đăng** ("b cũng cận 5 độ giống e" khi người ta chưa nói độ) — bịa là output tệ hơn story chung chung, vì nó mâu thuẫn với người thật.
+
+#### Chi tiết nào tính là "gương chiếu"
+
+Gate đọc chi tiết từ chính bài gốc, gồm:
+
+- **Số + đơn vị:** `cận 5 độ`, `68t`, `lớp 5`, `10 năm đeo kính`, `mổ 3 tháng`
+- **Ai / hoàn cảnh:** sinh viên, văn phòng, giáo viên, tài xế, công an/quân đội/phi công/tiếp viên, mẹ/ba/con/bé/bà, ba mẹ cản, deadline, sơ tuyển, hồ sơ, du học, cưới, mang thai, tiểu đường, huyết áp, tiết kiệm/trả góp, học phí, lens/kính áp tròng, bơi/thể thao/gym/trang điểm
+- **Ở đâu:** Biên Hòa, Long An, Bình Dương, Đồng Nai, ở tỉnh, dưới quê, Hà Nội, miền Tây…
+
+> Cố ý **không** tính token dịch vụ (`phaco`, `smile`, `ortho`…) là chi tiết gương chiếu. Service đã bị M6-B/C gác riêng; tính nó ở đây chỉ dạy người viết lặp tên dịch vụ rồi gọi đó là story.
+
+#### Cách viết — kế thừa luật story ở MODE 1B, bỏ phần "bài đăng"
+
+- **Luật 3 câu** (§Nhóm A mở rộng) vẫn áp: sợ/vướng **cái gì cụ thể** · **hai thứ nào đang kéo nhau** · kết bám đúng cái xung đột đó.
+- **≥1 chi tiết vật lý** (đồ vật, hành động, mốc trong ngày) — "tay lạnh ngắt lúc đợi kết quả", "tờ giấy bs ghi để trong tủ 6 tháng".
+- **Khác MODE 1B ở chỗ:** đây là **comment trả lời**, nên mở bằng cách nối vào người đăng (`e cx …`, `case e y chang b nè`, `hồi đó e cx v`), và kết **không cần** là câu hỏi xin chia sẻ — có thể kết bằng cái mình đã làm hoặc một lời khuyên thật.
+- Vẫn chịu đủ §7C (claim hết đau, superlative, so sánh viện, `cam kết`, `khỏi cận`) và §7D anti-repeat.
+- Mỗi run **1-3 item** Kiểu 11 là đủ. Nhiều hơn thì thread thành một chuỗi tự truyện, không ai comment dài như vậy 5 lần trong cùng một bài.
+
+#### Ví dụ Kiểu 11
+
+**Bài gốc (dạng B, blockquote):**
+
+```
+**Câu hỏi gốc:**
+> mn ơi e cận 5 độ, làm văn phòng ngồi máy tính cả ngày
+> đeo kính 10 năm r, đổi qua lens thì khô mắt
+> e muốn mổ mà ba mẹ e cản, sợ mổ xong có j hối k kịp
+> ai mổ r cho e xin review với ạ
+**Topic:** kx / pre
+```
+
+✅ **Story bám hoàn cảnh** (đã qua `--check` PASS):
+
+> "e cx cận 5 độ, làm văn phòng nên chiều nào mắt cx rát. ba mẹ e hồi đó cản y v b, mẹ e còn kể bà cô ở quê mổ xong khô rát cả năm. e chọn cách rủ mẹ đi cùng buổi khám bên DND Trương Định cho mẹ nghe bs nói trực tiếp, chứ e nói mẹ k tin. mẹ ngồi nghe xong về nhà mới chịu, giờ e mổ r mà vẫn nhớ cái buổi đó"
+
+Gương chiếu: `5 độ` · `văn phòng` · `ba mẹ` cản. Xung đột hai chiều: muốn mổ vs mẹ lo. Chi tiết vật lý: buổi khám, mẹ ngồi nghe.
+
+❌ **Story không bám gì → fail M8-B:**
+
+> "hồi đó e đi khám xong bs đưa 2 hướng r để e tự chọn, e ngồi đó đứng hình lun. về nhà e mở lại tờ giấy bs ghi, đọc tới lui cả tuần. e chưa hẹn lại lịch vì sợ chọn xong lại nghĩ hồi đó chọn cái kia có khi hơn"
+
+Story này **viết tốt** — có xung đột, có chi tiết vật lý. Nhưng nó không chạm gì trong bài của người ta: không nói tới độ cận, không nói văn phòng, không nói ba mẹ. Dán vào thread nào cũng được, tức là dán vào thread nào cũng không đúng người.
+
+❌ **Story dài 1 câu → fail M8-A:** "e cx cận 5 độ làm văn phòng, mổ bên DND SG r thấy ổn" — đây là Kiểu 1, đừng dán nhãn 11.
+
+
+### Kiểu 8 / 9 / 10 / 11 nói gì theo service
+
+Bốn kiểu này ở trên **chỉ mô tả phiên bản mổ cận** — đó chính là lý do reply hay trôi. Câu hỏi
 service khác thì nội dung phải đổi theo, không phải dịch lại bài mổ cận. Dữ kiện lấy ở
 `services.md`.
 
-| service | Kiểu 8 đính chính cái gì | Kiểu 9 hậu cần gì | Kiểu 10 đang cân nhắc gì |
-|---|---|---|---|
-| `phaco` | "nhỏ thuốc cho tan cườm" (không tan được, phải mổ) · "để chín rồi mổ luôn thể" (để chín mổ khó hơn) | nhịn ăn sáng để xét nghiệm nếu mổ trong ngày · mang thẻ BHYT · người lớn tuổi cần người đi cùng | đang xem vài chỗ mổ cho ba mẹ, hỏi loại thủy tinh thể nào hợp |
-| `lao_thi` | "lão thị chỉ có nước đeo kính lão" (điều trị được: Presbyond hoặc IOL đa tiêu) | nhỏ tê bề mặt không tiêm · tầm 10-15 phút/mắt · về trong ngày · vài tiếng đầu cộm xốn | đang cân nhắc giữa đường laser và đường thay thủy tinh thể |
-| `ksct` | "cho bé đeo kính là xong" (KSCT là kiểm soát tốc độ tăng độ, khác cắt kính) · "Ortho-K hại mắt" | khám 60-90 phút, có nhỏ liệt điều tiết thì 90-120 · **Ortho-K phải ngưng 1 tháng** trước khám | đang so tròng kính KSCT vs Ortho-K vs atropine cho con |
-| `kinh` | "đo độ ở đâu chả giống nhau" (đo máy + thử kính khác nhau) | lens mềm ngưng 1 tuần trước đo · đo xong mới ra đơn | đang phân vân cắt kính hay tìm hiểu mổ luôn |
-| `glaucoma` | "cườm nước với cườm khô là một" (hai bệnh khác nhau) | cần theo dõi định kỳ, không phải khám 1 lần là xong | đang tìm chỗ theo dõi lâu dài |
-| `vong_mac` | "mắt còn nhìn được là chưa sao" (võng mạc hỏng âm thầm) | khám đáy mắt phải nhỏ giãn, mắt nhoè vài tiếng, đừng tự lái xe | tiểu đường nên đi tầm soát định kỳ |
-| `lac` | "lác thì phải mổ" (phải khám tìm nguyên nhân trước) | khám tìm nguyên nhân trước rồi bs mới chỉ định | đang tìm hiểu cho con / cho bản thân |
-| `mong` | "mộng nhỏ kệ nó" (mộng lan vào tròng đen thì phiền hơn) | có hỗ trợ BHYT (số → hotline) | đang xem mổ ở đâu |
-| `tham_my` | "sụp mi chỉ là xấu thôi" (có thể che tầm nhìn) | khám tư vấn trước | đang tìm hiểu cắt mí |
-| `tong_quat` | "mắt không mờ thì khỏi khám" (nhiều bệnh tiến triển âm thầm) | khám định kỳ, ra vấn đề thì bs chuyển chuyên sâu | đang tìm chỗ khám định kỳ cho cả nhà |
+| service | Kiểu 8 đính chính cái gì | Kiểu 9 hậu cần gì | Kiểu 10 đang cân nhắc gì | Kiểu 11 story kể chuyện ai |
+|---|---|---|---|---|
+| `phaco` | "nhỏ thuốc cho tan cườm" (không tan được, phải mổ) · "để chín rồi mổ luôn thể" (để chín mổ khó hơn) | nhịn ăn sáng để xét nghiệm nếu mổ trong ngày · mang thẻ BHYT · người lớn tuổi cần người đi cùng | đang xem vài chỗ mổ cho ba mẹ, hỏi loại thủy tinh thể nào hợp | **con dẫn ba mẹ đi mổ** — thuyết phục bà đi khám, sắp lịch nghỉ làm đưa bà đi, bà sợ mổ mắt |
+| `lao_thi` | "lão thị chỉ có nước đeo kính lão" (điều trị được: Presbyond hoặc IOL đa tiêu) | nhỏ tê bề mặt không tiêm · tầm 10-15 phút/mắt · về trong ngày · vài tiếng đầu cộm xốn | đang cân nhắc giữa đường laser và đường thay thủy tinh thể | người 45-55t phải đeo 2 cặp kính, mệt cảnh tháo ra đeo vào khi đọc |
+| `ksct` | "cho bé đeo kính là xong" (KSCT là kiểm soát tốc độ tăng độ, khác cắt kính) · "Ortho-K hại mắt" | khám 60-90 phút, có nhỏ liệt điều tiết thì 90-120 · **Ortho-K phải ngưng 1 tháng** trước khám | đang so tròng kính KSCT vs Ortho-K vs atropine cho con | **mẹ có con cận tăng nhanh** — kèm con đeo kính đêm, tập cho con tự đeo, theo mốc đo lại |
+| `kinh` | "đo độ ở đâu chả giống nhau" (đo máy + thử kính khác nhau) | lens mềm ngưng 1 tuần trước đo · đo xong mới ra đơn | đang phân vân cắt kính hay tìm hiểu mổ luôn | cắt kính ở tiệm bị lệch độ, nhức đầu cả tháng mới đi đo lại ở bv |
+| `glaucoma` | "cườm nước với cườm khô là một" (hai bệnh khác nhau) | cần theo dõi định kỳ, không phải khám 1 lần là xong | đang tìm chỗ theo dõi lâu dài | người nhà phải theo lịch tái khám dài hạn, nhắc uống/nhỏ thuốc đúng giờ |
+| `vong_mac` | "mắt còn nhìn được là chưa sao" (võng mạc hỏng âm thầm) | khám đáy mắt phải nhỏ giãn, mắt nhoè vài tiếng, đừng tự lái xe | tiểu đường nên đi tầm soát định kỳ | người tiểu đường đi tầm soát vì bs nội khoa dặn, lúc đầu chần chừ |
+| `lac` | "lác thì phải mổ" (phải khám tìm nguyên nhân trước) | khám tìm nguyên nhân trước rồi bs mới chỉ định | đang tìm hiểu cho con / cho bản thân | phụ huynh phát hiện con lệch mắt trong ảnh, hoặc người lớn tự ti nhiều năm |
+| `mong` | "mộng nhỏ kệ nó" (mộng lan vào tròng đen thì phiền hơn) | có hỗ trợ BHYT (số → hotline) | đang xem mổ ở đâu | người làm ngoài trời/đi biển nhiều, để lâu mới đi khám |
+| `tham_my` | "sụp mi chỉ là xấu thôi" (có thể che tầm nhìn) | khám tư vấn trước | đang tìm hiểu cắt mí | người bị sụp mi che tầm nhìn, ngại đi vì sợ bị nói làm thẩm mỹ |
+| `tong_quat` | "mắt không mờ thì khỏi khám" (nhiều bệnh tiến triển âm thầm) | khám định kỳ, ra vấn đề thì bs chuyển chuyên sâu | đang tìm chỗ khám định kỳ cho cả nhà | dẫn cả nhà đi khám định kỳ sau khi một người trong nhà phát hiện bệnh |
+
+> Kiểu 11 chịu **M6-B** như mọi kiểu khác: bài gốc hỏi Phaco mà story kể chuyện mình mổ SMILE, đo bản đồ giác mạc, thoát kính → **fail**. Story dài không mua được quyền lạc service; nó chỉ làm chỗ lạc service dài hơn.
 
 **Luật phí theo service — đọc kỹ, sai chỗ này là tái tạo bug `:55`:**
 
@@ -602,9 +733,9 @@ service khác thì nội dung phải đổi theo, không phải dịch lại bà
   chung để né token cũng là lạc đề — M6-C bắt
 - Không nhắc DND quá lộ liễu — tối đa nhắc tên 1 lần/comment, có comment chỉ nói "chỗ mình mổ bên Trương Định q3" mà không nhắc DND
 - Một số reply **không nhắc DND** — chỉ trả lời câu hỏi thuần túy, tạo cảm giác tự nhiên cho cả thread. Kiểu 7 luôn thuộc nhóm này
-- **Độ dài: đúng 1 câu/reply.** Đây là reply để copy-paste, không phải bài đăng. Ngoại lệ duy nhất: **Kiểu 6** (phải mang điểm dở thật) và **Kiểu 9** (thông tin hậu cần) được tối đa 2 câu.
-  > Đừng viết reply 3-4 câu kể cả khi thấy "còn nhiều thứ hay để nói". Câu thứ 2 trở đi làm reply trông như bài PR, không như người thật gõ trên điện thoại. Thà cắt ý còn hơn dài.
-- **`10/10` chỉ được xuất hiện ở Kiểu 1**, tối đa 20% số item trong run (~4/20). Kiểu 6-10 không mang `10/10` — xem §7
+- **Độ dài: đúng 1 câu/reply.** Đây là reply để copy-paste, không phải bài đăng. Ngoại lệ: **Kiểu 6** (phải mang điểm dở thật) và **Kiểu 9** (thông tin hậu cần) được tối đa 2 câu; **Kiểu 11** (story) được 3-7 câu — xem §Kiểu 11.
+  > Đừng viết reply 3-4 câu kể cả khi thấy "còn nhiều thứ hay để nói". Câu thứ 2 trở đi làm reply trông như bài PR, không như người thật gõ trên điện thoại. Thà cắt ý còn hơn dài. Muốn kể dài thì dùng đúng Kiểu 11, và Kiểu 11 phải bám hoàn cảnh bài gốc — không phải giấy phép viết dài cho mọi kiểu.
+- **`10/10` chỉ được xuất hiện ở Kiểu 1**, tối đa 20% số item trong run (~4/20). Kiểu 6-11 không mang `10/10` — xem §7
 
 ### Ví dụ mode `reply-group`
 
@@ -884,6 +1015,7 @@ Chỉ đọc **token đầu tiên**, và chỉ phần **trước** dấu ngoặc
 - `group story` HOẶC `story` (đứng ngay sau lệnh) → chạy **Mode 1B** (sub-mode story), CHỈ sinh ~15 bài story
 - `group` (không kèm `story`) hoặc không có tham số → chạy Mode 1 đầy đủ 8 góc
 - `reply-group "..."` → chạy Mode 2, parse câu hỏi gốc từ dấu ngoặc kép, rồi **làm Bước 0 phân loại service trước khi chọn kiểu**
+  - User dán **bài post/review dài nhiều dòng** thay vì 1 câu hỏi → vẫn là Mode 2. In marker **dạng B** (blockquote) và cân nhắc thêm **Kiểu 11 story reply** bám hoàn cảnh trong bài
 - `ads` → chạy Mode 3
 - `live (nội dung content live)` → chạy Mode 4, parse toàn bộ nội dung live, detect bác sĩ/chủ đề/ưu đãi từ đó
 - `maps` / `maps_foreigner` / `koc` → chạy Mode 5A / 5B / 5C, áp ngoại lệ §7B đúng theo mode
@@ -894,6 +1026,7 @@ Chỉ đọc **token đầu tiên**, và chỉ phần **trước** dấu ngoặc
 - **Mode `reply-group`: làm Bước 0 (phân loại service) TRƯỚC.** Service ≠ `kx`/`none` → đọc `services.md` lấy dữ kiện, rồi mới viết
 - Chọn ngẫu nhiên 5-6 persona từ Persona Pool
 - Sinh đúng số câu theo cấu trúc của mode tương ứng (mode `group` ~28 câu, sub-mode `story` ~15 câu, mode `reply-group`/`ads`/`live` ~20 câu)
+- Mode `reply-group`: bài gốc có kể hoàn cảnh cụ thể → thêm **1-3 item Kiểu 11 story reply**, mỗi item 3-7 câu và phải gương chiếu ≥1 chi tiết của bài gốc (§Kiểu 11)
 - Đảm bảo đa dạng persona, cấu trúc câu, cách xưng hô
 
 **Bước 3: Áp dụng Tone & Viết tắt**
@@ -903,7 +1036,7 @@ Chỉ đọc **token đầu tiên**, và chỉ phần **trước** dấu ngoặc
 
 **Bước 4: Xuất kết quả ra Chat**
 - Hiển thị rõ ràng theo nhóm/kiểu để dễ copy
-- Mode `reply-group`: in **`**Câu hỏi gốc:**`** và **`**Topic:** <service> / <phase>`** ở đầu output (bắt buộc — thiếu là fail M6-A)
+- Mode `reply-group`: in **`**Câu hỏi gốc:**`** và **`**Topic:** <service> / <phase>`** ở đầu output (bắt buộc — thiếu là fail M6-A). Bài gốc nhiều dòng → dạng B blockquote, mỗi dòng bắt đầu `> `
 - Mode `live`: hiện lại tên bác sĩ/chủ đề hội thảo đã detect được ở đầu để tiện đối chiếu
 
 **Bước 4B: Gác phí trước khi lưu**
@@ -948,8 +1081,14 @@ Lưu vào: `C:\Users\Admin\.gemini\antigravity-ide\scratch\seeding_<mode>_<times
 | **Lẫn mốc ngưng kính áp tròng** | Lens mềm ngưng ≥ **1 tuần**; Ortho-K ngưng ≥ **1 tháng** |
 | **Lẫn thời hạn thẻ Family** | Sau mổ **khúc xạ: 3 năm**; sau mổ **Phaco: 2 năm** |
 | **Đưa giá Phaco / Ortho-K / lác / mộng / cườm nước vào `services.md`** | Những giá đó KHÔNG có trong `fees-promos.md` → seeding chuyển hotline. `services.md` là fact pack phi-tiền, gate M6-E fail nếu có số tiền |
-| **Reply dài 3-4 câu (mode reply-group)** | Đúng **1 câu/reply** để copy-paste ngay; chỉ Kiểu 6 và 9 được 2 câu. Reply dài đọc như bài PR, không như người thật gõ trên đt |
-| **Xuất đủ 10 kiểu dù câu hỏi gốc không hợp (mode reply-group)** | Chọn kiểu theo ngữ cảnh. Kiểu 8 chỉ khi bài gốc có nhận định sai; Kiểu 9 chỉ khi có hỏi về quy trình. Kiểu 6 và 7 thì luôn giữ |
+| **Reply dài 3-4 câu (mode reply-group)** | Đúng **1 câu/reply** để copy-paste ngay; Kiểu 6 và 9 được 2 câu, Kiểu 11 (story) được 3-7 câu. Reply dài mà không phải Kiểu 11 thì đọc như bài PR, không như người thật gõ trên đt |
+| **Kiểu 11 chỉ có 1-2 câu** | Đó là Kiểu 1 dán nhãn story, gate M8-A chặn. Story cần 3-7 câu: hoàn cảnh → xung đột → mình đã làm gì |
+| **Kiểu 11 dài quá 7 câu** | Thành bài đăng group, không phải comment trong thread. Gate M8-A chặn. Muốn viết dài hẳn thì dùng `/dnd-seeding story` |
+| **Kiểu 11 kể mạch chung chung, không chạm gì trong bài gốc** | Story viết hay mà dán thread nào cũng được thì dán thread nào cũng không đúng người. Phải gương chiếu ≥1 chi tiết: độ cận, tuổi, nghề, ai đang cản, ở tỉnh nào. Gate M8-B chặn |
+| **Bịa chi tiết cho người đăng ("b cũng cận 5 độ giống e" khi họ chưa nói độ)** | Bài gốc không nêu chi tiết → M8-B tự bỏ qua, viết story chung chung còn được. Bịa là mâu thuẫn với người thật, tệ hơn chung chung |
+| **Kiểu 11 kể chuyện mổ cận trong thread hỏi Phaco/Ortho-K** | Story dài không mua được quyền lạc service. M6-B chặn y như các kiểu khác — xem bảng "Kiểu 8/9/10/11 nói gì theo service" |
+| **Dán bài gốc nhiều dòng dạng văn trần (không blockquote)** | Regex chỉ đọc dòng đầu → `detect_topic` mất chủ đề → M6-B/C tắt im lặng; số trong bài gốc thành item của mình. In dạng B: `> ` mỗi dòng |
+| **Xuất đủ 10 kiểu dù câu hỏi gốc không hợp (mode reply-group)** | Chọn kiểu theo ngữ cảnh. Kiểu 8 chỉ khi bài gốc có nhận định sai; Kiểu 9 chỉ khi có hỏi về quy trình; Kiểu 11 chỉ khi bài gốc kể hoàn cảnh. Kiểu 6 và 7 thì luôn giữ |
 | Comment ads quá dài/chuyên nghiệp (mode ads) | Comment ngắn 1-2 câu, có emoji, giống comment nhanh trên đt |
 | Tất cả comment ads đều khen | Phải xen kẽ hỏi giá, tag bạn, hỏi lịch — đa dạng kiểu tương tác |
 | Bịa thêm bác sĩ/chủ đề không có trong content live (mode live) | Chỉ dùng tên bác sĩ/chủ đề đã detect từ nội dung content được paste |

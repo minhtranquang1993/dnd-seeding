@@ -656,8 +656,30 @@ SERVICE_DRIFT_TARGETS = {
 
 # M6-A: the draft must declare what it is answering. Without it M6-B/C have
 # nothing to compare against.
-ORIGINAL_Q_RX = re.compile(r"^\*\*Câu hỏi gốc:\*\*\s*(.+)$",
+ORIGINAL_Q_RX = re.compile(r"^\*\*Câu hỏi gốc:\*\*[ \t]*(\S.*)$",
                            re.IGNORECASE | re.MULTILINE)
+
+# Kiểu 11 (story reply) needs the ORIGINAL POST, not just its first line: a story
+# reply mirrors the poster's situation (độ cận, tuổi, nghề, ai đang lo cái gì), and
+# that detail lives on lines 2..n of a pasted post. So the marker accepts a second
+# shape - the blockquote form already proven by REVIEW_Q_RX in mode `anti`:
+#
+#   **Câu hỏi gốc:**
+#   > mn ơi e cận 5 độ, làm văn phòng...
+#   > ba mẹ e cản, sợ mổ xong khô mắt
+#
+# Same three measured reasons as REVIEW_Q_RX: `.` excludes newline so an inline
+# regex reads only line 1 (detect_topic would miss `phaco` on line 2 and
+# check_topic_fit would early-return); a pasted post's own numbered gripes match
+# ITEM_RX and become phantom items unless prefixed with `>`; and a `>` boundary is
+# a character rather than whitespace, so items pasted right under the marker
+# cannot be swallowed into the excised block.
+ORIGINAL_Q_BLOCK_RX = re.compile(
+    r"^\*\*Câu hỏi gốc:\*\*[ \t]*\r?\n((?:^>.*(?:\r?\n|$))+)",
+    re.IGNORECASE | re.MULTILINE)
+# The bare marker, whichever shape follows it: lets M6-A say "wrong format"
+# (marker with nothing after it) rather than "missing", which is a different fix.
+ORIGINAL_Q_MARKER_RX = re.compile(r"^\*\*Câu hỏi gốc:\*\*", re.IGNORECASE | re.MULTILINE)
 
 # M7-A: mode `anti` answers a pasted NEGATIVE REVIEW, and the review must arrive
 # as a BLOCKQUOTE. Three measured reasons it is not shaped like ORIGINAL_Q_RX:
@@ -991,7 +1013,7 @@ ANTIREPEAT_BLOCK_PER_ITEM = 0.30  # block above this share
 # point rather than praise in disguise.
 NEW_REPLY_SECTIONS = {6: "mixed review", 7: "hỏi lại, không nhắc DND",
                       8: "đính chính", 9: "quy trình/hậu cần",
-                      10: "đang cân nhắc"}
+                      10: "đang cân nhắc", 11: "story reply"}
 # Coverage floor. 6 and 7 are not content angles - they exist so the thread is
 # not all-praise, and they fit any thread (anyone can have a mixed experience,
 # anyone can ask a clarifying question), so requiring them never forces an
@@ -1001,7 +1023,7 @@ NEW_REPLY_SECTIONS = {6: "mixed review", 7: "hỏi lại, không nhắc DND",
 # passing gate at the cost of an irrelevant reply, so they are optional and
 # reported as a note.
 REQUIRED_REPLY_SECTIONS = {6, 7}
-OPTIONAL_REPLY_SECTIONS = {8, 9, 10}
+OPTIONAL_REPLY_SECTIONS = {8, 9, 10, 11}
 MIXED_SECTION = 6
 # a mixed item must hit one of these to count as carrying a real downside
 DISSATISFACTION_RX = (r"chờ (hơi )?lâu|đông|khô mắt|hơi phiền|bất tiện|đi xa|"
@@ -1011,11 +1033,63 @@ DISSATISFACTION_RX = (r"chờ (hơi )?lâu|đông|khô mắt|hơi phiền|bất 
 # angles that must not name the brand (7 exists to make the thread look real)
 NO_BRAND_SECTIONS = {7}
 BRAND_RX = r"\bDND\b|Trương Định"
-# angles barred from carrying 10/10 regardless of the mode quota
-NO_SCORE_SECTIONS = {6, 7, 8, 9, 10}
+# angles barred from carrying 10/10 regardless of the mode quota.
+# 11 (story) is in here even though a story reply CAN legitimately be told by
+# someone post-op: `10/10` is the single heaviest measured fingerprint (167 hits)
+# and a story has four sentences in which to describe the result instead of
+# scoring it. Kiểu 1 keeps the quota.
+NO_SCORE_SECTIONS = {6, 7, 8, 9, 10, 11}
 # reply-group ships ~20 items; below this a draft is a fragment, so missing
 # angles are reported as a note instead of a failure.
 M5_FULL_RUN_MIN_ITEMS = 10
+
+# ---------------------------------------------------------------------------
+# M8 - Kiểu 11, story reply. A reply-group run is one-sentence copy-paste
+# comments; Kiểu 11 is the deliberate exception - a 3-5 sentence lived-experience
+# comment that MIRRORS the original poster's situation instead of reciting the
+# generic mo-can arc.
+#
+# The gate exists because "write a story" is exactly the kind of instruction that
+# degrades silently into "write a longer advert". Two measurable failure shapes:
+#   - a one-line reply relabelled Kiểu 11 (no story at all)
+#   - a story that shares nothing with the post it answers, i.e. the same generic
+#     arc the user asked to move away from
+# ---------------------------------------------------------------------------
+STORY_SECTION = 11
+# 3 is the floor because at two sentences it is a Kiểu 6 with extra words. 7 is
+# the ceiling because past that it reads as a group POST, not a thread reply -
+# the exact tell SKILL.md's reply-group length rule was written against.
+STORY_MIN_SENTENCES = 3
+STORY_MAX_SENTENCES = 7
+
+# M8-B anchors: concrete details a poster gives that a mirroring story can echo.
+# Two kinds, both read off the ORIGINAL POST (never off a hand-maintained list of
+# what stories should say):
+#   1. number+unit - "cận 5 độ", "68t", "lớp 5", "10 năm đeo kính"
+#   2. situation words - who the poster is and what hems them in
+#
+# The lexicon is deliberately about SITUATION, not about eyes: service words are
+# already gated by M6-B/C, and rewarding them here would just push writers to
+# repeat the service name and call it a story.
+STORY_ANCHOR_NUM_RX = re.compile(
+    r"\b\d+([.,]\d+)? *(độ|diop|dp|tuổi|t\b|năm|tháng|tuần|lớp)\b", re.IGNORECASE)
+STORY_ANCHOR_WORDS = (
+    # who
+    "sinh viên", "sv", "văn phòng", "máy tính", "giáo viên", "tài xế", "lái xe",
+    "công an", "quân đội", "phi công", "tiếp viên", "vận động viên", "bộ đội",
+    "mẹ", "ba", "bố", "con", "bé", "cháu", "bà", "ông", "chồng", "vợ",
+    "em trai", "em gái", "chị gái", "anh trai", "bạn cùng phòng",
+    # what hems them in
+    "ba mẹ", "gia đình", "deadline", "sơ tuyển", "thi tuyển", "hồ sơ", "du học",
+    "cưới", "mang thai", "bầu", "cho con bú", "tiểu đường", "huyết áp",
+    "tiết kiệm", "dành dụm", "trả góp", "lương", "học phí",
+    "lens", "kính áp tròng", "đeo kính", "gọng kính",
+    "bơi", "thể thao", "gym", "trang điểm", "chơi bóng",
+    # where from
+    "biên hòa", "long an", "bình dương", "đồng nai", "vũng tàu", "cần thơ",
+    "tây ninh", "tiền giang", "bến tre", "đà lạt", "nha trang", "quy nhơn",
+    "ở tỉnh", "dưới quê", "về quê", "hà nội", "miền tây",
+)
 
 # Kiểu 8 exists to correct a false belief, and correcting one means naming it
 # ("mổ khúc xạ chỉnh độ hiện tại thôi chứ k phải khỏi cận mãi mãi"). Same
@@ -1843,6 +1917,99 @@ def check_new_angles(mode, items, rep):
                          % (it.number, it.line, sec))
 
 
+def count_sentences(text):
+    """Sentence count for the M8 length rule.
+
+    Vietnamese seeding text often drops the final full stop on purpose (SKILL.md
+    Tone actively asks for it), so a naive split on `.` undercounts the last
+    sentence. Splitting and counting non-empty fragments handles both.
+
+    Emoji and `...` are not separators: "dễ chịu hơn e tưởng 😔 e vẫn chưa chốt" is
+    one clause carrying an emoji, and an ellipsis inside a clause is a pause, not a
+    stop. So `.{2,}` collapses before the split rather than yielding empty pieces.
+    """
+    t = re.sub(r"\.{2,}", " ", text)
+    parts = [p for p in re.split(r"[.;!?\n]+", t) if p.strip()]
+    return len(parts)
+
+
+def story_anchors(source):
+    """Concrete details in the original post that a Kiểu 11 story can mirror."""
+    s = norm(source)
+    found = set(m.group(0).strip() for m in STORY_ANCHOR_NUM_RX.finditer(s))
+    for w in STORY_ANCHOR_WORDS:
+        if re.search(r"(?<![\wàáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ])"
+                     + re.escape(w)
+                     + r"(?![\wàáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ])",
+                     s):
+            found.add(w)
+    return found
+
+
+def check_story_reply(mode, text, items, rep):
+    """M8 - Kiểu 11 story replies must be stories, and must mirror the post.
+
+    Kiểu 11 is the only reply-group angle allowed to run long, which makes it the
+    only one where "write it better" can silently become "write it longer". Two
+    gates, in the order the failures actually happen:
+
+      M8-A  length: 3..7 sentences. Below 3 it is a relabelled one-liner (the
+            angle bought nothing); above 7 it reads as a group post, which is the
+            tell the reply-group length rule was written against.
+      M8-B  mirroring: the story must echo >=1 concrete detail from the original
+            post. This is the whole reason the angle was added - a story that
+            shares nothing with the poster's situation is the generic arc under a
+            new header.
+
+    M8-B needs the post to HAVE anchors, so it skips (with a note) on a bare
+    one-line question like "mổ cận ở đâu tốt ạ". Failing there would push writers
+    to invent details the poster never gave, which is worse output than a generic
+    story: an invented "b cũng cận 5 độ giống e" contradicts a real poster.
+    """
+    if mode not in ("reply-group", "reply_group"):
+        return
+    stories = [it for it in items if it.section == STORY_SECTION]
+    if not stories:
+        return
+
+    for it in stories:
+        n = count_sentences(it.text)
+        if n < STORY_MIN_SENTENCES:
+            rep.fail("M8-A", "item %s (line %d) ở Kiểu %d nhưng chỉ có %d câu, cần "
+                             ">=%d. Dưới ngưỡng đó thì nó là reply 1 câu dán nhãn "
+                             "story, không phải story"
+                     % (it.number, it.line, STORY_SECTION, n, STORY_MIN_SENTENCES))
+        elif n > STORY_MAX_SENTENCES:
+            rep.fail("M8-A", "item %s (line %d) ở Kiểu %d dài %d câu, tối đa %d. Dài "
+                             "hơn thì đọc như bài đăng group, không như comment "
+                             "trả lời trong thread"
+                     % (it.number, it.line, STORY_SECTION, n, STORY_MAX_SENTENCES))
+
+    source = original_q_body(text)
+    if not source:
+        # M6-A already failed on this; do not print a second error for one cause.
+        return
+    anchors = story_anchors(source)
+    if not anchors:
+        rep.note("M8-B skipped: bài gốc không nêu chi tiết cụ thể nào (độ cận, "
+                 "tuổi, nghề, hoàn cảnh) nên không có gì để story bám. Bịa chi "
+                 "tiết cho poster là output tệ hơn story chung chung.")
+        return
+
+    for it in stories:
+        hit = story_anchors(it.text) & anchors
+        if not hit:
+            rep.fail("M8-B", "item %s (line %d) ở Kiểu %d không bám chi tiết nào của "
+                             "bài gốc. Bài gốc có: %s. Story phải gương chiếu ít nhất "
+                             "1 chi tiết, không thì nó là mạch chung chung dán nhãn "
+                             "story"
+                     % (it.number, it.line, STORY_SECTION,
+                        ", ".join("%r" % a for a in sorted(anchors)[:8])))
+        else:
+            rep.note("M8-B: item %s bám %s" % (it.number,
+                                               ", ".join("%r" % a for a in sorted(hit))))
+
+
 def review_block_body(text):
     """The pasted negative review, `>` markers stripped, or None."""
     m = REVIEW_Q_RX.search(text)
@@ -1850,6 +2017,39 @@ def review_block_body(text):
         return None
     body = "\n".join(re.sub(r"^>[ \t]?", "", ln) for ln in m.group(1).splitlines())
     return body.strip()
+
+
+def original_q_body(text):
+    """The `**Câu hỏi gốc:**` payload, inline or blockquote, or None.
+
+    Two accepted shapes, checked blockquote-first: a bare marker followed by a
+    blockquote is not an inline match (ORIGINAL_Q_RX requires a non-space on the
+    marker line), so the order only documents intent - it does not disambiguate.
+    """
+    m = ORIGINAL_Q_BLOCK_RX.search(text)
+    if m:
+        body = "\n".join(re.sub(r"^>[ \t]?", "", ln) for ln in m.group(1).splitlines())
+        return body.strip() or None
+    m = ORIGINAL_Q_RX.search(text)
+    if m:
+        return m.group(1).strip() or None
+    return None
+
+
+def excise_original_q(text):
+    """Blank the `**Câu hỏi gốc:**` blockquote, preserving line numbering.
+
+    Same reason as excise_review: 5C/M3 scan the whole draft, so a pasted post
+    that itself says "mổ xong hết cận, bs cam kết" would fail the draft for
+    QUOTING what it answers. The inline form is left alone - it always has, and
+    changing that here would be a silent behaviour change to every existing
+    reply-group draft rather than a feature of the new block form.
+    """
+    m = ORIGINAL_Q_BLOCK_RX.search(text)
+    if not m:
+        return text
+    raw = m.group(0)
+    return text.replace(raw, "\n" * raw.count("\n"), 1)
 
 
 def excise_review(text):
@@ -2008,17 +2208,22 @@ def check_topic_fit(mode, text, items, rep):
         source = review_block_body(text)
         label = "review xấu"
     else:
-        m = ORIGINAL_Q_RX.search(text)
-        if not m:
+        source = original_q_body(text)
+        if not source:
             # Applies at ANY length, unlike M5's full-run coverage rule. A short
             # draft can still drift, and exempting fixtures by name would create a
             # class of draft the gate never looks at - exactly what
             # SELFTEST_MODE_EXEMPT exists to prevent.
-            rep.fail("M6-A", "reply-group draft has no '**Câu hỏi gốc:**' line, so there "
-                             "is nothing to check the replies against. Print the original "
-                             "question at the top of the output.")
+            if ORIGINAL_Q_MARKER_RX.search(text):
+                rep.fail("M6-A", "reply-group draft có dòng '**Câu hỏi gốc:**' nhưng "
+                                 "không có nội dung sau nó. Viết câu hỏi ngay trên "
+                                 "cùng dòng, hoặc dán bài gốc nhiều dòng ở dưới dạng "
+                                 "blockquote (mỗi dòng bắt đầu '> ').")
+            else:
+                rep.fail("M6-A", "reply-group draft has no '**Câu hỏi gốc:**' line, so there "
+                                 "is nothing to check the replies against. Print the original "
+                                 "question at the top of the output.")
             return
-        source = m.group(1).strip()
         label = "câu hỏi gốc"
 
     phase, service = detect_topic(source)
@@ -2263,6 +2468,7 @@ def run_check(text, mode=None, fees_path=None, label="<stdin>", require_policy=T
     # numbered items.
     check_quota_10_10(mode, items or [Item(0, None, text, 1)], rep)
     check_new_angles(mode, items, rep)
+    check_story_reply(mode, text, items, rep)
     check_topic_fit(mode, text, items, rep)
     check_anti_mode(mode, text, items, rep)
     # The marker IMPLIES the mode. Measured: a draft carrying the review
@@ -2276,8 +2482,11 @@ def run_check(text, mode=None, fees_path=None, label="<stdin>", require_policy=T
                          "chỉ thuộc mode anti; thiếu dòng '**Mode:** anti' thì cả họ gate "
                          "M7 không chạy và draft báo PASS oan." % mode)
     # 5C/M3 scan the whole draft, so the quoted review is excised first - see
-    # excise_review for the five measured false failures this prevents.
-    check_bans(mode, excise_review(text), items, rep)
+    # excise_review for the five measured false failures this prevents. The
+    # blockquote form of `**Câu hỏi gốc:**` (Kiểu 11 story replies paste a whole
+    # post) gets the same treatment for the same reason: a poster writing "bs cam
+    # kết mổ xong hết cận" must not fail the draft that answers them.
+    check_bans(mode, excise_original_q(excise_review(text)), items, rep)
     check_antirepeat(items, rep)
 
     rc = rep.emit()
@@ -3068,6 +3277,118 @@ SELFTEST_M6_COVERAGE = [
 """, None),
 ]
 
+# ---------------------------------------------------------------------------
+# M8 - Kiểu 11 story replies. (label, draft, expected FAIL code or None)
+#
+# _M8_POST is the multi-line blockquote form, because that is the shape the angle
+# was built for: a story mirrors detail that only exists on lines 2..n. Its
+# anchors: `5 độ`, `văn phòng`, `10 năm`, `lens`, `ba mẹ`.
+# ---------------------------------------------------------------------------
+_M8_POST = """**Mode:** reply-group
+**Câu hỏi gốc:**
+> mn ơi e cận 5 độ, làm văn phòng ngồi máy tính cả ngày
+> đeo kính 10 năm r, đổi qua lens thì khô mắt
+> e muốn mổ mà ba mẹ e cản, sợ mổ xong có j hối k kịp
+> ai mổ r cho e xin review với ạ
+
+"""
+
+SELFTEST_M8 = [
+    ("story mirrors the post -> pass", _M8_POST + """### Kiểu 1: Trả lời từ kinh nghiệm bản thân (1 bình luận)
+1. case e y chang b nè, mổ smile pro bên DND SG hồi tháng 3
+
+### Kiểu 6: Review có điểm chưa hài lòng (1 bình luận)
+2. e mổ bên DND SG, nói thật hôm khám đông nên chờ hơi lâu. còn lại e k tiếc
+
+### Kiểu 7: Hỏi lại người đăng (1 bình luận)
+3. b đeo lens lâu chưa v, có đi đo lại độ gần đây k?
+
+### Kiểu 11: Story reply (1 bình luận)
+4. e cx cận 5 độ, làm văn phòng nên chiều nào mắt cx rát. ba mẹ e hồi đó cản y v b, mẹ e còn kể bà cô ở quê mổ xong khô rát cả năm. e chọn cách rủ mẹ đi cùng buổi khám bên DND Trương Định cho mẹ nghe bs nói trực tiếp, chứ e nói mẹ k tin. mẹ ngồi nghe xong về nhà mới chịu, giờ e mổ r mà vẫn nhớ cái buổi đó
+""", None),
+
+    # Length floor: the failure mode is a one-liner wearing the header.
+    ("story is one sentence -> M8-A", _M8_POST + """### Kiểu 11: Story reply (1 bình luận)
+1. e cx cận 5 độ làm văn phòng, mổ bên DND SG r thấy ổn
+""", "M8-A"),
+
+    # Ceiling: at this length it is a group post, not a thread reply.
+    ("story runs 8 sentences -> M8-A", _M8_POST + """### Kiểu 11: Story reply (1 bình luận)
+1. e cx cận 5 độ. e làm văn phòng. ngồi máy tính cả ngày. đeo kính 10 năm r. ba mẹ e cx cản. e tìm hiểu cả tháng. rồi e rủ mẹ đi khám cùng. giờ e mổ r
+""", "M8-A"),
+
+    # The whole point of the angle: a story that shares nothing with the poster.
+    ("story ignores the post -> M8-B", _M8_POST + """### Kiểu 11: Story reply (1 bình luận)
+1. hồi đó e đi khám xong bs đưa 2 hướng r để e tự chọn, e ngồi đó đứng hình lun. về nhà e mở lại tờ giấy bs ghi, đọc tới lui cả tuần. e chưa hẹn lại lịch vì sợ chọn xong lại nghĩ hồi đó chọn cái kia có khi hơn
+""", "M8-B"),
+
+    # A bare one-line question gives nothing to mirror. Failing here would push
+    # writers to invent details the poster never gave - worse than generic.
+    ("bare question -> M8-B skipped", """**Mode:** reply-group
+**Câu hỏi gốc:** mn ơi mổ cận ở đâu tốt ạ
+
+### Kiểu 11: Story reply (1 bình luận)
+1. hồi đó e cx đi hỏi khắp nơi như b. e khám 2 chỗ r mới qua DND Trương Định khám thêm cho có cái so. bs ngồi giải thích vì sao mắt e đi đường này chứ k phải đường kia, e mới thấy đỡ hoang mang. tới lúc chốt e vẫn về nhà nghĩ thêm mấy hôm
+""", None),
+
+    # Kiểu 11 is long, which makes it the easiest place to hide a banned claim.
+    # Pins that M8 does not create an exemption from 5C.
+    ("story carrying a pain claim -> 5C", _M8_POST + """### Kiểu 11: Story reply (1 bình luận)
+1. e cx cận 5 độ, làm văn phòng nên mắt mỏi hoài. ba mẹ e cx cản y v b nên e phải rủ mẹ đi khám cùng. hôm mổ e k đau gì hết, xong cái là về
+""", "5C"),
+
+    # 10/10 belongs to Kiểu 1: a story has four sentences to describe the result
+    # instead of scoring it.
+    ("story carrying 10/10 -> M5", _M8_POST + """### Kiểu 11: Story reply (1 bình luận)
+1. e cx cận 5 độ, làm văn phòng, đeo kính 10 năm r. ba mẹ e cản nên e rủ mẹ đi khám cùng bên DND SG. giờ e 10/10 r
+""", "M5"),
+
+    # The blockquote form must be excised from 5C/M3, or a draft fails for
+    # quoting the poster. Pairs with the smuggle case below - same shape as the
+    # measured excise bypass in mode `anti`.
+    ("banned claim inside the quoted post -> pass", """**Mode:** reply-group
+**Câu hỏi gốc:**
+> mn ơi e cận 5 độ làm văn phòng
+> có chỗ tư vấn e là mổ xong hết cận vĩnh viễn, k đau gì hết
+> nghe vậy đúng k ạ
+
+### Kiểu 8: Đính chính nhầm lẫn kỹ thuật (1 bình luận)
+1. cho e góp ý nhẹ, mổ khúc xạ là chỉnh độ hiện tại thôi chứ k phải khỏi cận mãi mãi nha
+
+### Kiểu 11: Story reply (1 bình luận)
+2. e cx cận 5 độ làm văn phòng nên e hiểu cảm giác đi hỏi mỗi nơi một kiểu. hồi e đi khám bên DND Trương Định, bs nói rõ là chỉnh độ hiện tại chứ k hứa j thêm, e nghe vậy mới tin. b cứ đi khám nghe bs nói trực tiếp r hẵng chốt
+""", None),
+
+    # ...and the boundary is the `>` character, not a blank line: an item pasted
+    # directly under the marker with no `>` must stay outside the excised block.
+    ("item smuggled under the marker still fails 5C", """**Mode:** reply-group
+**Câu hỏi gốc:**
+> mn ơi e cận 5 độ làm văn phòng, mổ ở đâu ổn ạ
+1. e mổ bên DND SG xong k đau gì hết nha b
+""", "5C"),
+
+    # Marker with nothing after it: M6-A must say "wrong format", and must not be
+    # satisfied by an empty payload.
+    ("marker with empty payload -> M6-A", """**Mode:** reply-group
+**Câu hỏi gốc:**
+
+### Kiểu 11: Story reply (1 bình luận)
+1. e cx cận 5 độ làm văn phòng. ba mẹ e cản y v. e rủ mẹ đi khám cùng r mẹ mới chịu
+""", "M6-A"),
+
+    # M6 must read the WHOLE block, not line 1. `phaco` sits on line 2, so a
+    # SMILE story is drift - the exact failure the inline regex could not see.
+    ("multi-line post: M6 reads past line 1", """**Mode:** reply-group
+**Câu hỏi gốc:**
+> mn ơi mẹ e 68t mắt mờ dần cả năm nay
+> bs bảo bị đục thủy tinh thể, phải mổ phaco
+> mổ ở đâu ổn ạ
+
+### Kiểu 11: Story reply (1 bình luận)
+1. hồi đó mẹ e cx v, e mổ cận smile pro bên DND SG xong thấy ổn nên đưa mẹ qua luôn. bs đo bản đồ giác mạc cho e kỹ lắm. giờ mắt e thoát kính r
+""", "M6-B"),
+]
+
 # M5 negatives - each must fail for exactly one reason.
 SELFTEST_M5_BAD = [
     ("mixed angle with no downside", "M5", """**Mode:** reply-group
@@ -3584,6 +3905,23 @@ def run_selftest():
                                    + SELFTEST_M6_SENTENCE + SELFTEST_M6_NEIGHBOUR):
         box = []
         rc = run_check(body, label="<m6: %s>" % label, require_policy=False, rep_out=box)
+        codes = set(c for c, _ in box[0].fails) if box else set()
+        if want_code is None:
+            ok = rc == 0
+        else:
+            ok = rc != 0 and want_code in codes
+        if not ok:
+            nfail += 1
+        print("  %-4s %-46s rc=%d codes=%s (want %s)"
+              % ("ok" if ok else "FAIL", label, rc,
+                 ",".join(sorted(codes)) or "none", want_code or "PASS"))
+
+    print("")
+    print("G1a. M8 - Kiểu 11 story replies (length + mirroring)")
+    print("-" * 68)
+    for label, body, want_code in SELFTEST_M8:
+        box = []
+        rc = run_check(body, label="<m8: %s>" % label, require_policy=False, rep_out=box)
         codes = set(c for c, _ in box[0].fails) if box else set()
         if want_code is None:
             ok = rc == 0
