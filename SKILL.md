@@ -27,6 +27,7 @@ Mode chỉ được nhận ở **token đầu tiên** và phải đứng **trư�
 | `group` (mặc định) | ~28 bài post seeding group mổ cận |
 | `group story` / `story` | ~15 bài story kể chuyện |
 | `reply-group "câu hỏi"` | ~20 comment reply vào bài người khác (có **Kiểu 11 story reply**) |
+| `fast "câu hỏi"` | **đúng 1 comment reply** đúng trọng tâm (1 câu; Kiểu 9 được 2 câu) — xem MODE 2F |
 | `ads` | ~20 comment dưới bài quảng cáo của mình |
 | `live (nội dung live)` | ~20 comment nick ảo cho livestream |
 | `maps` / `maps_foreigner` | ~20 review Google Maps (tiếng Việt / persona nước ngoài) |
@@ -36,16 +37,20 @@ Mode chỉ được nhận ở **token đầu tiên** và phải đứng **trư�
 **Ví dụ**
 1. `/dnd-seeding` → chạy mode `group`
 2. `/dnd-seeding reply-group "mổ cận ở đâu tốt vậy mọi người"`
-3. `/dnd-seeding reply-group "mắt mờ dần nhìn không rõ" service=phaco`
-4. `/dnd-seeding maps_foreigner`
-5. `/dnd-seeding anti "khám ở đây chờ lâu, thái độ kém"`
-6. `reply-group` với **bài post dài**: dán nguyên bài nhiều dòng, skill in nó dạng blockquote rồi viết Kiểu 11 story bám chi tiết trong bài
+3. `/dnd-seeding fast "mổ cận ở đâu tốt vậy mọi người"` → đúng 1 reply gọn (xem MODE 2F)
+4. `/dnd-seeding reply-group "mắt mờ dần nhìn không rõ" service=phaco`
+5. `/dnd-seeding maps_foreigner`
+6. `/dnd-seeding anti "khám ở đây chờ lâu, thái độ kém"`
+7. `reply-group` với **bài post dài**: dán nguyên bài nhiều dòng, skill in nó dạng blockquote rồi viết Kiểu 11 story bám chi tiết trong bài
 
 **Output:** danh sách item plain text, đã qua `scripts/qa_seeding.py --check`.
 
 **Lưu ý**
 - Mọi số tiền / ưu đãi chỉ lấy từ `fees-promos.md`. Chưa đọc file đó → không được nêu, phải chuyển hotline.
-- `reply-group` mà câu hỏi không phải mổ cận/khúc xạ → bắt buộc đọc `services.md` trước.
+- `reply-group` / `fast` mà câu hỏi không phải mổ cận/khúc xạ → bắt buộc đọc `services.md` trước.
+- `fast "câu hỏi"` ra đúng **1 reply** (1 câu; Kiểu 9 được 2 câu), chỉ dùng 1 kiểu trong 1-5/8/9/10 — **Kiểu 6/7/11 CẤM** (gate M9-B).
+- Draft `fast` phải khai `**Mode:** fast` ở đầu và check bằng `--check --mode fast` (thiếu dòng Mode là fail M9-A).
+- `fast` KHÔNG mang `10/10` (quota = 0 như `live`), KHÔNG dùng cụm nào trong ANTIREPEAT_WATCH (1 item dính cụm là 100% > block 30%).
 - `reply-group "… maps …"` vẫn là mode `reply-group` — chữ `maps` nằm trong câu hỏi của user, không phải lệnh.
 - Bài gốc dài nhiều dòng → in dạng blockquote (`> ` mỗi dòng). Dán văn trần thì gate chỉ đọc được dòng đầu.
 
@@ -58,7 +63,7 @@ Trước khi sinh nội dung, đọc theo nhu cầu:
 | Khi nào | Bắt buộc đọc |
 |---|---|
 | **Mọi run có thể nêu thông tin phí hoặc số ưu đãi** (kể cả chữ "free", "miễn phí", "tặng gói khám") | **`fees-promos.md`** — chưa đọc thì không được nêu, phải chuyển hotline |
-| **Mode `reply-group` mà câu hỏi gốc KHÔNG phải mổ cận/khúc xạ** (phaco, lão thị, kiểm soát cận/Ortho-K, cắt kính, glaucoma, võng mạc, lác, mộng, thẩm mỹ, tổng quát) | **`services.md`** — fact pack theo service. Chưa đọc thì không có dữ kiện gì để trả lời ngoài mổ cận, và đó chính là con bug M6 gác |
+| **Mode `reply-group` / `fast` mà câu hỏi gốc KHÔNG phải mổ cận/khúc xạ** (phaco, lão thị, kiểm soát cận/Ortho-K, cắt kính, glaucoma, võng mạc, lác, mộng, thẩm mỹ, tổng quát) | **`services.md`** — fact pack theo service. Chưa đọc thì không có dữ kiện gì để trả lời ngoài mổ cận, và đó chính là con bug M6 gác |
 | Trước khi ghi file scratch | chạy `scripts/qa_seeding.py --check` (pipe draft qua stdin) |
 | Muốn biết script gác gì / ngưỡng bao nhiêu | `qa/checks.md` |
 
@@ -72,10 +77,10 @@ Repo GitHub: https://github.com/minhtranquang1993/dnd-seeding (nhánh `main`).
 Layout 5 file: `SKILL.md` · `fees-promos.md` · `services.md` · `qa/` · `scripts/`.
 
 - **Push:** copy cả 5 path vào clone local, commit, push.
-- **Pull về máy:** ghi đè cả 5 path vào **cả 3 runtime** (đường dẫn macOS):
-  - `~/.claude/skills/dnd-seeding/`
-  - `~/.commandcode/skills/dnd-seeding/`
-  - `~/.gemini/config/skills/seeding-dnd/`
+- **Pull về máy:** ghi đè cả 5 path vào **2 runtime Windows thật** (source sửa duy nhất là bản `.claude`):
+  - `C:\Users\Admin\.claude\skills\dnd-seeding\` (= clone git repo minhtranquang1993/dnd-seeding, ngang remote)
+  - `C:\Users\Admin\.gemini\config\skills\seeding-dnd\` (clone cùng repo)
+- `C:\Users\Admin\.commandcode\skills\dnd-seeding` **KHÔNG tồn tại** — bỏ qua, đừng sync vào path này.
 - Sync thiếu 1 runtime là sinh version skew — đã xảy ra: 3 runtime từng chạy 3 version khác nhau (492 / 392 / 336 dòng).
 
 ## When to Use
@@ -83,6 +88,7 @@ Layout 5 file: `SKILL.md` · `fees-promos.md` · `services.md` · `qa/` · `scri
 - `/dnd-seeding group` — Tạo ~28 bài đăng seeding trên group mổ cận
 - `/dnd-seeding group story` (hoặc `/dnd-seeding story`) — Nhánh con: chỉ sinh ~15 bài **story kể chuyện**, bỏ 7 góc còn lại
 - `/dnd-seeding reply-group "câu hỏi gốc"` — Tạo ~20 comment reply vào bài người khác trên group
+- `/dnd-seeding fast "câu hỏi gốc"` — Trả đúng **1 comment reply** đúng trọng tâm (xem MODE 2F)
 - `/dnd-seeding ads` — Tạo ~20 comment seeding dưới bài quảng cáo của mình
 - `/dnd-seeding live (nội dung content live)` — Tạo ~20 comment seeding dùng nick ảo để bình luận trên livestream (workshop/hội thảo)
 - `/dnd-seeding maps` — Tạo ~20 review Google Maps tiếng Việt (xem MODE 5A)
@@ -249,6 +255,7 @@ Mọi số hit dưới đây đo trên 217 file output cũ. Script `--check` gá
 | `maps_foreigner` | không góc nào | **0** — đo 0 hit, không được miễn |
 | `koc` | mọi item | **miễn hạn ngạch** — đo 5 hit, ngoại lệ có chủ đích |
 | `anti` | Kiểu 1 (khách đã mổ) | ≤20% item/run |
+| `fast` | **Không cho `10/10`** | **0** — 1 reply duy nhất, không có chỗ để spread 20% quota |
 
 Mẫu số = số item trong run đó, không phải cả file lịch sử.
 
@@ -801,6 +808,34 @@ service khác thì nội dung phải đổi theo, không phải dịch lại bà
 
 ---
 
+# MODE 2F: `/dnd-seeding fast "câu hỏi"` — 1 reply gọn
+
+**Mục đích:** bài nào chỉ cần **đúng 1 comment reply** đúng trọng tâm, không cần cả thread ~20 reply. Dùng khi câu hỏi đã rõ, chỉ cần trả lời gọn để copy-paste ngay.
+
+**Flow fast (ngắn hơn Mode 2, giữ nguyên Bước 0):**
+1. **Bước 0 y hệt Mode 2** — phân loại service + phase, in `**Câu hỏi gốc:**` + `**Topic:**`. Service ≠ `kx`/`none` → đọc `services.md` trước.
+2. **Chọn đúng 1 kiểu hợp nhất** trong 1-5/8/9/10 — kiểu nào trả lời trúng nhất câu hỏi đó. **Kiểu 6/7/11 CẤM** (gate M9-B fail cứng, không ngoại lệ: cần story/mixed/hỏi-lại thì dùng mode `reply-group` thường).
+3. **Viết đúng 1 reply:** 1 câu duy nhất. Ngoại lệ duy nhất: **Kiểu 9 được 2 câu** (hậu cần cần 2 ý). Không có ngoại lệ story dài như Kiểu 11.
+4. **In marker ở đầu output** (thiếu dòng Mode là fail M9-A):
+```
+**Mode:** fast
+**Câu hỏi gốc:** <paste nguyên câu hỏi>
+**Topic:** <service> / <phase>
+```
+5. **Check bắt buộc:** `python scripts/qa_seeding.py --check <file> --mode fast` — phải có cờ `--mode fast`, không pipe trần. Fail thì sửa rồi chạy lại.
+6. Yếu tố DND giữ nguyên: phi đọc `fees-promos.md` + footer khi nêu phí, luật bs Tuấn, cấm claim/superlative/so sánh/cam kết.
+
+**Luật cứng của fast (3 cái, đều có gate cưỡng chế):**
+- **KHÔNG mang `10/10`** — quota fast = 0 như `live` (gate 5A). 1 reply không có run để spread 20%.
+- **KHÔNG dùng cụm nào trong ANTIREPEAT_WATCH** (`nhẹ nhàng`, `ổn áp`, `10/10`, `nhanh gọn`, `máy xịn`, `êm ru`, `nhẹ tênh`, `ngọt xớt`, `dễ chịu hơn`, `đỡ hơn`, …) — 1 item dính cụm là 100% > block 30% (gate ANTIREP). Không sửa gate chung, luật nằm ở skill.
+- **KHÔNG dùng Kiểu 6/7/11** — gate M9-B fail cứng kể cả run 1 item. 6/7 là đồ thread (vô nghĩa với 1 câu đơn), 11 là story 3-7 câu (vô hiệu định nghĩa fast 1 câu).
+
+**Ví dụ fast:**
+- Câu hỏi: _"mọi người ơi cận 5 độ mổ smile pro có ổn không ạ"_ (`kx` / `pre`) → (Kiểu 2) "bạn qua DND Trương Định q3 khám xem, mình mổ bên đó thấy ổn lắm"
+- Câu hỏi: _"mẹ e 68t bị đục thủy tinh thể, mổ phaco ở đâu ổn ạ"_ (`phaco` / `pre`) → (Kiểu 9) "muốn mổ luôn trong ngày thì phải nhịn ăn sáng để lấy máu xét nghiệm. nhớ mang thẻ BHYT với CCCD cho bác nha" ← 2 câu, hậu cần **riêng của Phaco**
+
+---
+
 # MODE 3: `/dnd-seeding ads`
 
 **Mục đích:** Tạo ~20 comment seeding dưới bài quảng cáo (Facebook Ads) của chính mình, dùng nhiều nick ảo. Mục tiêu: tạo engagement, social proof, kéo người thật comment theo.
@@ -1016,6 +1051,7 @@ Chỉ đọc **token đầu tiên**, và chỉ phần **trước** dấu ngoặc
 - `group` (không kèm `story`) hoặc không có tham số → chạy Mode 1 đầy đủ 8 góc
 - `reply-group "..."` → chạy Mode 2, parse câu hỏi gốc từ dấu ngoặc kép, rồi **làm Bước 0 phân loại service trước khi chọn kiểu**
   - User dán **bài post/review dài nhiều dòng** thay vì 1 câu hỏi → vẫn là Mode 2. In marker **dạng B** (blockquote) và cân nhắc thêm **Kiểu 11 story reply** bám hoàn cảnh trong bài
+- `fast "..."` → chạy **MODE 2F** (flow gọn của Mode 2, xem §MODE 2F ngay sau MODE 2): Bước 0 y hệt → 1 kiểu hợp nhất → đúng 1 reply → marker `**Mode:** fast` → `--check --mode fast`
 - `ads` → chạy Mode 3
 - `live (nội dung content live)` → chạy Mode 4, parse toàn bộ nội dung live, detect bác sĩ/chủ đề/ưu đãi từ đó
 - `maps` / `maps_foreigner` / `koc` → chạy Mode 5A / 5B / 5C, áp ngoại lệ §7B đúng theo mode
@@ -1024,8 +1060,9 @@ Chỉ đọc **token đầu tiên**, và chỉ phần **trước** dấu ngoặc
 
 **Bước 2: Chọn Persona & Sinh nội dung**
 - **Mode `reply-group`: làm Bước 0 (phân loại service) TRƯỚC.** Service ≠ `kx`/`none` → đọc `services.md` lấy dữ kiện, rồi mới viết
+- **Mode `fast`: làm Bước 0 y hệt, rồi chỉ chọn 1 kiểu hợp nhất trong 1-5/8/9/10** (xem MODE 2F). Kiểu 6/7/11 CẤM — có gate M9-B cưỡng chế, không còn là luật miệng
 - Chọn ngẫu nhiên 5-6 persona từ Persona Pool
-- Sinh đúng số câu theo cấu trúc của mode tương ứng (mode `group` ~28 câu, sub-mode `story` ~15 câu, mode `reply-group`/`ads`/`live` ~20 câu)
+- Sinh đúng số câu theo cấu trúc của mode tương ứng (mode `group` ~28 câu, sub-mode `story` ~15 câu, mode `reply-group`/`ads`/`live` ~20 câu, mode `fast` **đúng 1 reply**)
 - Mode `reply-group`: bài gốc có kể hoàn cảnh cụ thể → thêm **1-3 item Kiểu 11 story reply**, mỗi item 3-7 câu và phải gương chiếu ≥1 chi tiết của bài gốc (§Kiểu 11)
 - Đảm bảo đa dạng persona, cấu trúc câu, cách xưng hô
 
@@ -1037,12 +1074,14 @@ Chỉ đọc **token đầu tiên**, và chỉ phần **trước** dấu ngoặc
 **Bước 4: Xuất kết quả ra Chat**
 - Hiển thị rõ ràng theo nhóm/kiểu để dễ copy
 - Mode `reply-group`: in **`**Câu hỏi gốc:**`** và **`**Topic:** <service> / <phase>`** ở đầu output (bắt buộc — thiếu là fail M6-A). Bài gốc nhiều dòng → dạng B blockquote, mỗi dòng bắt đầu `> `
+- Mode `fast`: in thêm **`**Mode:** fast`** ở dòng đầu (trước cả `**Câu hỏi gốc:**`) — thiếu là fail M9-A. Xem MODE 2F
 - Mode `live`: hiện lại tên bác sĩ/chủ đề hội thảo đã detect được ở đầu để tiện đối chiếu
 
 **Bước 4B: Gác phí trước khi lưu**
 - Đối chiếu từng câu có **thông tin phí** (free/0đ/miễn phí/tặng gói/trị giá/số tiền) với luật §6. Câu nào không đủ điều kiện → sửa hoặc bỏ.
 - Có nêu thông tin phí → phải **đã đọc `fees-promos.md` trong run này** + in footer `[fees: <updated> · <fee-tier-id>]`. Chưa đọc → bỏ hết thông tin phí, chuyển hotline.
 - Chạy `python scripts/qa_seeding.py --check <file>` (hoặc pipe draft qua stdin trước khi ghi). Fail thì sửa rồi chạy lại.
+- Mode `fast`: **bắt buộc** `python scripts/qa_seeding.py --check <file> --mode fast` (có cờ `--mode fast`, không pipe trần) — xem MODE 2F
 
 **Bước 5: Lưu file scratch**
 Lưu vào: `C:\Users\Admin\.gemini\antigravity-ide\scratch\seeding_<mode>_<timestamp>.md`
@@ -1076,6 +1115,10 @@ Lưu vào: `C:\Users\Admin\.gemini\antigravity-ide\scratch\seeding_<mode>_<times
 | **Trôi chủ đề không cần nhắc tên** (thread Phaco mà nói "bản đồ giác mạc", "ngưng lens", "vạt giác mạc") | Đó vẫn là giọng mổ cận, M6-B bắt qua `KX_CONTEXT`. Nói hậu cần **của service đang hỏi** |
 | **Trả lời chung chung để né gate** ("bên đó ổn lắm", "b ib hỏi thử") | ≥60% item thực chất phải chạm đúng service, M6-C bắt. Chung chung cũng là lạc đề |
 | **Thiếu dòng `**Câu hỏi gốc:**` ở đầu output (mode reply-group)** | In cả `**Câu hỏi gốc:**` và `**Topic:**`. Thiếu là fail M6-A — không khai câu hỏi thì không gác được gì |
+| **Mode `fast`: thiếu dòng `**Mode:** fast`** | Draft fast thiếu dòng này (dù đủ marker) mà check bằng `--mode fast` là fail M9-A. In đúng 3 dòng đầu: `**Mode:** fast` → `**Câu hỏi gốc:**` → `**Topic:**` — xem MODE 2F |
+| **Mode `fast`: quên `--mode fast` khi check** | Draft thiếu Mode mà không ép `--mode fast` thì rơi về `unknown` và PASS oan (M6 không chạy). Flow fast bắt buộc `--check <file> --mode fast` |
+| **Mode `fast`: viết Kiểu 6/7/11** | Fail cứng M9-B kể cả 1 item. Cần story/mixed/hỏi-lại thì dùng mode `reply-group` thường |
+| **Mode `fast`: mang `10/10` hoặc cụm watch** | `10/10` quota fast = 0 (fail 5A); cụm ANTIREPEAT_WATCH dính 1/1 item là 100% > block 30%. Viết lại câu, không chữa bằng cách thêm item |
 | **Nêu số / % BHYT** | Nói "có BHYT hỗ trợ" thôi, số thì chuyển hotline 0775.147.147 (M6-D) |
 | **Lẫn cườm nước (glaucoma) với cườm khô (Phaco)** | Hai bệnh khác nhau. Cườm khô = đục thủy tinh thể = mổ Phaco. Cườm nước = tăng nhãn áp = thuốc/laser/cắt bè |
 | **Lẫn mốc ngưng kính áp tròng** | Lens mềm ngưng ≥ **1 tuần**; Ortho-K ngưng ≥ **1 tháng** |

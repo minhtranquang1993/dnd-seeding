@@ -720,7 +720,7 @@ TOPIC_NEUTRAL_SECTIONS = {7}
 # string exactly - so `**Mode:** reply_group` skipped both gates entirely.
 # Measured: a textbook drift item on a Phaco question printed PASS under that
 # spelling.
-TOPIC_FIT_MODES = frozenset(("reply-group", "reply_group", "anti"))
+TOPIC_FIT_MODES = frozenset(("reply-group", "reply_group", "anti", "fast"))
 
 # M6-D: BHYT may be mentioned, its numbers may not - they are not in
 # fees-promos.md, so they route to the hotline like every other unpriced number.
@@ -931,6 +931,10 @@ QUOTA_10_10 = {
     "anti":        {"allowed": {1},    "max_ratio": 0.20},
     "ads":         {"allowed": {5},    "max_ratio": 0.20},
     "live":        {"allowed": set(),  "max_ratio": 0.0},
+    # `fast` is one reply, not a thread: there is no run to spread a 20%
+    # quota over, so 10/10 is banned outright like `live`. The skill also
+    # bans it at authoring time; this row is the second net.
+    "fast":        {"allowed": set(),  "max_ratio": 0.0},
     # 5B is a PER-COLUMN exemption, not a blanket one. maps/maps_foreigner are
     # NOT exempt from 10/10 (brief 5B measured 0 hits in both - the need is
     # absent, so the exemption was never earned). Without these rows the mode
@@ -1297,7 +1301,7 @@ COMMAND_PREFIX_RX = re.compile(r"^\s*/?(?:dnd-seeding|seeding-dnd)\b", re.IGNORE
 
 # Longest-first so `reply-group` wins over `group`, `maps_foreigner` over `maps`.
 COMMAND_MODES = ("maps_foreigner", "reply-group", "reply_group", "google_maps",
-                 "maps", "koc", "group", "story", "ads", "live", "anti")
+                 "maps", "koc", "group", "story", "ads", "live", "anti", "fast")
 
 DEFAULT_MODE = "group"
 
@@ -1865,8 +1869,11 @@ def check_new_angles(mode, items, rep):
     reuse M5: its Kiểu 6 is the mixed-review angle, which `anti` forbids outright
     (the user's locked decision is to avoid a legitimate complaint, not concede
     it). check_anti_mode enforces the Kiểu 7 floor for `anti` instead.
+    `fast` reuses M5: a one-item fast draft is exempt from the full-run
+    coverage floor (< 10 items), but per-item rules still apply when an
+    angle shows up.
     """
-    if mode not in ("reply-group", "reply_group"):
+    if mode not in ("reply-group", "reply_group", "fast"):
         return
     by_section = {}
     for it in items:
@@ -1965,8 +1972,11 @@ def check_story_reply(mode, text, items, rep):
     one-line question like "mổ cận ở đâu tốt ạ". Failing there would push writers
     to invent details the poster never gave, which is worse output than a generic
     story: an invented "b cũng cận 5 độ giống e" contradicts a real poster.
+
+    `fast` reuses M8 for the same reason as M5: Kiểu 11 is already banned
+    in fast by M9-B, and this gate stays as the second net.
     """
-    if mode not in ("reply-group", "reply_group"):
+    if mode not in ("reply-group", "reply_group", "fast"):
         return
     stories = [it for it in items if it.section == STORY_SECTION]
     if not stories:
@@ -2339,6 +2349,33 @@ def check_topic_fit(mode, text, items, rep):
                      % (on_topic, substantive, share * 100, service))
 
 
+def check_fast_mode(mode, text, items, rep):
+    """M9 - fast mode is one reply, so its shape is gated hard, not by volume.
+
+    M9-A  the draft must declare `**Mode:** fast`. This gate only runs when
+          the mode was forced to `fast` (flow runs `--check --mode fast`),
+          so a draft missing the line while claiming to be fast fails here
+          instead of falling back to `unknown` and passing with M6 silent.
+    M9-B  Kiểu 6/7/11 are banned in fast at any length. They are thread
+          furniture (mixed floor, ask-back floor) or a 3-7 sentence story -
+          all meaningless in a single reply. Other modes are untouched:
+          this gate returns immediately when mode != "fast".
+    """
+    if mode != "fast":
+        return
+    m = MODE_RX.search(text)
+    if not m or m.group(1).strip().lower() != "fast":
+        rep.fail("M9-A", "mode fast mà thiếu dòng '**Mode:** fast'. "
+                         "In đúng dòng này ở đầu draft rồi chạy lại "
+                         "`--check --mode fast`.")
+    for it in items:
+        if it.section in ({MIXED_SECTION} | set(NO_BRAND_SECTIONS) | {STORY_SECTION}):
+            rep.fail("M9-B", "item %s (line %d) ở Kiểu %d, mà fast chỉ dùng "
+                             "1 kiểu trong 1-5/8/9/10. Cần story/mixed/hỏi-lại "
+                             "thì dùng mode reply-group thường"
+                     % (it.number, it.line, it.section))
+
+
 def default_services_path():
     return os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                         SERVICES_FILENAME)
@@ -2470,6 +2507,7 @@ def run_check(text, mode=None, fees_path=None, label="<stdin>", require_policy=T
     check_new_angles(mode, items, rep)
     check_story_reply(mode, text, items, rep)
     check_topic_fit(mode, text, items, rep)
+    check_fast_mode(mode, text, items, rep)
     check_anti_mode(mode, text, items, rep)
     # The marker IMPLIES the mode. Measured: a draft carrying the review
     # blockquote but no `**Mode:**` line detected as `unknown`, which made
@@ -2585,6 +2623,8 @@ SELFTEST_COMMANDS = [
     ("/dnd-seeding story", "story", None),
     ('/dnd-seeding reply-group "e cận 5 độ mổ smile đc k"', "reply-group",
      "e cận 5 độ mổ smile đc k"),
+    ('/dnd-seeding fast "mổ cận ở đâu tốt ạ"', "fast",
+     "mổ cận ở đâu tốt ạ"),
     ("/dnd-seeding ads", "ads", None),
     ("/dnd-seeding live (workshop bs Tuấn nói về smile pro)", "live",
      "workshop bs Tuấn nói về smile pro"),
@@ -3389,6 +3429,103 @@ SELFTEST_M8 = [
 """, "M6-B"),
 ]
 
+# ---------------------------------------------------------------------------
+# M9 - fast mode shape. (label, draft, expected FAIL code or None)
+# All PASS rows carry `**Mode:** fast` and run through detection; the M9-A
+# row omits the Mode line and is run with an explicit mode override (see
+# runner G1c) - that is the flow's `--check --mode fast` shape.
+# ---------------------------------------------------------------------------
+SELFTEST_M9 = [
+    ("fast Kieu 2 on-topic kx passes", """**Mode:** fast
+**Câu hỏi gốc:** mn ơi cận 5 độ mổ smile pro có ổn k ạ
+**Topic:** kx / pre
+
+### Kiểu 2: Gợi ý/Recommend tự nhiên (1 bình luận)
+1. bạn qua DND Trương Định q3 khám xem, mình mổ bên đó thấy ổn lắm
+""", None),
+
+    ("fast Kieu 8 correction on-topic passes", """**Mode:** fast
+**Câu hỏi gốc:** nghe nói mổ cận xong không cần tái khám nữa đúng k ạ
+
+### Kiểu 8: Đính chính nhầm lẫn kỹ thuật (1 bình luận)
+1. góp ý nhẹ là sau mổ cận vẫn cần tái khám theo lịch hẹn nha b
+""", None),
+
+    ("fast Kieu 9 phaco logistics on-topic passes", """**Mode:** fast
+**Câu hỏi gốc:** mẹ e bị đục thủy tinh thể, mổ phaco ở đâu ổn ạ
+**Topic:** phaco / pre
+
+### Kiểu 9: Chi tiết quy trình/hậu cần (1 bình luận)
+1. mẹ mình mổ phaco bên DND Trương Định q3, bs Tuấn mổ, tầm 3-5 phút 1 mắt à. hôm đó nhớ cho bà nhịn ăn sáng để xét nghiệm nha
+""", None),
+
+    ("fast drift to kx -> M6-B", """**Mode:** fast
+**Câu hỏi gốc:** mẹ e bị đục thủy tinh thể, mổ phaco ở đâu ổn ạ
+**Topic:** phaco / pre
+
+### Kiểu 2: Gợi ý/Recommend tự nhiên (1 bình luận)
+1. bạn qua DND Trương Định q3 khám xem, mình mổ smile pro bên đó thấy ổn lắm
+""", "M6-B"),
+
+    ("fast missing marker -> M6-A", """**Mode:** fast
+
+### Kiểu 2: Gợi ý/Recommend tự nhiên (1 bình luận)
+1. bạn qua DND Trương Định q3 khám thử xem
+""", "M6-A"),
+
+    ("fast Kieu 1 with 10/10 -> 5A", """**Mode:** fast
+**Câu hỏi gốc:** mn ơi cận 5 độ mổ smile pro có ổn k ạ
+**Topic:** kx / pre
+
+### Kiểu 1: Trả lời từ kinh nghiệm bản thân (1 bình luận)
+1. mình mổ bên DND Trương Định q3 thấy ổn lắm, giờ 10/10 r nha
+""", "5A"),
+
+    ("fast Kieu 6 -> M9-B", """**Mode:** fast
+**Câu hỏi gốc:** mn ơi cận 5 độ mổ smile pro có ổn k ạ
+**Topic:** kx / pre
+
+### Kiểu 6: Review có điểm chưa hài lòng (1 bình luận)
+1. mình mổ bên DND SG, nói thật hôm khám đông nên chờ hơi lâu. còn lại thì ổn
+""", "M9-B"),
+
+    ("fast Kieu 7 -> M9-B", """**Mode:** fast
+**Câu hỏi gốc:** mn ơi cho e hỏi khám bên DND ntn ạ
+**Topic:** kx / pre
+
+### Kiểu 7: Hỏi lại người đăng (1 bình luận)
+1. bạn cận bao nhiêu độ r, đã đi khám ở đâu chưa v
+""", "M9-B"),
+
+    ("fast Kieu 11 -> M9-B", """**Mode:** fast
+**Câu hỏi gốc:** mn ơi mổ cận ở đâu tốt ạ
+**Topic:** kx / pre
+
+### Kiểu 11: Story reply (1 bình luận)
+1. hồi đó e cx đi hỏi khắp nơi như b. e khám 2 chỗ r mới qua DND Trương Định khám thêm cho có cái so. bs ngồi giải thích kỹ nên e thấy đỡ hoang mang hẳn
+""", "M9-B"),
+
+    # M9-B must not leak into legacy modes: a short reply-group draft
+    # carrying Kiểu 6 still passes like any short draft.
+    ("reply-group short Kieu 6 unaffected", """**Mode:** reply-group
+**Câu hỏi gốc:** mn ơi cho e hỏi khám bên DND ntn ạ
+
+### Kiểu 6: Review có điểm chưa hài lòng (1 bình luận)
+1. mình mổ bên DND SG, bs Tuấn mổ khéo, chỉ có hôm khám đông nên chờ hơi lâu một chút
+""", None),
+]
+
+# M9-A forced-mode row: the body omits the Mode line on purpose; the runner
+# passes mode="fast" explicitly, mirroring the flow's `--check --mode fast`.
+SELFTEST_M9_FORCED = [
+    ("fast missing Mode line with --mode fast -> M9-A", """**Câu hỏi gốc:** mn ơi cận 5 độ mổ smile pro có ổn k ạ
+**Topic:** kx / pre
+
+### Kiểu 2: Gợi ý/Recommend tự nhiên (1 bình luận)
+1. bạn qua DND Trương Định q3 khám xem, mình mổ bên đó thấy ổn lắm
+""", "fast", "M9-A"),
+]
+
 # M5 negatives - each must fail for exactly one reason.
 SELFTEST_M5_BAD = [
     ("mixed angle with no downside", "M5", """**Mode:** reply-group
@@ -3944,6 +4081,37 @@ def run_selftest():
             nfail += 1
         print("  %-4s %-64s -> %s (want %s)"
               % ("ok" if ok else "FAIL", text[:64], got, want))
+
+    print("")
+    print("G1c. M9 - fast mode shape (M9-A declaration, M9-B Kieu 6/7/11 ban)")
+    print("-" * 68)
+    for label, body, want_code in SELFTEST_M9:
+        box = []
+        rc = run_check(body, label="<m9: %s>" % label, require_policy=False, rep_out=box)
+        codes = set(c for c, _ in box[0].fails) if box else set()
+        if want_code is None:
+            ok = rc == 0
+        else:
+            ok = rc != 0 and want_code in codes
+        if not ok:
+            nfail += 1
+        print("  %-4s %-46s rc=%d codes=%s (want %s)"
+              % ("ok" if ok else "FAIL", label, rc,
+                 ",".join(sorted(codes)) or "none", want_code or "PASS"))
+    for label, body, forced, want_code in SELFTEST_M9_FORCED:
+        box = []
+        rc = run_check(body, mode=forced, label="<m9: %s>" % label,
+                       require_policy=False, rep_out=box)
+        codes = set(c for c, _ in box[0].fails) if box else set()
+        if want_code is None:
+            ok = rc == 0
+        else:
+            ok = rc != 0 and want_code in codes
+        if not ok:
+            nfail += 1
+        print("  %-4s %-46s rc=%d codes=%s (want %s)"
+              % ("ok" if ok else "FAIL", label, rc,
+                 ",".join(sorted(codes)) or "none", want_code or "PASS"))
 
     print("")
     print("G2. M6-B ladder - topic labels must not collapse the way fee buckets do")

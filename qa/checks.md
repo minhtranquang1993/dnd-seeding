@@ -27,7 +27,7 @@ Draft phải qua `--check` **trước** khi ghi file. Ghi trước rồi check t
 | `M2` | fail | Câu nói khám free mà service không thuộc T0/T-FU | 0 vi phạm |
 | `M3` | fail | Claim hết đau (regex mở rộng) | 0 hit |
 | `M5` | fail | Góc reply mới: Kiểu 6 phải có điểm dở thật, Kiểu 7 không nhắc brand, 10/10 chỉ ở Kiểu 1 | **Kiểu 6 + 7** bắt buộc khi run ≥10 item; Kiểu 8/9/10/11 optional → note |
-| `M6-A` | fail | Draft `reply-group` thiếu dòng `**Câu hỏi gốc:**`, **hoặc** có marker mà không có nội dung sau nó | **mọi độ dài**, không riêng full run |
+| `M6-A` | fail | Draft `reply-group` / `fast` thiếu dòng `**Câu hỏi gốc:**`, **hoặc** có marker mà không có nội dung sau nó | **mọi độ dài**, không riêng full run |
 | `M6-B` | fail | Item trôi khỏi service câu hỏi: mang token service khác, **hoặc** giọng khúc xạ (`KX_CONTEXT`), mà không nhắc service đang hỏi | 0 item; xét **theo từng câu**; service `kx`/`none` không kích hoạt |
 | `M6-C` | fail | Tỉ lệ item **thực chất** chạm service câu hỏi quá thấp (trả lời chung chung / lạc đề) | **≥60%**, mẫu số **loại Kiểu 7**; chỉ áp run ≥10 item |
 | `M6-D` | fail | Nhắc BHYT kèm số hoặc % | 0 item — "có BHYT" thì được, số thì hotline. **Chạy cho mọi service**, kể cả `kx`/`none`: đây là luật phí mang số hiệu M6, không phải luật chủ đề |
@@ -38,9 +38,11 @@ Draft phải qua `--check` **trước** khi ghi file. Ghi trước rồi check t
 | `M7-D` | fail | Sàn Kiểu 7: item không phải câu hỏi · nhắc brand · mang trải nghiệm/đánh giá ngôi 1 | 3 luật per-item **mọi độ dài**; sàn ≥2 item chỉ ở run ≥10 |
 | `M7-E` | fail | Item ngoài Kiểu 7 mang **khung nhượng bộ** (`nói thật`, `công nhận`, `bù lại`, `e cx chờ lâu`) | 0 item |
 | `M7-F` | fail | Item xếp hạng chung (`khám kỹ nhất`, `uy tín nhất q3`, `hơn hẳn`) hoặc so sánh viện **phi-giá** (`viện khác k bằng`) | 0 item; item là **câu hỏi** được miễn |
-| `M8-A` | fail | Item ở Kiểu 11 (story reply) dài dưới 3 câu hoặc trên 7 câu | 3-7 câu/item; chỉ mode `reply-group` |
-| `M8-B` | fail | Item ở Kiểu 11 không gương chiếu chi tiết nào của bài gốc | ≥1 chi tiết trùng; **bỏ qua kèm note** nếu bài gốc không nêu chi tiết nào |
-| `5A` | fail | `10/10` ngoài góc được phép, hoặc vượt hạn ngạch | ≤20% item/run, `live` = 0 |
+| `M8-A` | fail | Item ở Kiểu 11 (story reply) dài dưới 3 câu hoặc trên 7 câu | 3-7 câu/item; mode `reply-group` + `fast` (fast cấm Kiểu 11 từ M9-B, M8 là lưới thứ hai) |
+| `M8-B` | fail | Item ở Kiểu 11 không gương chiếu chi tiết nào của bài gốc | ≥1 chi tiết trùng; **bỏ qua kèm note** nếu bài gốc không nêu chi tiết nào; mode `reply-group` + `fast` |
+| `M9-A` | fail | Draft `fast` (check bằng `--mode fast`) thiếu dòng `**Mode:** fast` | **mọi độ dài**; chỉ chạy khi `mode == "fast"` |
+| `M9-B` | fail | Item ở Kiểu 6/7/11 trong draft `fast` | 0 item, **mọi độ dài**; chỉ chạy khi `mode == "fast"`, không ảnh hưởng mode cũ |
+| `5A` | fail | `10/10` ngoài góc được phép, hoặc vượt hạn ngạch | ≤20% item/run, `live`/`fast` = 0 |
 | `5A` | fail / warn | Mode không khai được (`unknown`): có `10/10` → **fail** (không có luật nào xử được); không có `10/10` → warn | khai `**Mode:** <tên>` hoặc `--mode` |
 | `5C` | fail | Cấm chung: hết đau · superlative VN/EN · so sánh viện · cam kết · khỏi cận · **an toàn tuyệt đối** (`safety_absolute`) | 0 hit |
 | `FOOTER-A` | fail | Có nêu thông tin phí mà **không có footer** | bắt buộc có footer |
