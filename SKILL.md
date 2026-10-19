@@ -24,9 +24,7 @@ Mode chỉ được nhận ở **token đầu tiên** và phải đứng **trư�
 
 | Mode | Ra gì |
 |---|---|
-| `group` (mặc định) | ~28 bài post seeding group mổ cận |
-| `group story` / `story` | ~15 bài story kể chuyện |
-| `reply-group "câu hỏi"` | ~20 comment reply vào bài người khác (có **Kiểu 11 story reply**) |
+| `story` (mặc định) | ~15 bài story kể chuyện |
 | `fast "câu hỏi"` | **đúng 1 comment reply** đúng trọng tâm (1 câu; Kiểu 9 được 2 câu) — xem MODE 2F |
 | `ads` | ~20 comment dưới bài quảng cáo của mình |
 | `live (nội dung live)` | ~20 comment nick ảo cho livestream |
@@ -35,23 +33,20 @@ Mode chỉ được nhận ở **token đầu tiên** và phải đứng **trư�
 | `anti "review xấu"` | ~20 comment cứu thread có review xấu |
 
 **Ví dụ**
-1. `/dnd-seeding` → chạy mode `group`
-2. `/dnd-seeding reply-group "mổ cận ở đâu tốt vậy mọi người"`
+1. `/dnd-seeding` → chạy mode `story`
+2. `/dnd-seeding story`
 3. `/dnd-seeding fast "mổ cận ở đâu tốt vậy mọi người"` → đúng 1 reply gọn (xem MODE 2F)
-4. `/dnd-seeding reply-group "mắt mờ dần nhìn không rõ" service=phaco`
-5. `/dnd-seeding maps_foreigner`
-6. `/dnd-seeding anti "khám ở đây chờ lâu, thái độ kém"`
-7. `reply-group` với **bài post dài**: dán nguyên bài nhiều dòng, skill in nó dạng blockquote rồi viết Kiểu 11 story bám chi tiết trong bài
+4. `/dnd-seeding maps_foreigner`
+5. `/dnd-seeding anti "khám ở đây chờ lâu, thái độ kém"`
 
 **Output:** danh sách item plain text, đã qua `scripts/qa_seeding.py --check`.
 
 **Lưu ý**
 - Mọi số tiền / ưu đãi chỉ lấy từ `fees-promos.md`. Chưa đọc file đó → không được nêu, phải chuyển hotline.
-- `reply-group` / `fast` mà câu hỏi không phải mổ cận/khúc xạ → bắt buộc đọc `services.md` trước.
+- Câu hỏi / nội dung không phải mổ cận/khúc xạ (phaco, lão thị, kiểm soát cận/Ortho-K, cắt kính, glaucoma, võng mạc, lác, mộng, thẩm mỹ, tổng quát) → bắt buộc đọc `services.md` trước.
 - `fast "câu hỏi"` ra đúng **1 reply** (1 câu; Kiểu 9 được 2 câu), chỉ dùng 1 kiểu trong 1-5/8/9/10 — **Kiểu 6/7/11 CẤM** (gate M9-B).
 - Draft `fast` phải khai `**Mode:** fast` ở đầu và check bằng `--check --mode fast` (thiếu dòng Mode là fail M9-A).
 - `fast` KHÔNG mang `10/10` (quota = 0 như `live`), KHÔNG dùng cụm nào trong ANTIREPEAT_WATCH (1 item dính cụm là 100% > block 30%).
-- `reply-group "… maps …"` vẫn là mode `reply-group` — chữ `maps` nằm trong câu hỏi của user, không phải lệnh.
 - Bài gốc dài nhiều dòng → in dạng blockquote (`> ` mỗi dòng). Dán văn trần thì gate chỉ đọc được dòng đầu.
 
 ---
@@ -63,7 +58,7 @@ Trước khi sinh nội dung, đọc theo nhu cầu:
 | Khi nào | Bắt buộc đọc |
 |---|---|
 | **Mọi run có thể nêu thông tin phí hoặc số ưu đãi** (kể cả chữ "free", "miễn phí", "tặng gói khám") | **`fees-promos.md`** — chưa đọc thì không được nêu, phải chuyển hotline |
-| **Mode `reply-group` / `fast` mà câu hỏi gốc KHÔNG phải mổ cận/khúc xạ** (phaco, lão thị, kiểm soát cận/Ortho-K, cắt kính, glaucoma, võng mạc, lác, mộng, thẩm mỹ, tổng quát) | **`services.md`** — fact pack theo service. Chưa đọc thì không có dữ kiện gì để trả lời ngoài mổ cận, và đó chính là con bug M6 gác |
+| **Mọi run mà nội dung / câu hỏi gốc KHÔNG phải mổ cận/khúc xạ** (phaco, lão thị, kiểm soát cận/Ortho-K, cắt kính, glaucoma, võng mạc, lác, mộng, thẩm mỹ, tổng quát) | **`services.md`** — fact pack theo service. Chưa đọc thì không có dữ kiện gì để trả lời ngoài mổ cận, và đó chính là con bug M6 gác |
 | Trước khi ghi file scratch | chạy `scripts/qa_seeding.py --check` (pipe draft qua stdin) |
 | Muốn biết script gác gì / ngưỡng bao nhiêu | `qa/checks.md` |
 
@@ -85,9 +80,7 @@ Layout 5 file: `SKILL.md` · `fees-promos.md` · `services.md` · `qa/` · `scri
 
 ## When to Use
 
-- `/dnd-seeding group` — Tạo ~28 bài đăng seeding trên group mổ cận
-- `/dnd-seeding group story` (hoặc `/dnd-seeding story`) — Nhánh con: chỉ sinh ~15 bài **story kể chuyện**, bỏ 7 góc còn lại
-- `/dnd-seeding reply-group "câu hỏi gốc"` — Tạo ~20 comment reply vào bài người khác trên group
+- `/dnd-seeding story` (hoặc `/dnd-seeding` gõ trơn) — Mode mặc định: ~15 bài **story kể chuyện**, đúng 4 nhóm A/B/C/D
 - `/dnd-seeding fast "câu hỏi gốc"` — Trả đúng **1 comment reply** đúng trọng tâm (xem MODE 2F)
 - `/dnd-seeding ads` — Tạo ~20 comment seeding dưới bài quảng cáo của mình
 - `/dnd-seeding live (nội dung content live)` — Tạo ~20 comment seeding dùng nick ảo để bình luận trên livestream (workshop/hội thảo)
@@ -95,10 +88,9 @@ Layout 5 file: `SKILL.md` · `fees-promos.md` · `services.md` · `qa/` · `scri
 - `/dnd-seeding maps_foreigner` — Tạo ~20 review Google Maps tiếng Anh, persona người nước ngoài (MODE 5B)
 - `/dnd-seeding koc` — Tạo ~20 item giọng KOC/vlogger (MODE 5C)
 - `/dnd-seeding anti "review xấu"` — Tạo ~20 comment reply vào thread có **review xấu**, giọng khách đã trải nghiệm tốt (MODE 6)
-- `/dnd-seeding` (không tham số) — Mặc định chạy mode `group`
 
-**Luật nhận lệnh:** mode token chỉ được nhận ở **vị trí token đầu tiên**, và chỉ **trước** mọi chuỗi trong ngoặc kép. `k=v` (ví dụ `service=phaco`) luôn là param, không bao giờ là mode. Token đầu không khớp mode nào → chạy `group`, không đoán.
-> Vì vậy `reply-group "chị nào review maps cho e"` là mode **reply-group** — chữ `maps` nằm trong câu hỏi của user, không phải lệnh.
+**Luật nhận lệnh:** mode token chỉ được nhận ở **vị trí token đầu tiên**, và chỉ **trước** mọi chuỗi trong ngoặc kép. `k=v` (ví dụ `service=pc`) luôn là param, không bao giờ là mode. Token đầu không khớp mode nào → gõ trơn, coi như `story`, không đoán.
+> Vì vậy `fast "chị nào review maps cho e"` là mode **fast** — chữ `maps` nằm trong câu hỏi của user, không phải lệnh.
 
 ---
 
@@ -134,7 +126,7 @@ Layout 5 file: `SKILL.md` · `fees-promos.md` · `services.md` · `qa/` · `scri
 > ⛔ Số của mọi ưu đãi dưới đây nằm ở **`fees-promos.md` §3**. Mục này chỉ liệt kê **có ưu đãi gì**, không có số.
 > Muốn nêu số → đọc `fees-promos.md` trước, rồi in footer. Chưa đọc → nói "đang có ưu đãi" + chuyển hotline.
 
-- **Khám chuyên sâu 12 bước miễn phí — CHỈ áp dụng cho khám mổ cận / khúc xạ** (gồm lão thị đường laser, Phakic ICL). **KHÔNG áp dụng cho Ortho-K, Phaco, cắt kính, khám bệnh lý, khám tổng quát** — xem §6. (số: `fees-promos.md` §1, tier T0)
+- **Khám chuyên sâu 12 bước miễn phí — CHỈ áp dụng cho khám mổ cận / khúc xạ** (gồm lão thị đường laser, Phakic ICL). **KHÔNG áp dụng cho Ortho-K, Phaco, cắt kính, khám bệnh lý, khám tổng quát** — xem §7. (số: `fees-promos.md` §1, tier T0)
 - Hỗ trợ chi phí mổ cận + giá trọn gói 2 mắt. (số: `fees-promos.md` §3)
 - Cashback khi share hành trình. Thẻ Family. (số: `fees-promos.md` §3)
 - **Miễn phí tái khám & đồng hành hậu phẫu — CHỈ cho người đã mổ tại DND.** Người mổ ở viện khác đến tái khám: **có tính phí, không báo số → chuyển hotline.** (tier T-FU · thời hạn ở `fees-promos.md` §3)
@@ -143,8 +135,8 @@ Layout 5 file: `SKILL.md` · `fees-promos.md` · `services.md` · `qa/` · `scri
 ### 5. Dịch vụ khác
 
 > 📎 Mục này chỉ là **danh sách có gì**. Dữ kiện để *viết được reply* (quy trình, thời gian,
-> chuẩn bị, mốc tái khám) nằm ở **`services.md`** — mode `reply-group` với câu hỏi không phải
-> mổ cận thì bắt buộc đọc file đó.
+> chuẩn bị, mốc tái khám) nằm ở **`services.md`** — khi nội dung / câu hỏi gốc không phải
+> mổ cận/khúc xạ thì bắt buộc đọc file đó.
 
 - **Ortho-K:** Kính đeo đêm kiểm soát cận thị trẻ em. **Khám Ortho-K CÓ PHÍ** (T2).
 - **Phaco:** Mổ đục thủy tinh thể, 3-5 phút/mắt, 500.000+ ca. **Khám Phaco CÓ PHÍ** (T2).
@@ -156,7 +148,75 @@ Layout 5 file: `SKILL.md` · `fees-promos.md` · `services.md` · `qa/` · `scri
 
 ---
 
-## 6. Phí khám & luật báo phí
+## 6. Phân loại dịch vụ — `service=` (áp cho MỌI mode)
+
+Bảng này **chỉ phân loại**: mã → dịch vụ → đối tượng → tier phí. **Không** mang hướng dẫn chuẩn bị
+khám, mốc hậu phẫu hay điều kiện khám — mấy thứ đó nằm ở `services.md`, phải đọc đúng section và
+**giữ đủ điều kiện như nguồn**, không rút gọn lên bảng.
+
+| Viết tắt | Dịch vụ | Đối tượng | Tier khám / lưu ý phí |
+|---|---|---|---|
+| `kx` | khúc xạ mổ cận / loạn / viễn | **người trưởng thành (18 tuổi)** | T0 — nói free được. Note người viết: **không ghi tuổi trong content** |
+| `pc` | đục thủy tinh thể (Phaco, cườm khô) | người lớn tuổi — thường người nhà hỏi hộ | T2 **có phí**, không free. Có BHYT — số → hotline |
+| `ksct` | kiểm soát cận thị (Ortho-K, tròng kính KSCT, atropine, ánh sáng đỏ, trục nhãn cầu) | **trẻ em** | T2 **có phí**, không free |
+| `lt` | lão thị | người 45-55t | Đường laser T0 free; đường Phaco + IOL đa tiêu → **hotline** (chưa có chính sách) |
+
+Chuyển đổi tên gọi: bảng này ghi `lt`; `scripts/qa_seeding.py` dùng code `lao_thi` (cùng nhóm);
+`services.md` dùng key `phaco` / `ksct` / `lao_thi`.
+
+### Quy tắc phân loại dịch vụ
+
+1. **Hai thứ khác nhau, đừng lẫn:** `service=` là **mã danh mục người dùng chỉ định**; `TOPIC_LADDER`
+   là **kết quả nhận diện topic** từ nội dung. Cái trước là input, cái sau là suy luận. Bảng 4 mã
+   chỉ là **danh mục input cho phép**, không phải danh sách topic bắt buộc phải rơi vào.
+2. **Cách truyền mã:** `service=kx|pc|ksct|lt` — đúng cú pháp `k=v` khai ở §Cheat sheet. Mã chọn
+   **fact pack + góc content**, không thay câu hỏi gốc.
+3. **Thiếu mã → suy từ nội dung** theo `TOPIC_LADDER` (script là nguồn đúng), rồi lấy fact pack
+   `services.md` section tương ứng.
+4. **Topic ngoài 4 nhóm vẫn hợp lệ** (`glaucoma`, `vong_mac`, `lac`, `mong`, `tham_my`, `tong_quat`,
+   `kinh`): **không** ép vào `kx`/`pc`/`ksct`/`lt`. Lấy fact pack `services.md` section trùng tên key.
+   Dòng "Mọi content của mode này khai dịch vụ..." chỉ áp cho 4 mã; topic ngoài bảng ghi đúng key
+   của `services.md`.
+5. **Mâu thuẫn mã với câu hỏi gốc → câu hỏi gốc thắng.** Mã là gợi ý danh mục; câu hỏi nói rõ dịch vụ
+   khác thì theo dịch vụ câu hỏi. (Gate M6 không đọc `**Topic:**`, luôn suy lại từ `**Câu hỏi gốc:**`
+   — luật này ăn khớp gate, không tạo hai kết quả.)
+6. **Hai nhánh chưa xác định, HAI hành vi khác nhau — đừng dùng chung:**
+
+   **6a. Lệnh HOÀN TOÀN trơn** (`/dnd-seeding` không có mode, không có `service=`, không có payload)
+   → **mặc định `kx`**. Đây là thiết kế có chủ ý: `kx` là nhóm skill viết nhiều nhất, và T0 là nhóm
+   duy nhất được nói free trong content seeding. Lệnh trơn = mode `story` + dịch vụ `kx`.
+
+   **6b. Có lệnh nhưng suy ra `none`** (`/dnd-seeding story` không nói dịch vụ ·
+   `/dnd-seeding fast "bên mình thế nào ạ"` · `service=` nhận mã ngoài 4 nhóm · payload có mode nhưng
+   không mang token dịch vụ nào) → **KHÔNG đoán, KHÔNG ép về `kx`, KHÔNG bịa key.** Hành vi chốt:
+   - Khai thẳng `**Topic:** none` — `none` là giá trị hợp lệ, không phải lỗi.
+   - Content chỉ dùng **thông tin chung** của bệnh viện: địa chỉ 147 Trương Định, hotline
+     0775.147.147, giờ làm việc (nghỉ trưa 12h–13h, Chủ nhật chỉ sáng), quy trình chung, cách nhờ
+     người chở về.
+   - **TUYỆT ĐỐI không** đưa: phí/ưu đãi/số tiền, mốc hồi phục, tính tiết điều trị, tên phương pháp
+     (`smile`, `phaco`, `ortho`…).
+   - Có câu hỏi cần dữ kiện dịch vụ → 1 lời mời làm rõ: *"b cho e hỏi thêm là b đang hỏi về mổ cận,
+     đục thủy tinh thể hay kiểm soát cận cho con ạ"* — hỏi 1 lần, không hỏi lặp.
+   - **Mặc định `kx` (6a) không được áp cho nhánh này.** 6a chỉ dành cho lệnh không có gì để suy;
+     6b là đã có lệnh mà nội dung không xác định được.
+
+### Fact pack theo dịch vụ — không ngoại lệ mode nào
+
+Mọi mode đều chọn fact pack theo dịch vụ, **không ngoại lệ mode nào**. Cái khác nhau giữa các mode là
+**lượng gate tự động**, không phải cách chọn fact pack:
+
+| Mode | Gate tự động cho phân loại dịch vụ | Kiểm chứng |
+|---|---|---|
+| `fast`, `anti` | **Có** — M6-B/M6-C (`TOPIC_FIT_MODES`) | `--check --mode fast` / `--mode anti` |
+| `story`, `ads`, `maps`, `maps_foreigner`, `koc`, `live` | **Không** — ngoài `TOPIC_FIT_MODES`, `check_topic_fit()` return ngay | **Review thủ công bắt buộc**: fact pack đúng dịch vụ, không token lạc dịch vụ |
+
+Chữ `reply-group` trong script (`TOPIC_FIT_MODES`) là **mode reference** — không còn lệnh nào gọi tới.
+Ở 6 mode không có gate, chuyện "content dùng dữ kiện đúng dịch vụ" do **người review** giữ, script không
+giữ được. Không được biến cớ thiếu gate thành ngoại lệ nội dung.
+
+---
+
+## 7. Phí khám & luật báo phí
 
 > ⛔ **SỐ TIỀN KHÔNG NẰM Ở FILE NÀY.** Mọi con số phí + ưu đãi sống ở **`fees-promos.md`**.
 > File này chỉ giữ **pointer**: `fee-tier-id` (T-FU/T0/T1/T2/hotline) và `promo-key` (fu_dnd/fu_other/kx/kinh/pc/or/khac/lt_phaco/ambiguous/none).
@@ -237,18 +297,17 @@ Chạy: `python scripts/qa_seeding.py --check draft.md` (hoặc pipe draft qua s
 
 ---
 
-## 7. Guardrail nội dung
+## 8. Guardrail nội dung
 
 Mọi số hit dưới đây đo trên 217 file output cũ. Script `--check` gác tự động; số dòng vi phạm in kèm.
 
-### 7A. `10/10` — hạn ngạch THEO MODE
+### 8A. `10/10` — hạn ngạch THEO MODE
 
 `10/10` không bị cấm tuyệt đối, nhưng 167 hit trên corpus cũ là quá dày. Luật: chỉ góc kể trải nghiệm cá nhân được mang, tối đa **20% số item trong 1 run**.
 
 | Mode | Góc/Kiểu được mang `10/10` | Hạn ngạch |
 |---|---|---|
-| `group` | Góc 6 (social proof) + Góc 7 (story) | ≤20% item/run |
-| `reply-group` | Kiểu 1 (kinh nghiệm bản thân) | ≤20% item/run — **Kiểu 11 story không được mang**, story có 4 câu để kể kết quả thay vì cho điểm |
+| `story` | Góc 7 (story) | ≤20% item/run |
 | `ads` | kiểu 5 (chia sẻ đã mổ ở đây) | ≤20% item/run |
 | `live` | không góc nào | 0 |
 | `maps` | không góc nào | **0** — đo 0 hit, không được miễn |
@@ -259,7 +318,7 @@ Mọi số hit dưới đây đo trên 217 file output cũ. Script `--check` gá
 
 Mẫu số = số item trong run đó, không phải cả file lịch sử.
 
-### 7B. Ngoại lệ `maps` / `koc`
+### 8B. Ngoại lệ `maps` / `koc`
 
 2 mode này viết giọng review Google Maps / KOC nên nhu cầu khác hẳn. Ngoại lệ cấp **theo từng cột đã đo**, không miễn cả gói:
 
@@ -273,7 +332,7 @@ Mẫu số = số item trong run đó, không phải cả file lịch sử.
 
 Layout 4-file không có file mode riêng để cách ly example, nên việc chặn lây nhiễm do **script** cưỡng chế thay vì do vị trí file: `--check` áp `EXEMPT` theo mode, nên cùng câu "mổ xong ko đau gì" **pass** ở `maps` và **fail 5C** ở `group`. Fixture `B3d` khoá hành vi đó cho cả 3 mode.
 
-### 7C. Cấm chung — `group` / `reply-group` / `ads` / `live`
+### 8C. Cấm chung — `story` / `ads` / `live`
 
 | Cấm | Đo được trên corpus cũ | Thay bằng |
 |---|---|---|
@@ -284,7 +343,7 @@ Layout 4-file không có file mode riêng để cách ly example, nên việc ch
 | So sánh giá/chất lượng vượt trội với viện khác (`rẻ hơn`, `bằng nửa`, `so với viện X`) | **31** hit | Nêu DND như 1 lựa chọn đang xem xét (Góc 8) |
 | Mốc hồi phục bằng số cứng | — | Nói theo khoảng: "tầm 2-3 ngày", "mấy tuần đầu" |
 
-### 7D. Anti-repeat
+### 8D. Anti-repeat
 
 Cụm trong watch list: `nhẹ nhàng` · `ổn áp` · `10/10` · `nhanh gọn` · `máy xịn` · `êm ru` · `nhẹ tênh` · `ngọt xớt` + 8 biến thể mới ở mục Tone.
 
@@ -330,7 +389,7 @@ Xáo trộn persona mỗi lần chạy. Không dùng quá 3 câu cùng 1 persona
 - **Không tạo fingerprint mới:** cụm `nhẹ nhàng` đã bị dùng **281 lần** trên 217 file cũ — dùng lại là tự ký tên. Cần 6-8 biến thể xoay vòng, **mỗi cụm ≤15% số item/run**:
   `dễ chịu hơn e tưởng` · `đỡ hơn e nghĩ nhiều` · `k căng như e lo` · `nhanh hơn e tưởng` · `xong lúc nào k hay` · `bớt áp lực hơn hẳn` · `thoải mái hơn e hình dung` · `đơn giản hơn e tưởng`
   - Biến thể mới cũng vào watch list anti-repeat — thay fingerprint cũ bằng fingerprint mới thì không giải quyết được gì
-  - Tuyệt đối không viết thành claim hết đau ("k đau", "ko hề đau"): đó là 121 hit đang phải xoá, xem §7
+  - Tuyệt đối không viết thành claim hết đau ("k đau", "ko hề đau"): đó là 121 hit đang phải xoá, xem §8C
   - Thỉnh thoảng thiếu dấu chấm cuối câu hoặc lỗi chính tả nhẹ
 - **Đa dạng cấu trúc:**
   - Đổi chủ ngữ: e, mình, tui, đứa bạn e, bạn e, con e
@@ -339,14 +398,18 @@ Xáo trộn persona mỗi lần chạy. Không dùng quá 3 câu cùng 1 persona
 
 ---
 
-# MODE 1: `/dnd-seeding group`
+# MODE 1 (`group`)
+
+**Dịch vụ:** mọi content của mode này khai dịch vụ theo §6 Quy tắc phân loại dịch vụ (`kx`/`pc`/`ksct`/`lt`); topic ngoài 4 nhóm dùng key `services.md` tương ứng; suy không ra thì khai `none` và theo luật 6b. Fact pack lấy theo đúng dịch vụ đó, không theo khuôn mổ cận.
+
+> ⚠️ Không có lệnh kích hoạt — tài liệu tham chiếu. Không mode nào gọi tới; pool góc ở dưới vẫn được dùng làm **Góc 7 của mode `story`** (MODE 1B).
 
 **Mục đích:** Tạo ~28 bài đăng mới trên các group review mổ cận (Hội mổ cận, Hội review SMILE Pro...). Đóng vai người đi tìm hiểu, người đã mổ xong muốn chia sẻ, hoặc người đang kể lại một trải nghiệm/tâm trạng cụ thể.
 
 ### Phân bổ 8 góc (tổng ~28 câu)
 
 1. **Góc 1: Hỏi review Bác sĩ (3 câu)** — Hỏi tay nghề/khám của BS Tuấn (mổ chính), BS Linh, BS Hoàng Lan (khám). Ai mát tay, ai khám kỹ.
-2. **Góc 2: Chi phí & Ưu đãi (3 câu)** — Hỏi gói khám 12 bước **(chỉ trong ngữ cảnh mổ cận/khúc xạ — xem §6)**, ưu đãi SmileDays, giá trọn gói. **Nêu số → phải đọc `fees-promos.md` + in footer; chưa đọc thì hỏi dạng "đang có ưu đãi gì" không kèm số.**
+2. **Góc 2: Chi phí & Ưu đãi (3 câu)** — Hỏi gói khám 12 bước **(chỉ trong ngữ cảnh mổ cận/khúc xạ — xem §7)**, ưu đãi SmileDays, giá trọn gói. **Nêu số → phải đọc `fees-promos.md` + in footer; chưa đọc thì hỏi dạng "đang có ưu đãi gì" không kèm số.**
 3. **Góc 3: So sánh Công nghệ (3 câu)** — SMILE Pro vs SmartSight, SmartSurfACE cho mắt mỏng, Phakic ICL cho cận nặng.
 4. **Góc 4: Dịch vụ & CSVC (3 câu)** — Quy trình trong ngày, phòng ốc, Ortho-K cho trẻ. **Câu Ortho-K không được nhắc khám free** (Ortho-K = T2 có phí); hỏi phí thì để ngỏ/hotline.
 5. **Góc 5: Hậu phẫu (3 câu)** — Hồi phục, khô mắt, tái khám, kiêng cữ.
@@ -365,11 +428,23 @@ Xáo trộn persona mỗi lần chạy. Không dùng quá 3 câu cùng 1 persona
 
 ---
 
-# MODE 1B (sub-mode): `/dnd-seeding group story` (hoặc `/dnd-seeding story`)
+# MODE 1B: `/dnd-seeding story` — mode mặc định khi gõ trơn
 
-**Mục đích:** Nhánh con của Mode `group`. Chỉ sinh **~15 bài story kể chuyện** — KHÔNG sinh 7 góc còn lại của Mode 1. Dùng khi chỉ cần content dạng kể chuyện dài để đăng group.
+**Dịch vụ:** mọi content của mode này khai dịch vụ theo §6 Quy tắc phân loại dịch vụ (`kx`/`pc`/`ksct`/`lt`); topic ngoài 4 nhóm dùng key `services.md` tương ứng; suy không ra thì khai `none` và theo luật 6b. Fact pack lấy theo đúng dịch vụ đó, không theo khuôn mổ cận.
 
-**Kích hoạt:** tham số `story` đứng sau `group` (`group story`), hoặc gõ tắt `story` ngay sau lệnh. Nếu chỉ có `group` (không kèm `story`) → chạy Mode 1 đầy đủ 8 góc như thường.
+**Mục đích:** Sinh **~15 bài story kể chuyện** — chỉ 1 góc duy nhất (Góc 7), không sinh 7 góc còn lại. Dùng khi chỉ cần content dạng kể chuyện dài để đăng group.
+
+**Kích hoạt:** tham số `story` sau lệnh, hoặc `/dnd-seeding` gõ trơn (không tham số) → mode này.
+
+**Output — bắt buộc:** mọi output story (kể cả khi lệnh gõ trơn) phải bắt đầu bằng dòng **`**Mode:** story`**
+ở dòng đầu tiên, rồi tới các nhóm A/B/C/D. `MODE_RX` trong script là anchored (`^\*\*Mode:\*\*` đầu dòng) —
+đặt dòng này lệch chỗ là mất tác dụng.
+
+Khác với `fast`, mode `story` **không có gate nào cưỡng dòng marker** (M9-A chỉ chạy khi mode = `fast`,
+[check_fast_mode](../scripts/qa_seeding.py#L2361) return ngay nếu khác). Nên nếu thiếu dòng này rồi check trần,
+`detect_mode()` suy từ 400 ký tự đầu: draft có chữ "story"/"group"/"live"/"ads" thì ăn đúng mode nhưng
+**không chắc**; không có token nào thì ra `unknown` và QA áp sai luật theo mode. Vì vậy `--mode story`
+là cờ bắt buộc, và dòng `**Mode:** story` là điều kiện để lần chạy sau vẫn đọc đúng mode.
 
 ### Đặc trưng story (kế thừa Góc 7)
 - **Bài dài hơn hẳn comment thường:** mỗi bài 1 đoạn 4-6 câu, kể mạch trải nghiệm thật, có cảm xúc.
@@ -512,7 +587,11 @@ Trục A2 (sợ hậu quả 20 năm) và A3 (đọc case biến chứng) **đư�
 
 ---
 
-# MODE 2: `/dnd-seeding reply-group "câu hỏi gốc"`
+# MODE 2 (`reply-group`)
+
+**Dịch vụ:** mọi content của mode này khai dịch vụ theo §6 Quy tắc phân loại dịch vụ (`kx`/`pc`/`ksct`/`lt`); topic ngoài 4 nhóm dùng key `services.md` tương ứng; suy không ra thì khai `none` và theo luật 6b. Fact pack lấy theo đúng dịch vụ đó, không theo khuôn mổ cận.
+
+> ⚠️ Không có lệnh kích hoạt — tài liệu tham chiếu. **Bước 0 phân loại service + gate M6/M8/M9 ở dưới vẫn là của mode `fast`/`anti`** — `fast` (MODE 2F) kế thừa nguyên Bước 0.
 
 **Mục đích:** Tạo ~20 comment reply vào bài viết của người khác trên group. Đóng vai **người từng trải nghiệm** hoặc **người cũng đang tìm hiểu** mà biết DND, dẫn dắt tự nhiên về DND Sài Gòn.
 
@@ -548,7 +627,7 @@ Trục A2 (sợ hậu quả 20 năm) và A3 (đọc case biến chứng) **đư�
 > ⛔ Dạng B **bắt buộc blockquote** (`> ` mỗi dòng), cùng 3 lý do đã đo ở mode `anti`:
 > - Regex một dòng chỉ đọc **dòng đầu**. Bài gốc có `phaco` ở dòng 2 → `detect_topic` ra `none` → **M6-B/C tắt im lặng**.
 > - Bài gốc hay có gạch đầu dòng số ("1. e cận 5 độ"). Không có `>` thì script đếm chúng thành **item của anh**.
-> - Vùng blockquote được **miễn** luật §7C (đang trích dẫn, không phải đang nói). Ranh giới phải là ký tự `>`, không phải dòng trống — nếu không nó thành chỗ giấu vi phạm.
+> - Vùng blockquote được **miễn** luật §8C (đang trích dẫn, không phải đang nói). Ranh giới phải là ký tự `>`, không phải dòng trống — nếu không nó thành chỗ giấu vi phạm.
 >
 > Marker có mà không có nội dung sau nó → **fail M6-A** kèm thông báo "wrong format".
 
@@ -571,9 +650,9 @@ Trục A2 (sợ hậu quả 20 năm) và A3 (đọc case biến chứng) **đư�
 
 **Thứ tự ladder có lý do, đừng đảo:**
 - `kx` đứng **cuối** — để chữ `mổ` trơn không nuốt service khác. `mổ phaco` phải ra `phaco`,
-  không phải `kx`. Cùng cái bẫy §6 #1.
+  không phải `kx`. Cùng cái bẫy §7 luật ưu tiên #1.
 - `lao_thi` đứng **trước** `phaco` — người hỏi lão thị cần nghe Presbyond / IOL đa tiêu, không
-  phải bài Phaco thường. (Phí thì vẫn theo §6: `lão thị` + `phaco` → hotline. Hai hệ thống khác nhau.)
+  phải bài Phaco thường. (Phí thì vẫn theo §7: `lão thị` + `phaco` → hotline. Hai hệ thống khác nhau.)
 - `tong_quat` đứng **sau** các nhóm cụ thể — "khám tổng quát xem có bị cườm không" là câu hỏi về cườm.
 
 **3. `phase`:** câu hỏi có `tái khám` / `sau mổ` / `hậu phẫu` / `mới-vừa-đã mổ` → `fu`, còn lại → `pre`.
@@ -602,12 +681,12 @@ In section header đúng dạng `### Kiểu N: <tên>` — QA script attribute i
 | 10 (đang cân nhắc) | tuỳ ngữ cảnh | Chỉ khi bài gốc đang so sánh nhiều chỗ hoặc chưa quyết |
 | **11** (story reply) | tuỳ ngữ cảnh | **Chỉ khi bài gốc kể hoàn cảnh cụ thể** (độ cận, tuổi, nghề, ai đang cản, đang vướng gì). Bài hỏi một câu trơn ("mổ ở đâu tốt ạ") → bỏ, không có gì để gương chiếu |
 
-Kiểu 6 và 7 là sàn cứng vì chúng không phải "nội dung" — chúng tồn tại để thread không toàn khen. Bỏ 2 kiểu này là quay lại đúng fingerprint mà guardrail §7 dựng ra để chặn. QA script fail nếu run ≥10 item mà thiếu 1 trong 2.
+Kiểu 6 và 7 là sàn cứng vì chúng không phải "nội dung" — chúng tồn tại để thread không toàn khen. Bỏ 2 kiểu này là quay lại đúng fingerprint mà guardrail §8C dựng ra để chặn. QA script fail nếu run ≥10 item mà thiếu 1 trong 2.
 
 **5 kiểu gốc (giữ nguyên cú pháp cũ):**
 
 1. **Trả lời từ kinh nghiệm bản thân** — "mình cx từng bị vậy, cuối cùng chọn mổ bên DND SG..."
-2. **Gợi ý/Recommend tự nhiên** — "bạn thử qua DND Trương Định q3 khám xem, mình thấy ổn lắm" (chỉ thêm chữ *free* khi câu hỏi gốc thuộc T0/T-FU — xem §6)
+2. **Gợi ý/Recommend tự nhiên** — "bạn thử qua DND Trương Định q3 khám xem, mình thấy ổn lắm" (chỉ thêm chữ *free* khi câu hỏi gốc thuộc T0/T-FU — xem §7)
 3. **Bổ sung thông tin hữu ích** — "theo mình biết thì bên DND SG đang có smiledays nè, b ib hỏi thử"
 4. **Đồng cảm + dẫn dắt** — "e cx sợ vậy nè, hôm mổ thấy dễ chịu hơn e tưởng, bs Tuấn bên DND SG khéo tay lắm"
 5. **Tag bạn / Rủ đi cùng** — "cái này giống case đứa bạn mình mổ bên DND SG nè, để mình hỏi rồi rep lại"
@@ -638,7 +717,7 @@ Kiểu 6 và 7 là sàn cứng vì chúng không phải "nội dung" — chúng 
 | **Phải gương chiếu ≥1 chi tiết của bài gốc** | Bài gốc nói `cận 5 độ` / `làm văn phòng` / `ba mẹ cản` / `ở Long An` / `con lớp 5` → story phải chạm ít nhất một trong số đó. Story không chạm gì là **mạch chung chung dán nhãn story** — đúng thứ kiểu này được thêm vào để tránh | **M8-B** |
 | **Bám đúng service ở Bước 0** | Bài gốc hỏi Phaco → story kể chuyện dẫn ba mẹ đi mổ Phaco, **không** kể chuyện mình mổ cận. Chịu M6-B/M6-C y như 10 kiểu kia | **M6-B/C** |
 
-**Không mang `10/10`** (chỉ Kiểu 1 được — §7A). Story có 4 câu để **kể** kết quả thay vì cho điểm.
+**Không mang `10/10`** (chỉ Kiểu 1 được — §8A). Story có 4 câu để **kể** kết quả thay vì cho điểm.
 
 **Bài gốc không nêu chi tiết nào** → M8-B tự bỏ qua kèm note. Lúc đó **đừng bịa chi tiết cho người đăng** ("b cũng cận 5 độ giống e" khi người ta chưa nói độ) — bịa là output tệ hơn story chung chung, vì nó mâu thuẫn với người thật.
 
@@ -657,7 +736,7 @@ Gate đọc chi tiết từ chính bài gốc, gồm:
 - **Luật 3 câu** (§Nhóm A mở rộng) vẫn áp: sợ/vướng **cái gì cụ thể** · **hai thứ nào đang kéo nhau** · kết bám đúng cái xung đột đó.
 - **≥1 chi tiết vật lý** (đồ vật, hành động, mốc trong ngày) — "tay lạnh ngắt lúc đợi kết quả", "tờ giấy bs ghi để trong tủ 6 tháng".
 - **Khác MODE 1B ở chỗ:** đây là **comment trả lời**, nên mở bằng cách nối vào người đăng (`e cx …`, `case e y chang b nè`, `hồi đó e cx v`), và kết **không cần** là câu hỏi xin chia sẻ — có thể kết bằng cái mình đã làm hoặc một lời khuyên thật.
-- Vẫn chịu đủ §7C (claim hết đau, superlative, so sánh viện, `cam kết`, `khỏi cận`) và §7D anti-repeat.
+- Vẫn chịu đủ §8C (claim hết đau, superlative, so sánh viện, `cam kết`, `khỏi cận`) và §8D anti-repeat.
 - Mỗi run **1-3 item** Kiểu 11 là đủ. Nhiều hơn thì thread thành một chuỗi tự truyện, không ai comment dài như vậy 5 lần trong cùng một bài.
 
 #### Ví dụ Kiểu 11
@@ -742,7 +821,7 @@ service khác thì nội dung phải đổi theo, không phải dịch lại bà
 - Một số reply **không nhắc DND** — chỉ trả lời câu hỏi thuần túy, tạo cảm giác tự nhiên cho cả thread. Kiểu 7 luôn thuộc nhóm này
 - **Độ dài: đúng 1 câu/reply.** Đây là reply để copy-paste, không phải bài đăng. Ngoại lệ: **Kiểu 6** (phải mang điểm dở thật) và **Kiểu 9** (thông tin hậu cần) được tối đa 2 câu; **Kiểu 11** (story) được 3-7 câu — xem §Kiểu 11.
   > Đừng viết reply 3-4 câu kể cả khi thấy "còn nhiều thứ hay để nói". Câu thứ 2 trở đi làm reply trông như bài PR, không như người thật gõ trên điện thoại. Thà cắt ý còn hơn dài. Muốn kể dài thì dùng đúng Kiểu 11, và Kiểu 11 phải bám hoàn cảnh bài gốc — không phải giấy phép viết dài cho mọi kiểu.
-- **`10/10` chỉ được xuất hiện ở Kiểu 1**, tối đa 20% số item trong run (~4/20). Kiểu 6-11 không mang `10/10` — xem §7
+- **`10/10` chỉ được xuất hiện ở Kiểu 1**, tối đa 20% số item trong run (~4/20). Kiểu 6-11 không mang `10/10` — xem §8A
 
 ### Ví dụ mode `reply-group`
 
@@ -760,7 +839,7 @@ service khác thì nội dung phải đổi theo, không phải dịch lại bà
 
 - (Kiểu 1) "case mình cx tương tự bạn nè, cận 4.5 loạn 1.75, mổ smile pro bên DND SG, giờ 10/10 r nha" ← `10/10` hợp lệ vì đây là Kiểu 1 và còn trong hạn ngạch 20%
 - (Kiểu 2) "cận 5 loạn 2 thì làm smile pro đc bạn ơi, quan trọng là giác mạc đủ dày nên đi khám chuyên sâu trước đi"
-- (Kiểu 2) "bạn qua DND Trương Định q3 khám 12 bước trước mổ cận free luôn á" ← chữ *free* hợp lệ vì câu tự mang ngữ cảnh **mổ cận** (T0). Bỏ 2 chữ "mổ cận" ra là câu này vi phạm §6.
+- (Kiểu 2) "bạn qua DND Trương Định q3 khám 12 bước trước mổ cận free luôn á" ← chữ *free* hợp lệ vì câu tự mang ngữ cảnh **mổ cận** (T0). Bỏ 2 chữ "mổ cận" ra là câu này vi phạm §7.
 - (Kiểu 4) "e cx loạn 2 độ nè, bs Tuấn bên DND SG bảo e làm smile pro đc"
 - (Kiểu 3) "loạn 2 độ thì smile pro máy visumax 800 có OcuLign bù trừ trục loạn thị đó bạn"
 - (Kiểu 6 - mixed) "mình mổ smile pro bên DND SG cx cận 5 loạn 2, nói thật hôm khám đông nên chờ hơi lâu với khô mắt mấy tuần đầu hơi phiền. còn lại thì mình k tiếc tiền bỏ ra" ← 2 câu, có điểm dở THẬT (đông + chờ lâu + khô mắt), không xoá đi
@@ -793,7 +872,7 @@ service khác thì nội dung phải đổi theo, không phải dịch lại bà
 **Câu hỏi gốc:** _"mn ơi e muốn đo độ cắt kính mới thì đi đâu uy tín ạ"_
 **Topic:** `kinh` / `pre`
 
-> Cạm bẫy ở đây là **phí**: cắt kính là T1 **có phí**, nói "khám free" là vi phạm §6. Và đừng
+> Cạm bẫy ở đây là **phí**: cắt kính là T1 **có phí**, nói "khám free" là vi phạm §7. Và đừng
 > biến câu hỏi đo độ thành bài chào mổ cận — gợi mổ tối đa **một câu** ở Kiểu 10.
 
 - (Kiểu 1) "e đo độ cắt kính bên DND Trương Định q3, máy đo xong bs thử kính lại nên đeo êm"
@@ -810,11 +889,13 @@ service khác thì nội dung phải đổi theo, không phải dịch lại bà
 
 # MODE 2F: `/dnd-seeding fast "câu hỏi"` — 1 reply gọn
 
+**Dịch vụ:** mọi content của mode này khai dịch vụ theo §6 Quy tắc phân loại dịch vụ (`kx`/`pc`/`ksct`/`lt`); topic ngoài 4 nhóm dùng key `services.md` tương ứng; suy không ra thì khai `none` và theo luật 6b. Fact pack lấy theo đúng dịch vụ đó, không theo khuôn mổ cận.
+
 **Mục đích:** bài nào chỉ cần **đúng 1 comment reply** đúng trọng tâm, không cần cả thread ~20 reply. Dùng khi câu hỏi đã rõ, chỉ cần trả lời gọn để copy-paste ngay.
 
 **Flow fast (ngắn hơn Mode 2, giữ nguyên Bước 0):**
 1. **Bước 0 y hệt Mode 2** — phân loại service + phase, in `**Câu hỏi gốc:**` + `**Topic:**`. Service ≠ `kx`/`none` → đọc `services.md` trước.
-2. **Chọn đúng 1 kiểu hợp nhất** trong 1-5/8/9/10 — kiểu nào trả lời trúng nhất câu hỏi đó. **Kiểu 6/7/11 CẤM** (gate M9-B fail cứng, không ngoại lệ: cần story/mixed/hỏi-lại thì dùng mode `reply-group` thường).
+2. **Chọn đúng 1 kiểu hợp nhất** trong 1-5/8/9/10 — kiểu nào trả lời trúng nhất câu hỏi đó. **Kiểu 6/7/11 CẤM** (gate M9-B fail cứng, không ngoại lệ: cần story/mixed/hỏi-lại thì dùng mode `story` (MODE 1B).
 3. **Viết đúng 1 reply:** 1 câu duy nhất. Ngoại lệ duy nhất: **Kiểu 9 được 2 câu** (hậu cần cần 2 ý). Không có ngoại lệ story dài như Kiểu 11.
 4. **In marker ở đầu output** (thiếu dòng Mode là fail M9-A):
 ```
@@ -837,6 +918,8 @@ service khác thì nội dung phải đổi theo, không phải dịch lại bà
 ---
 
 # MODE 3: `/dnd-seeding ads`
+
+**Dịch vụ:** mọi content của mode này khai dịch vụ theo §6 Quy tắc phân loại dịch vụ (`kx`/`pc`/`ksct`/`lt`); topic ngoài 4 nhóm dùng key `services.md` tương ứng; suy không ra thì khai `none` và theo luật 6b. Fact pack lấy theo đúng dịch vụ đó, không theo khuôn mổ cận.
 
 **Mục đích:** Tạo ~20 comment seeding dưới bài quảng cáo (Facebook Ads) của chính mình, dùng nhiều nick ảo. Mục tiêu: tạo engagement, social proof, kéo người thật comment theo.
 
@@ -872,6 +955,8 @@ service khác thì nội dung phải đổi theo, không phải dịch lại bà
 
 # MODE 4: `/dnd-seeding live (nội dung content live)`
 
+**Dịch vụ:** mọi content của mode này khai dịch vụ theo §6 Quy tắc phân loại dịch vụ (`kx`/`pc`/`ksct`/`lt`); topic ngoài 4 nhóm dùng key `services.md` tương ứng; suy không ra thì khai `none` và theo luật 6b. Fact pack lấy theo đúng dịch vụ đó, không theo khuôn mổ cận.
+
 **Mục đích:** Tạo ~20 comment seeding dùng nick ảo để bình luận trực tiếp trên livestream (workshop/hội thảo của DND). Đóng vai người xem live thật, comment real-time tạo không khí sôi động, kéo người thật tương tác theo.
 
 ### Cách hoạt động
@@ -891,7 +976,7 @@ service khác thì nội dung phải đổi theo, không phải dịch lại bà
 - Văn phong giống mode `ads`: ngắn 1-2 câu, có emoji, tự nhiên như bình luận real-time khi đang xem trực tiếp
 - Dùng ngữ cảnh "đang xem live", "vừa vào coi", "đang nghe bs nói" — không dùng từ ngữ kiểu bài post/bài viết
 - Tên bác sĩ/chủ đề hội thảo phải khớp đúng nội dung content live được cung cấp, không tự thêm bác sĩ khác
-- **Comment hỏi ưu đãi/chi phí (nhóm 2) chịu luật §6:** hội thảo kiểm soát cận thị trẻ em / Ortho-K / Phaco đều là **T2 có phí** — không comment "khám free" cho các chủ đề này. Chỉ chủ đề **mổ cận/khúc xạ** mới được nhắc gói khám 12 bước free.
+- **Comment hỏi ưu đãi/chi phí (nhóm 2) chịu luật §7:** hội thảo kiểm soát cận thị trẻ em / Ortho-K / Phaco đều là **T2 có phí** — không comment "khám free" cho các chủ đề này. Chỉ chủ đề **mổ cận/khúc xạ** mới được nhắc gói khám 12 bước free.
 
 ### Ví dụ mode `live`
 (Giả sử content live nhắc BS.CKII Phạm Thị Hằng và workshop SMILE Pro)
@@ -910,13 +995,17 @@ service khác thì nội dung phải đổi theo, không phải dịch lại bà
 
 # MODE 5: `/dnd-seeding maps` · `maps_foreigner` · `koc`
 
-3 mode này viết giọng **review** (Google Maps / KOC) nên nhu cầu khác 4 mode trên. Chúng có **ngoại lệ guardrail** — nhưng ngoại lệ cấp **theo từng cột đã đo**, không miễn cả gói. Xem §7B.
+**Dịch vụ:** mọi content của mode này khai dịch vụ theo §6 Quy tắc phân loại dịch vụ (`kx`/`pc`/`ksct`/`lt`); topic ngoài 4 nhóm dùng key `services.md` tương ứng; suy không ra thì khai `none` và theo luật 6b. Fact pack lấy theo đúng dịch vụ đó, không theo khuôn mổ cận.
+
+3 mode này viết giọng **review** (Google Maps / KOC) nên nhu cầu khác 4 mode trên. Chúng có **ngoại lệ guardrail** — nhưng ngoại lệ cấp **theo từng cột đã đo**, không miễn cả gói. Xem §8B.
 
 > ⚠️ **Luật phí KHÔNG có ngoại lệ mode nào.** `maps`/`koc` vẫn chịu Luật 0, M2 và footer đầy đủ như mọi mode khác. Nêu thông tin phí mà chưa đọc `fees-promos.md` → vẫn fail.
 
 ## MODE 5A: `maps` — review Google Maps tiếng Việt
 
 **Dùng khi:** cần review đặt trên Google Maps profile của bv.
+
+**Dịch vụ:** mọi content của mode này khai dịch vụ theo §6 Quy tắc phân loại dịch vụ (`kx`/`pc`/`ksct`/`lt`); topic ngoài 4 nhóm dùng key `services.md` tương ứng; suy không ra thì khai `none` và theo luật 6b. Fact pack lấy theo đúng dịch vụ đó, không theo khuôn mổ cận.
 
 - ~20 review, mỗi cái 2-4 câu, dài hơn comment seeding thường
 - Giọng người thật đã đi khám/mổ xong, kể lại trải nghiệm cụ thể: chỗ đậu xe, thời gian chờ, nhân viên hướng dẫn, bs giải thích
@@ -930,6 +1019,8 @@ service khác thì nội dung phải đổi theo, không phải dịch lại bà
 
 **Dùng khi:** cần review tiếng Anh từ persona người nước ngoài sống ở VN.
 
+**Dịch vụ:** mọi content của mode này khai dịch vụ theo §6 Quy tắc phân loại dịch vụ (`kx`/`pc`/`ksct`/`lt`); topic ngoài 4 nhóm dùng key `services.md` tương ứng; suy không ra thì khai `none` và theo luật 6b. Fact pack lấy theo đúng dịch vụ đó, không theo khuôn mổ cận.
+
 - ~20 review tiếng Anh, giọng expat/du khách, tự nhiên không dịch cứng
 - Nhắc được: giao tiếp tiếng Anh của staff, thủ tục cho người nước ngoài, vị trí trung tâm Q3
 - Không viết tiếng Việt lẫn vào
@@ -940,6 +1031,8 @@ service khác thì nội dung phải đổi theo, không phải dịch lại bà
 ## MODE 5C: `koc` — review KOC / vlogger
 
 **Dùng khi:** cần comment/caption giọng KOC đang làm content về hành trình mổ.
+
+**Dịch vụ:** mọi content của mode này khai dịch vụ theo §6 Quy tắc phân loại dịch vụ (`kx`/`pc`/`ksct`/`lt`); topic ngoài 4 nhóm dùng key `services.md` tương ứng; suy không ra thì khai `none` và theo luật 6b. Fact pack lấy theo đúng dịch vụ đó, không theo khuôn mổ cận.
 
 - ~20 item, giọng người đang quay vlog/làm content, có nhắc việc ghi hình
 - Được dùng persona Tiktoker/KOC làm chủ đạo
@@ -960,6 +1053,8 @@ Việc chặn lây nhiễm do **script** cưỡng chế, không do vị trí fil
 
 # MODE 6: `/dnd-seeding anti "<review xấu>"`
 
+**Dịch vụ:** mọi content của mode này khai dịch vụ theo §6 Quy tắc phân loại dịch vụ (`kx`/`pc`/`ksct`/`lt`); topic ngoài 4 nhóm dùng key `services.md` tương ứng; suy không ra thì khai `none` và theo luật 6b. Fact pack lấy theo đúng dịch vụ đó, không theo khuôn mổ cận.
+
 **Mục đích:** Có người đăng **review xấu** về DND trên group/fanpage. Sinh ~20 comment vào thread đó, đóng vai **khách hàng đã trải nghiệm tốt** — kể chuyện của mình, không phản bác, không đấu khẩu.
 
 > ⛔ **Đây KHÔNG phải giọng bệnh viện trả lời khiếu nại.** Không "bệnh viện chúng tôi rất tiếc", không "xin lỗi quý khách", không "bộ phận CSKH sẽ liên hệ". Gate **M7-B** chặn.
@@ -970,7 +1065,7 @@ Việc chặn lây nhiễm do **script** cưỡng chế, không do vị trí fil
 |---|---|---|
 | **Không đấu khẩu** | Không quy kết động cơ (`đối thủ`, `dựng chuyện`, `nick ảo`, `được thuê`) và không phủ nhận lời kể của người đăng (`chắc b hên xui`, `1 sao mà kể như thật`, `acc mới tinh nhỉ`) | **M7-C** |
 | **Né hẳn điểm phàn nàn** | Không thừa nhận rồi cân bằng lại. Không `nói thật hôm e đi cx chờ hơi lâu mà...`, không `công nhận hơi đông nhưng...`, không `bù lại`. Kể trải nghiệm tốt của mình, **không nhắc lại điểm người ta phàn nàn** | **M7-E** |
-| **Không xếp hạng** | Không `khám kỹ nhất`, `uy tín nhất q3`, `hơn hẳn chỗ cũ`, `viện khác k bằng`. Nêu **lý do cụ thể** ("bs chịu ngồi giải thích", "gần nhà") thay vì so bên nào hơn | **M7-F** + §7C |
+| **Không xếp hạng** | Không `khám kỹ nhất`, `uy tín nhất q3`, `hơn hẳn chỗ cũ`, `viện khác k bằng`. Nêu **lý do cụ thể** ("bs chịu ngồi giải thích", "gần nhà") thay vì so bên nào hơn | **M7-F** + §8C |
 
 **Được đính chính DỮ KIỆN, không được phủ nhận TRẢI NGHIỆM.** "chắc b nhầm lịch nghỉ trưa r, bên đó nghỉ 12h-13h" — hợp lệ, hữu ích. "chắc b hên xui gặp hôm đó thôi" — bị chặn.
 
@@ -990,7 +1085,7 @@ Vì sao phải blockquote, không phải văn trần:
 
 - Review dán vào thường **nhiều dòng**. Regex một dòng chỉ đọc được dòng đầu → mất chủ đề → M6 tắt im lặng.
 - Review hay có gạch đầu dòng số ("1. chờ 2 tiếng"). Không có `>` thì script đếm chúng thành **item của bạn**.
-- Vùng review được **miễn** luật §7C (bạn đang trích dẫn, không phải đang nói). Ranh giới vùng đó phải rõ ràng, nếu không nó thành chỗ giấu vi phạm.
+- Vùng review được **miễn** luật §8C (bạn đang trích dẫn, không phải đang nói). Ranh giới vùng đó phải rõ ràng, nếu không nó thành chỗ giấu vi phạm.
 
 Thiếu dòng `**Mode:** anti` → **fail M7-A**, dù có marker review. Không có dòng đó thì cả họ gate M7 không chạy.
 
@@ -1011,7 +1106,7 @@ In header đúng dạng `### Kiểu N: <tên>` — script attribute item theo he
 
 **Không có Kiểu 6.** Ở MODE 2, Kiểu 6 nghĩa là "review có điểm chưa hài lòng thật" — mode này **cấm** đúng thứ đó. Số 6 để trống có chủ đích; đừng dùng lại nó cho nghĩa khác.
 
-**Kiểu 5 là kiểu rủi ro nhất.** "Đã đi nhiều viện rồi chốt DND" mời gọi đúng thứ §7C cấm. Viết theo hình "đã xem nhiều nơi, chốt chỗ này **vì lý do cụ thể**", không xếp hạng:
+**Kiểu 5 là kiểu rủi ro nhất.** "Đã đi nhiều viện rồi chốt DND" mời gọi đúng thứ §8C cấm. Viết theo hình "đã xem nhiều nơi, chốt chỗ này **vì lý do cụ thể**", không xếp hạng:
 - ❌ "e khám 3 chỗ r mới chốt bên này, tại thấy bs giải thích **rõ nhất**"
 - ✅ "e khám 3 chỗ r mới chốt bên này, tại bs chịu ngồi giải thích kỹ cho e"
 
@@ -1023,17 +1118,17 @@ In header đúng dạng `### Kiểu N: <tên>` — script attribute item theo he
 
 ### Luật kế thừa (không có ngoại lệ nào cho mode này)
 
-- **§6 luật phí** — nêu thông tin phí phải đọc `fees-promos.md` + in footer. Kiểu 3 nói Phaco/Ortho-K là **T2 có phí**, không được nói free.
-- **§7C cấm chung** — claim hết đau, superlative, so sánh viện, `cam kết`/`đảm bảo`, `khỏi cận`.
+- **§7 luật phí** — nêu thông tin phí phải đọc `fees-promos.md` + in footer. Kiểu 3 nói Phaco/Ortho-K là **T2 có phí**, không được nói free.
+- **§8C cấm chung** — claim hết đau, superlative, so sánh viện, `cam kết`/`đảm bảo`, `khỏi cận`.
 - **Claim an toàn tuyệt đối bị cấm** (họ `safety_absolute`): "an toàn 100%", "chưa nghe ai bị biến chứng", "k có ca nào bị sao", "chưa lỗi ca nào". Thread phòng thủ dễ trượt vào đây nhất, và đây là loại claim rủi ro pháp lý cao nhất skill sinh ra được. Nói được: "bs giải thích rõ rủi ro cho e".
 - **`10/10` chỉ ở Kiểu 1**, tối đa 20% item/run.
-- **Anti-repeat §7D** — mỗi cụm ≤15% item/run.
+- **Anti-repeat §8D** — mỗi cụm ≤15% item/run.
 - **Độ dài** — 1-2 câu/comment, như MODE 2.
 - **Mật độ nhắc DND** — tối đa 1 lần/comment; có comment chỉ nói "chỗ Trương Định q3" hoặc "bên đó"; Kiểu 7 không nhắc.
 
 ### Giới hạn đã biết — nói thẳng
 
-Chốt "né hẳn" nghĩa là **18/20 comment đều tích cực**. Đó chính là fingerprint mà §7 dựng ra để chặn. Các lớp giảm nhẹ: sàn Kiểu 7 · anti-repeat · §7C + M7-F · `safety_absolute` · quota `10/10`. **Không xoá được hết** — nếu thread cần trông thật hơn nữa thì phải nới chốt "né hẳn", và đó là quyết định của bạn, không phải của skill.
+Chốt "né hẳn" nghĩa là **18/20 comment đều tích cực**. Đó chính là fingerprint mà §8C dựng ra để chặn. Các lớp giảm nhẹ: sàn Kiểu 7 · anti-repeat · §8C + M7-F · `safety_absolute` · quota `10/10`. **Không xoá được hết** — nếu thread cần trông thật hơn nữa thì phải nới chốt "né hẳn", và đó là quyết định của bạn, không phải của skill.
 
 M7-E cũng **không kín**: nó bắt các hình nhượng bộ phổ biến ("nói thật...", "công nhận...", "bù lại"), nhưng "hôm e đi thì phải ngồi đợi tới trưa, mà bs khám kỹ" thì lọt. Tập cách nói một điểm dở là mở; siết thêm sẽ bắt oan câu hợp lệ.
 
@@ -1047,23 +1142,28 @@ M7-E cũng **không kín**: nó bắt các hình nhượng bộ phổ biến ("n
 
 Chỉ đọc **token đầu tiên**, và chỉ phần **trước** dấu ngoặc kép đầu tiên. Bỏ mọi `k=v` ra làm param trước khi so.
 
-- `group story` HOẶC `story` (đứng ngay sau lệnh) → chạy **Mode 1B** (sub-mode story), CHỈ sinh ~15 bài story
-- `group` (không kèm `story`) hoặc không có tham số → chạy Mode 1 đầy đủ 8 góc
-- `reply-group "..."` → chạy Mode 2, parse câu hỏi gốc từ dấu ngoặc kép, rồi **làm Bước 0 phân loại service trước khi chọn kiểu**
-  - User dán **bài post/review dài nhiều dòng** thay vì 1 câu hỏi → vẫn là Mode 2. In marker **dạng B** (blockquote) và cân nhắc thêm **Kiểu 11 story reply** bám hoàn cảnh trong bài
+- `story` (đứng ngay sau lệnh) → chạy **MODE 1B**, CHỈ sinh ~15 bài story
+- không có tham số (gõ trơn) → chạy **MODE 1B (`story`)** — mode mặc định là `story`, **không** phải 28 bài góc rời
 - `fast "..."` → chạy **MODE 2F** (flow gọn của Mode 2, xem §MODE 2F ngay sau MODE 2): Bước 0 y hệt → 1 kiểu hợp nhất → đúng 1 reply → marker `**Mode:** fast` → `--check --mode fast`
 - `ads` → chạy Mode 3
 - `live (nội dung content live)` → chạy Mode 4, parse toàn bộ nội dung live, detect bác sĩ/chủ đề/ưu đãi từ đó
-- `maps` / `maps_foreigner` / `koc` → chạy Mode 5A / 5B / 5C, áp ngoại lệ §7B đúng theo mode
+- `maps` / `maps_foreigner` / `koc` → chạy Mode 5A / 5B / 5C, áp ngoại lệ §8B đúng theo mode
 - `anti "review xấu"` → chạy **Mode 6**, parse review xấu từ ngoặc kép, in marker blockquote, sinh 6 kiểu comment
-- token đầu không khớp mode nào → chạy `group`. **Không suy diễn mode từ chữ trong câu hỏi của user.**
+- token đầu không khớp mode nào → gõ trơn, coi như **`story`**, không suy diễn mode từ chữ trong câu hỏi của user
+- **Section có note "⚠️ Không có lệnh kích hoạt — tài liệu tham chiếu" (MODE 1, MODE 2) không bao giờ là đích đến của một lệnh**; chúng chỉ là fact pack cho mode đang chạy (`story` lấy pool góc Góc 7, `fast`/`anti` lấy Bước 0 + gate M6/M8/M9)
+- **Dịch vụ (áp cho mọi mode) — theo đúng thứ tự ưu tiên sau, không nhảy bước:**
+  1. Có `service=kx|pc|ksct|lt` → **xem câu hỏi gốc / payload trước**. Nội dung xác định rõ dịch vụ khác
+     → **câu hỏi gốc thắng** (§6 luật 5), dùng dịch vụ từ câu hỏi. Nội dung không xác định được dịch vụ nào
+     mới dùng mã vừa truyền. Mã chỉ là gợi ý danh mục, không thay câu hỏi gốc.
+  2. Không có `service=` nhưng **lệnh hoàn toàn trơn** (không mode, không payload) → mặc định `kx` theo §6 luật 6a. Lệnh trơn = mode `story` + dịch vụ `kx`.
+  3. Có mode hoặc payload → **suy từ nội dung** theo `TOPIC_LADDER`. Suy ra được thì khai đúng mã/key đó.
+  4. Suy không ra → mới khai `**Topic:** none` và chạy theo §6 luật 6b (thông tin chung, không phí/ưu đãi/mốc hồi phục/tên phương pháp, hỏi làm rõ đúng 1 lần). **Không** ép về `kx`.
 
 **Bước 2: Chọn Persona & Sinh nội dung**
-- **Mode `reply-group`: làm Bước 0 (phân loại service) TRƯỚC.** Service ≠ `kx`/`none` → đọc `services.md` lấy dữ kiện, rồi mới viết
+- **Mode `fast`/`anti`: làm Bước 0 (phân loại service) TRƯỚC.** Service ≠ `kx`/`none` → đọc `services.md` lấy dữ kiện, rồi mới viết
 - **Mode `fast`: làm Bước 0 y hệt, rồi chỉ chọn 1 kiểu hợp nhất trong 1-5/8/9/10** (xem MODE 2F). Kiểu 6/7/11 CẤM — có gate M9-B cưỡng chế, không còn là luật miệng
 - Chọn ngẫu nhiên 5-6 persona từ Persona Pool
-- Sinh đúng số câu theo cấu trúc của mode tương ứng (mode `group` ~28 câu, sub-mode `story` ~15 câu, mode `reply-group`/`ads`/`live` ~20 câu, mode `fast` **đúng 1 reply**)
-- Mode `reply-group`: bài gốc có kể hoàn cảnh cụ thể → thêm **1-3 item Kiểu 11 story reply**, mỗi item 3-7 câu và phải gương chiếu ≥1 chi tiết của bài gốc (§Kiểu 11)
+- Sinh đúng số câu theo cấu trúc của mode tương ứng (mode `story` ~15 câu, mode `ads`/`live` ~20 câu, mode `fast` **đúng 1 reply**)
 - Đảm bảo đa dạng persona, cấu trúc câu, cách xưng hô
 
 **Bước 3: Áp dụng Tone & Viết tắt**
@@ -1073,15 +1173,16 @@ Chỉ đọc **token đầu tiên**, và chỉ phần **trước** dấu ngoặc
 
 **Bước 4: Xuất kết quả ra Chat**
 - Hiển thị rõ ràng theo nhóm/kiểu để dễ copy
-- Mode `reply-group`: in **`**Câu hỏi gốc:**`** và **`**Topic:** <service> / <phase>`** ở đầu output (bắt buộc — thiếu là fail M6-A). Bài gốc nhiều dòng → dạng B blockquote, mỗi dòng bắt đầu `> `
+- Mode `story`: in **`**Mode:** story`** ở dòng đầu output (bắt buộc; không có gate cưỡng như `fast`, nhưng thiếu thì `detect_mode()` có thể ra `unknown` và QA áp sai luật mode). Xem MODE 1B
+- Mode `fast`/`anti`: in **`**Câu hỏi gốc:**`** và **`**Topic:** <service> / <phase>`** ở đầu output (bắt buộc — thiếu là fail M6-A). Bài gốc nhiều dòng → dạng B blockquote, mỗi dòng bắt đầu `> `
 - Mode `fast`: in thêm **`**Mode:** fast`** ở dòng đầu (trước cả `**Câu hỏi gốc:**`) — thiếu là fail M9-A. Xem MODE 2F
 - Mode `live`: hiện lại tên bác sĩ/chủ đề hội thảo đã detect được ở đầu để tiện đối chiếu
 
 **Bước 4B: Gác phí trước khi lưu**
-- Đối chiếu từng câu có **thông tin phí** (free/0đ/miễn phí/tặng gói/trị giá/số tiền) với luật §6. Câu nào không đủ điều kiện → sửa hoặc bỏ.
+- Đối chiếu từng câu có **thông tin phí** (free/0đ/miễn phí/tặng gói/trị giá/số tiền) với luật §7. Câu nào không đủ điều kiện → sửa hoặc bỏ.
 - Có nêu thông tin phí → phải **đã đọc `fees-promos.md` trong run này** + in footer `[fees: <updated> · <fee-tier-id>]`. Chưa đọc → bỏ hết thông tin phí, chuyển hotline.
-- Chạy `python scripts/qa_seeding.py --check <file>` (hoặc pipe draft qua stdin trước khi ghi). Fail thì sửa rồi chạy lại.
-- Mode `fast`: **bắt buộc** `python scripts/qa_seeding.py --check <file> --mode fast` (có cờ `--mode fast`, không pipe trần) — xem MODE 2F
+  - Chạy `python scripts/qa_seeding.py --check <file> --mode <mode>` — luôn kèm cờ `--mode`, không pipe trần. Mode `fast`/`anti` **bắt buộc** (có gate riêng); mode `story` cũng phải có vì output chỉ được nhận ra qua marker `**Mode:** story`. Fail thì sửa rồi chạy lại.
+- Không có `k=v`/cờ nào khác — `--mode <tên>` là tên mode thật (`story`, `fast`, `anti`, `ads`, `live`, `maps`, `maps_foreigner`, `koc`)
 
 **Bước 5: Lưu file scratch**
 Lưu vào: `C:\Users\Admin\.gemini\antigravity-ide\scratch\seeding_<mode>_<timestamp>.md`
@@ -1110,33 +1211,29 @@ Lưu vào: `C:\Users\Admin\.gemini\antigravity-ide\scratch\seeding_<mode>_<times
 | **Bài Nhóm A nào cũng kết "mn cho e xin ít động lực"** | Câu hỏi rỗng. Hỏi đúng xung đột của bài, mỗi bài một khuôn khác |
 | **Viết "ký giấy cam kết" trong story trước mổ** | Gate 5C `commitment` chặn chữ `cam kết`. Viết "giấy **đồng ý phẫu thuật**" |
 | **Viết "mong hết cận" / "bs nói k phải là k đau"** | `cure_myopia` và `dau_claim`/M3 chặn. Viết "mong **thoát kính**" · "cảm giác chỉ cộm xốn mấy tiếng đầu" |
-| Reply không liên quan câu hỏi gốc (mode reply-group) | Phải đọc kỹ câu hỏi gốc, reply đúng ngữ cảnh |
 | **Câu hỏi Phaco / cắt kính / lão thị / Ortho-K / tổng quát mà reply kéo về mổ cận** | Làm **Bước 0** phân loại service trước, đọc `services.md`, rồi viết theo service đó. Gate M6-B/M6-C chặn — xem MODE 2 |
 | **Trôi chủ đề không cần nhắc tên** (thread Phaco mà nói "bản đồ giác mạc", "ngưng lens", "vạt giác mạc") | Đó vẫn là giọng mổ cận, M6-B bắt qua `KX_CONTEXT`. Nói hậu cần **của service đang hỏi** |
 | **Trả lời chung chung để né gate** ("bên đó ổn lắm", "b ib hỏi thử") | ≥60% item thực chất phải chạm đúng service, M6-C bắt. Chung chung cũng là lạc đề |
-| **Thiếu dòng `**Câu hỏi gốc:**` ở đầu output (mode reply-group)** | In cả `**Câu hỏi gốc:**` và `**Topic:**`. Thiếu là fail M6-A — không khai câu hỏi thì không gác được gì |
 | **Mode `fast`: thiếu dòng `**Mode:** fast`** | Draft fast thiếu dòng này (dù đủ marker) mà check bằng `--mode fast` là fail M9-A. In đúng 3 dòng đầu: `**Mode:** fast` → `**Câu hỏi gốc:**` → `**Topic:**` — xem MODE 2F |
 | **Mode `fast`: quên `--mode fast` khi check** | Draft thiếu Mode mà không ép `--mode fast` thì rơi về `unknown` và PASS oan (M6 không chạy). Flow fast bắt buộc `--check <file> --mode fast` |
-| **Mode `fast`: viết Kiểu 6/7/11** | Fail cứng M9-B kể cả 1 item. Cần story/mixed/hỏi-lại thì dùng mode `reply-group` thường |
+| **Mode `fast`: viết Kiểu 6/7/11** | Fail cứng M9-B kể cả 1 item. Cần story/mixed/hỏi-lại thì dùng mode `story` (MODE 1B) |
 | **Mode `fast`: mang `10/10` hoặc cụm watch** | `10/10` quota fast = 0 (fail 5A); cụm ANTIREPEAT_WATCH dính 1/1 item là 100% > block 30%. Viết lại câu, không chữa bằng cách thêm item |
 | **Nêu số / % BHYT** | Nói "có BHYT hỗ trợ" thôi, số thì chuyển hotline 0775.147.147 (M6-D) |
 | **Lẫn cườm nước (glaucoma) với cườm khô (Phaco)** | Hai bệnh khác nhau. Cườm khô = đục thủy tinh thể = mổ Phaco. Cườm nước = tăng nhãn áp = thuốc/laser/cắt bè |
 | **Lẫn mốc ngưng kính áp tròng** | Lens mềm ngưng ≥ **1 tuần**; Ortho-K ngưng ≥ **1 tháng** |
 | **Lẫn thời hạn thẻ Family** | Sau mổ **khúc xạ: 3 năm**; sau mổ **Phaco: 2 năm** |
 | **Đưa giá Phaco / Ortho-K / lác / mộng / cườm nước vào `services.md`** | Những giá đó KHÔNG có trong `fees-promos.md` → seeding chuyển hotline. `services.md` là fact pack phi-tiền, gate M6-E fail nếu có số tiền |
-| **Reply dài 3-4 câu (mode reply-group)** | Đúng **1 câu/reply** để copy-paste ngay; Kiểu 6 và 9 được 2 câu, Kiểu 11 (story) được 3-7 câu. Reply dài mà không phải Kiểu 11 thì đọc như bài PR, không như người thật gõ trên đt |
 | **Kiểu 11 chỉ có 1-2 câu** | Đó là Kiểu 1 dán nhãn story, gate M8-A chặn. Story cần 3-7 câu: hoàn cảnh → xung đột → mình đã làm gì |
 | **Kiểu 11 dài quá 7 câu** | Thành bài đăng group, không phải comment trong thread. Gate M8-A chặn. Muốn viết dài hẳn thì dùng `/dnd-seeding story` |
 | **Kiểu 11 kể mạch chung chung, không chạm gì trong bài gốc** | Story viết hay mà dán thread nào cũng được thì dán thread nào cũng không đúng người. Phải gương chiếu ≥1 chi tiết: độ cận, tuổi, nghề, ai đang cản, ở tỉnh nào. Gate M8-B chặn |
 | **Bịa chi tiết cho người đăng ("b cũng cận 5 độ giống e" khi họ chưa nói độ)** | Bài gốc không nêu chi tiết → M8-B tự bỏ qua, viết story chung chung còn được. Bịa là mâu thuẫn với người thật, tệ hơn chung chung |
 | **Kiểu 11 kể chuyện mổ cận trong thread hỏi Phaco/Ortho-K** | Story dài không mua được quyền lạc service. M6-B chặn y như các kiểu khác — xem bảng "Kiểu 8/9/10/11 nói gì theo service" |
 | **Dán bài gốc nhiều dòng dạng văn trần (không blockquote)** | Regex chỉ đọc dòng đầu → `detect_topic` mất chủ đề → M6-B/C tắt im lặng; số trong bài gốc thành item của mình. In dạng B: `> ` mỗi dòng |
-| **Xuất đủ 10 kiểu dù câu hỏi gốc không hợp (mode reply-group)** | Chọn kiểu theo ngữ cảnh. Kiểu 8 chỉ khi bài gốc có nhận định sai; Kiểu 9 chỉ khi có hỏi về quy trình; Kiểu 11 chỉ khi bài gốc kể hoàn cảnh. Kiểu 6 và 7 thì luôn giữ |
 | Comment ads quá dài/chuyên nghiệp (mode ads) | Comment ngắn 1-2 câu, có emoji, giống comment nhanh trên đt |
 | Tất cả comment ads đều khen | Phải xen kẽ hỏi giá, tag bạn, hỏi lịch — đa dạng kiểu tương tác |
 | Bịa thêm bác sĩ/chủ đề không có trong content live (mode live) | Chỉ dùng tên bác sĩ/chủ đề đã detect từ nội dung content được paste |
 | Dùng từ "bài viết/bài post" cho comment live (mode live) | Dùng ngữ cảnh "đang xem live", "vừa vào coi", "đang nghe bs nói" |
-| **Nói "khám free" cho Ortho-K / Phaco / cắt kính / khám bệnh lý / tổng quát** | Free CHỈ cho khám mổ cận-khúc xạ (T0) và tái khám hậu phẫu đã mổ tại DND (T-FU). Xem §6 |
+| **Nói "khám free" cho Ortho-K / Phaco / cắt kính / khám bệnh lý / tổng quát** | Free CHỈ cho khám mổ cận-khúc xạ (T0) và tái khám hậu phẫu đã mổ tại DND (T-FU). Xem §7 |
 | **Nói "khám free" chung chung, không gắn service** | Mỗi câu phải tự mang ngữ cảnh T0/T-FU. Không có → không nói free |
 | **Hứa miễn phí tái khám cho người mổ ở viện khác** | Chỉ người đã mổ tại DND. Ca viện khác: có phí, không báo số, chuyển hotline |
 | **Đẩy người lão thị sang cắt kính** | Lão thị điều trị được (Presbyond / Phaco + IOL đa tiêu). Khám lão thị đường khúc xạ = free |
@@ -1144,7 +1241,7 @@ Lưu vào: `C:\Users\Admin\.gemini\antigravity-ide\scratch\seeding_<mode>_<times
 | **Mode `anti`: dùng giọng bệnh viện trả lời khiếu nại** | Mode này đóng vai **KHÁCH đã trải nghiệm**. Không "bệnh viện chúng tôi", "quý khách", "bộ phận CSKH" — gate M7-B chặn |
 | **Mode `anti`: đấu khẩu / quy kết người viết review** | Không "chắc đối thủ", "nick ảo", "chắc b hên xui gặp hôm đó". Được đính chính **dữ kiện** ("chắc b nhầm lịch nghỉ trưa"), không được phủ nhận **trải nghiệm** — gate M7-C |
 | **Mode `anti`: thừa nhận điểm phàn nàn rồi cân bằng lại** | Chốt là **né hẳn**: không "nói thật hôm e đi cx chờ hơi lâu mà...", không "công nhận hơi đông nhưng...", không "bù lại". Kể trải nghiệm tốt của mình — gate M7-E |
-| **Mode `anti`: xếp hạng ("khám kỹ nhất", "hơn hẳn chỗ cũ")** | §7C cấm superlative + so sánh viện, nhưng regex cũ chỉ phủ `tốt nhất/giỏi nhất/số 1` và so sánh **giá**. Gate M7-F phủ khoảng giữa. Nêu **lý do cụ thể** thay vì xếp hạng |
+| **Mode `anti`: xếp hạng ("khám kỹ nhất", "hơn hẳn chỗ cũ")** | §8C cấm superlative + so sánh viện, nhưng regex cũ chỉ phủ `tốt nhất/giỏi nhất/số 1` và so sánh **giá**. Gate M7-F phủ khoảng giữa. Nêu **lý do cụ thể** thay vì xếp hạng |
 | **Mode `anti`: review xấu viết văn trần, không blockquote** | Phải là `> ` mỗi dòng. Văn trần làm regex chỉ đọc dòng đầu (M6 mất chủ đề) và biến vùng review thành chỗ giấu vi phạm — gate M7-A |
 | **Mode `anti`: Kiểu 7 là câu khen dán câu hỏi ở đuôi** | "bên đó ổn lắm, b khám lại chưa v?" vẫn fail. Kiểu 7 phải trung tính hoàn toàn: không brand, không trải nghiệm bản thân — gate M7-D |
 | **Claim an toàn tuyệt đối ("an toàn 100%", "chưa nghe ai bị biến chứng")** | Bị cấm ở **mọi mode** (họ `safety_absolute`). Thread phòng thủ dễ trượt nhất. Nói được: "bs giải thích rõ rủi ro cho e" |
